@@ -1,0 +1,10 @@
+name: Hardlands
+version: '${version}'
+
+main: com.hardlands.Hardlands
+bootstrapper: com.hardlands.HardlandsBootstrap
+loader: com.hardlands.HardlandsLoader
+api-version: '26.2'
+load: POSTWORLD
+
+authors: [ Pepe3012_ ]
