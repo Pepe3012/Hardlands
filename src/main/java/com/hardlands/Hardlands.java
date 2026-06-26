@@ -1,11 +1,14 @@
 package com.hardlands;
 
-import com.hardlands.command.CommandInitializer;
+import com.hardlands.command.CommandRegistry;
+import com.hardlands.command.HardlandsCommand;
 import com.hardlands.listener.PlayerListener;
 import com.hardlands.scenario.ScenarioManager;
 import com.hardlands.scenario.Scenarios;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
 
 public final class Hardlands extends JavaPlugin {
     private ScenarioManager scenarioManager;
@@ -18,7 +21,11 @@ public final class Hardlands extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 
-        CommandInitializer.initialize(this);
+        CommandRegistry commandRegistry = new CommandRegistry(this);
+        commandRegistry.initializeCompletions();
+        commandRegistry.registerCommands(List.of(
+                HardlandsCommand::new
+        ));
 
         super.getLogger().info("The plugin has been successfully enabled.");
     }
