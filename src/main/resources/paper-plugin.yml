@@ -3,8 +3,12 @@ version: '${version}'
 
 main: com.hardlands.Hardlands
 bootstrapper: com.hardlands.HardlandsBootstrap
-loader: com.hardlands.HardlandsLoader
 api-version: '26.2'
 load: POSTWORLD
+
+permissions:
+  hardlands.admin:
+    description: Access to Hardlands admin commands
+    default: op
 
 authors: [ Pepe3012_ ]

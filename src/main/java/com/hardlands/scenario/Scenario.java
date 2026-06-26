@@ -4,18 +4,27 @@ import com.hardlands.Hardlands;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class Scenario implements Listener {
-    protected abstract void onInitialize();
-    protected abstract void onTerminate();
+    @Nullable private Hardlands plugin;
 
-    public void initialize() {
-        Bukkit.getPluginManager().registerEvents(this, Hardlands.getInstance());
-        this.onInitialize();
+    protected void onEnable() {}
+    protected void onDisable() {}
+
+    void enable() {
+        if (this.plugin == null) throw new IllegalStateException("Plugin has not been injected into scenario.");
+        Bukkit.getPluginManager().registerEvents(this, this.plugin);
+        this.onEnable();
     }
 
-    public void terminate() {
+    void disable() {
         HandlerList.unregisterAll(this);
-        this.onTerminate();
+        this.onDisable();
+    }
+
+    void setPlugin(@NotNull Hardlands plugin) {
+        this.plugin = plugin;
     }
 }

@@ -15,10 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 public final class PlayerListener implements Listener {
-    public static final PlayerListener INSTANCE = new PlayerListener();
     private static final String KILL_ACTION_BAR = "<#FFFFFF>☠ <#B22222>¡Has eliminado a <#FFFFFF>%s<#B22222>! <#FFFFFF>☠";
-
-    private PlayerListener() {}
 
     @EventHandler
     private void onDeath(PlayerDeathEvent event) {
