@@ -1,7 +1,6 @@
 package com.hardlands.scenario.custom;
 
-import com.hardlands.scenario.option.FloatOption;
-import com.hardlands.scenario.option.Option;
+import com.hardlands.scenario.Option;
 import com.hardlands.scenario.Scenario;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -13,7 +12,7 @@ import java.util.List;
 public class BonanzaScenario extends Scenario {
     private static final List<Material> ORE_MAP = createOreMap();
 
-    private final FloatOption multiplierOption = super.registerOption(new FloatOption("multiplier", 2.0F));
+    private final Option<Float> multiplierOption = super.registerOption(Option.create("multiplier", 2.0F));
 
     @EventHandler
     private void onBlockDrop(BlockDropItemEvent event) {

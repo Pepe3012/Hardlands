@@ -1,8 +1,12 @@
 package com.hardlands;
 
-import com.hardlands.command.CommandRegistry;
+import co.aikar.commands.BukkitCommandCompletionContext;
+import co.aikar.commands.CommandCompletions;
+import co.aikar.commands.PaperCommandManager;
 import com.hardlands.command.HardlandsCommand;
 import com.hardlands.listener.PlayerListener;
+import com.hardlands.scenario.Option;
+import com.hardlands.scenario.Scenario;
 import com.hardlands.scenario.ScenarioManager;
 import com.hardlands.scenario.Scenarios;
 import org.bukkit.Bukkit;
@@ -21,11 +25,9 @@ public final class Hardlands extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 
-        CommandRegistry commandRegistry = new CommandRegistry(this);
-        commandRegistry.initializeCompletions();
-        commandRegistry.registerCommands(List.of(
-                HardlandsCommand::new
-        ));
+        PaperCommandManager paperCommandManager = new PaperCommandManager(this);
+        this.registerCommandCompletions(paperCommandManager);
+        paperCommandManager.registerCommand(new HardlandsCommand(this));
 
         super.getLogger().info("The plugin has been successfully enabled.");
     }
@@ -33,6 +35,21 @@ public final class Hardlands extends JavaPlugin {
     @Override
     public void onDisable() {
         super.getLogger().info("The plugin has been successfully disabled.");
+    }
+
+    private void registerCommandCompletions(PaperCommandManager manager) {
+        CommandCompletions<BukkitCommandCompletionContext> completions = manager.getCommandCompletions();
+
+        completions.registerAsyncCompletion("registered_scenarios", _ -> this.scenarioManager.getRegisteredScenarios().keySet());
+        completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarios().keySet());
+
+        completions.registerAsyncCompletion("scenario_options", context -> {
+            String[] args = context.getInput().split(" ");
+            if (args.length < 4) return List.of();
+            Scenario scenario = this.scenarioManager.getRegisteredScenarios().get(args[3]);
+            if (scenario == null) return List.of();
+            return scenario.getOptions().stream().map(Option::getKey).toList();
+        });
     }
 
     public ScenarioManager getScenarioManager() {

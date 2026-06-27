@@ -69,9 +69,9 @@ public class CutCleanScenario extends Scenario {
                 Material.ANCIENT_DEBRIS, Material.NETHERITE_SCRAP
         ));
         map.clone().forEach((ore, result) -> {
-            Material deepslateOre = Material.getMaterial("DEEPSLATE_" + ore.name());
-            if (deepslateOre != null) {
-                map.put(deepslateOre, result);
+            Material deepslate = Material.getMaterial("DEEPSLATE_" + ore.name());
+            if (deepslate != null) {
+                map.put(deepslate, result);
             }
         });
         return map;

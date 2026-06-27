@@ -9,7 +9,7 @@ public final class ChatMessenger {
     private ChatMessenger() {}
 
     public static void sendMessage(Player player, String message) {
-        String format = "<#1A1A1A>[%s<#1A1A1A>] <gray>» <white>%s";
+        String format = "<dark_gray>[%s<dark_gray>] <gray>» <white>%s";
         player.sendMessage(MiniMessage.miniMessage().deserialize(format.formatted(PREFIX, message)));
     }
 }

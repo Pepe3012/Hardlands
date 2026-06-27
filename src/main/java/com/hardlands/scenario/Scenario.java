@@ -1,7 +1,6 @@
 package com.hardlands.scenario;
 
 import com.hardlands.Hardlands;
-import com.hardlands.scenario.option.Option;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
