@@ -54,7 +54,7 @@ public class HardlandsCommand extends BaseCommand {
     }
 
     @Subcommand("scenarios option")
-    @CommandCompletion("@registered_scenarios @scenario_options")
+    @CommandCompletion("@registered_scenarios")
     private void onScenarioOption(Player sender, @Single String id, @Single String key, @Single String value) {
         Scenario scenario = this.scenarioManager.getRegisteredScenarios().get(id);
         if (scenario == null) {

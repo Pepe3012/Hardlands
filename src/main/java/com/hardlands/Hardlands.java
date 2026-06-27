@@ -42,14 +42,6 @@ public final class Hardlands extends JavaPlugin {
 
         completions.registerAsyncCompletion("registered_scenarios", _ -> this.scenarioManager.getRegisteredScenarios().keySet());
         completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarios().keySet());
-
-        completions.registerAsyncCompletion("scenario_options", context -> {
-            String[] args = context.getInput().split(" ");
-            if (args.length < 4) return List.of();
-            Scenario scenario = this.scenarioManager.getRegisteredScenarios().get(args[3]);
-            if (scenario == null) return List.of();
-            return scenario.getOptions().stream().map(Option::getKey).toList();
-        });
     }
 
     public ScenarioManager getScenarioManager() {
