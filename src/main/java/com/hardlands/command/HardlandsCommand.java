@@ -3,7 +3,6 @@ package com.hardlands.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import com.hardlands.Hardlands;
-import com.hardlands.scenario.Option;
 import com.hardlands.scenario.Scenario;
 import com.hardlands.util.ChatMessenger;
 import com.hardlands.scenario.ScenarioManager;
@@ -61,7 +60,7 @@ public class HardlandsCommand extends BaseCommand {
             ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
             return;
         }
-        Option<?> option = scenario.getOption(key);
+        Scenario.Option<?> option = scenario.getOption(key);
         if (option == null) {
             ChatMessenger.sendMessage(sender, "<red>Option '" + key + "' not found.");
             return;
@@ -74,18 +73,18 @@ public class HardlandsCommand extends BaseCommand {
     }
 
     @SuppressWarnings("unchecked")
-    private static boolean setValue(Option<?> option, String value) {
+    private static boolean setValue(Scenario.Option<?> option, String value) {
         try {
             switch (option.getValue()) {
-                case Boolean _ -> ((Option<Boolean>) option).setValue(Boolean.parseBoolean(value));
-                case Float _ -> ((Option<Float>) option).setValue(Float.parseFloat(value));
-                case String _ -> ((Option<String>) option).setValue(value);
+                case Boolean _ -> ((Scenario.Option<Boolean>) option).setValue(Boolean.parseBoolean(value));
+                case Float _ -> ((Scenario.Option<Float>) option).setValue(Float.parseFloat(value));
+                case String _ -> ((Scenario.Option<String>) option).setValue(value);
                 default -> {
                     return false;
                 }
             }
             return true;
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException _) {
             return false;
         }
     }

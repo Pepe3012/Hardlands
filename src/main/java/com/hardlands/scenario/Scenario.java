@@ -13,9 +13,9 @@ public abstract class Scenario implements Listener {
     private final Map<String, Option<?>> options = new LinkedHashMap<>();
     @Nullable private Hardlands plugin;
 
-    @Nullable
-    public Option<?> getOption(String key) {
-        return this.options.get(key);
+    @SuppressWarnings("unchecked")
+    public <T> Option<T> getOption(String key) {
+        return (Option<T>) this.options.get(key);
     }
 
     public Collection<Option<?>> getOptions() {
@@ -43,5 +43,31 @@ public abstract class Scenario implements Listener {
 
     void setPlugin(@NotNull Hardlands plugin) {
         this.plugin = plugin;
+    }
+
+    public static class Option<T> {
+        private final String key;
+        private T value;
+
+        private Option(String key, T value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
+
+        public String getKey() {
+            return this.key;
+        }
+
+        public T getValue() {
+            return this.value;
+        }
+
+        public static <T> Option<T> create(String key, T value) {
+            return new Option<>(key, value);
+        }
     }
 }

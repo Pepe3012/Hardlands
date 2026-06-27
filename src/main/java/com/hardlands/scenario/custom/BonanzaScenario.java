@@ -1,6 +1,5 @@
 package com.hardlands.scenario.custom;
 
-import com.hardlands.scenario.Option;
 import com.hardlands.scenario.Scenario;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;

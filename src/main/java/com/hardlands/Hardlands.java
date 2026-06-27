@@ -5,14 +5,10 @@ import co.aikar.commands.CommandCompletions;
 import co.aikar.commands.PaperCommandManager;
 import com.hardlands.command.HardlandsCommand;
 import com.hardlands.listener.PlayerListener;
-import com.hardlands.scenario.Option;
-import com.hardlands.scenario.Scenario;
 import com.hardlands.scenario.ScenarioManager;
 import com.hardlands.scenario.Scenarios;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.List;
 
 public final class Hardlands extends JavaPlugin {
     private ScenarioManager scenarioManager;
