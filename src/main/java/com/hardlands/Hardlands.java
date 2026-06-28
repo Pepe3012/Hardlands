@@ -7,11 +7,13 @@ import com.hardlands.command.HardlandsCommand;
 import com.hardlands.listener.PlayerListener;
 import com.hardlands.scenario.ScenarioManager;
 import com.hardlands.scenario.Scenarios;
+import com.hardlands.game.GameManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Hardlands extends JavaPlugin {
     private final ScenarioManager scenarioManager = new ScenarioManager();
+    private final GameManager gameManager = new GameManager();
 
     @Override
     public void onEnable() {
@@ -40,6 +42,10 @@ public final class Hardlands extends JavaPlugin {
 
     public ScenarioManager getScenarioManager() {
         return this.scenarioManager;
+    }
+
+    public GameManager getGame() {
+        return this.gameManager;
     }
 
     public static Hardlands getInstance() {
