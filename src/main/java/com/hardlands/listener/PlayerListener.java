@@ -26,11 +26,11 @@ public final class PlayerListener implements Listener {
         Component deathMessage = event.deathMessage();
         if (deathMessage != null) {
             String plain = PlainTextComponentSerializer.plainText().serialize(deathMessage);
-            if (causingEntity instanceof Player killer) {
-                plain = plain.replace(killer.getName(), HardlandsUtil.getPlayerHeadAndName(killer));
-            }
-            plain = plain.replace(player.getName(), HardlandsUtil.getPlayerHeadAndName(player));
-            event.deathMessage(MiniMessage.miniMessage().deserialize("<#B22222>" + plain));
+            String withKiller = causingEntity instanceof Player killer
+                    ? plain.replace(killer.getName(), HardlandsUtil.getPlayerHeadAndName(killer))
+                    : plain;
+            String formatted = withKiller.replace(player.getName(), HardlandsUtil.getPlayerHeadAndName(player));
+            event.deathMessage(MiniMessage.miniMessage().deserialize("<#B22222>" + formatted));
         }
 
         if (causingEntity instanceof Player killer && killer != player) {

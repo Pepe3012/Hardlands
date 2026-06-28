@@ -1,6 +1,5 @@
 package com.hardlands.scenario;
 
-import com.hardlands.Hardlands;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
@@ -9,11 +8,6 @@ import java.util.Map;
 public final class ScenarioManager {
     private final Map<String, Scenario> registeredScenarios = new HashMap<>();
     private final Map<String, Scenario> activeScenarios = new HashMap<>();
-    private final Hardlands plugin;
-
-    public ScenarioManager(Hardlands plugin) {
-        this.plugin = plugin;
-    }
 
     public boolean enableScenario(String id) {
         Scenario scenario = this.registeredScenarios.get(id);
@@ -31,7 +25,6 @@ public final class ScenarioManager {
     }
 
     public void registerScenario(String id, Scenario scenario) {
-        scenario.setPlugin(this.plugin);
         this.registeredScenarios.put(id, scenario);
     }
 

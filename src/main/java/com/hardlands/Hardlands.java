@@ -11,19 +11,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Hardlands extends JavaPlugin {
-    private ScenarioManager scenarioManager;
+    private final ScenarioManager scenarioManager = new ScenarioManager();
 
     @Override
     public void onEnable() {
-        this.scenarioManager = new ScenarioManager(this);
-
         Scenarios.initialize(this.scenarioManager);
 
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 
         PaperCommandManager paperCommandManager = new PaperCommandManager(this);
         this.registerCommandCompletions(paperCommandManager);
-        paperCommandManager.registerCommand(new HardlandsCommand(this));
+        paperCommandManager.registerCommand(new HardlandsCommand());
 
         super.getLogger().info("The plugin has been successfully enabled.");
     }
@@ -42,5 +40,9 @@ public final class Hardlands extends JavaPlugin {
 
     public ScenarioManager getScenarioManager() {
         return this.scenarioManager;
+    }
+
+    public static Hardlands getInstance() {
+        return JavaPlugin.getPlugin(Hardlands.class);
     }
 }

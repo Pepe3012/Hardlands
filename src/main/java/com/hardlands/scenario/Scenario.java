@@ -4,14 +4,11 @@ import com.hardlands.Hardlands;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public abstract class Scenario implements Listener {
     private final Map<String, Option<?>> options = new LinkedHashMap<>();
-    @Nullable private Hardlands plugin;
 
     @SuppressWarnings("unchecked")
     public <T> Option<T> getOption(String key) {
@@ -25,14 +22,14 @@ public abstract class Scenario implements Listener {
     protected void onEnable() {}
     protected void onDisable() {}
 
-    protected <T, O extends Option<T>> O registerOption(O option) {
-        this.options.put(option.getKey(), option);
+    protected <T> Option<T> createOption(String key, T defaultValue) {
+        Option<T> option = new Option<>(key, defaultValue);
+        this.options.put(key, option);
         return option;
     }
 
     void enable() {
-        if (this.plugin == null) throw new IllegalStateException("Plugin has not been injected into scenario.");
-        Bukkit.getPluginManager().registerEvents(this, this.plugin);
+        Bukkit.getPluginManager().registerEvents(this, Hardlands.getInstance());
         this.onEnable();
     }
 
@@ -41,15 +38,11 @@ public abstract class Scenario implements Listener {
         this.onDisable();
     }
 
-    void setPlugin(@NotNull Hardlands plugin) {
-        this.plugin = plugin;
-    }
-
     public static class Option<T> {
         private final String key;
         private T value;
 
-        private Option(String key, T value) {
+        Option(String key, T value) {
             this.key = key;
             this.value = value;
         }
@@ -64,10 +57,6 @@ public abstract class Scenario implements Listener {
 
         public T getValue() {
             return this.value;
-        }
-
-        public static <T> Option<T> create(String key, T value) {
-            return new Option<>(key, value);
         }
     }
 }

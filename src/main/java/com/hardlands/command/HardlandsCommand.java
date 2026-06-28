@@ -16,15 +16,10 @@ import java.util.Map;
 @CommandAlias("hardlands")
 @CommandPermission("hardlands.admin")
 public class HardlandsCommand extends BaseCommand {
-    private final ScenarioManager scenarioManager;
-
-    public HardlandsCommand(Hardlands hardlands) {
-        this.scenarioManager = hardlands.getScenarioManager();
-    }
 
     @Subcommand("scenarios list")
     private void onScenariosList(Player sender) {
-        Map<String, Scenario> registered = this.scenarioManager.getRegisteredScenarios();
+        Map<String, Scenario> registered = Hardlands.getInstance().getScenarioManager().getRegisteredScenarios();
         if (registered.isEmpty()) {
             ChatMessenger.sendMessage(sender, "<red>No scenarios registered.");
             return;
@@ -33,7 +28,7 @@ public class HardlandsCommand extends BaseCommand {
         List<String> ids = new ArrayList<>(registered.keySet());
         for (int i = 0; i < ids.size(); i++) {
             String id = ids.get(i);
-            boolean active = this.scenarioManager.getActiveScenarios().containsKey(id);
+            boolean active = Hardlands.getInstance().getScenarioManager().getActiveScenarios().containsKey(id);
             sender.sendMessage(MiniMessage.miniMessage().deserialize("<gray>" + (i + 1) + ". <yellow>" + id + " <gray>- " + (active ? "<green>active" : "<red>inactive")));
         }
     }
@@ -41,21 +36,21 @@ public class HardlandsCommand extends BaseCommand {
     @Subcommand("scenarios enable")
     @CommandCompletion("@registered_scenarios")
     private void onScenariosEnable(Player sender, @Single String id) {
-        boolean success = this.scenarioManager.enableScenario(id);
+        boolean success = Hardlands.getInstance().getScenarioManager().enableScenario(id);
         ChatMessenger.sendMessage(sender, (success ? "<green>" : "<red>") + "Scenario '" + id + (success ? "' enabled." : "' not found or already active."));
     }
 
     @Subcommand("scenarios disable")
     @CommandCompletion("@active_scenarios")
     private void onScenariosDisable(Player sender, @Single String id) {
-        boolean success = this.scenarioManager.disableScenario(id);
+        boolean success = Hardlands.getInstance().getScenarioManager().disableScenario(id);
         ChatMessenger.sendMessage(sender, (success ? "<green>" : "<red>") + "Scenario '" + id + (success ? "' disabled." : "' not found or not active."));
     }
 
     @Subcommand("scenarios option")
     @CommandCompletion("@registered_scenarios")
     private void onScenarioOption(Player sender, @Single String id, @Single String key, @Single String value) {
-        Scenario scenario = this.scenarioManager.getRegisteredScenarios().get(id);
+        Scenario scenario = Hardlands.getInstance().getScenarioManager().getRegisteredScenarios().get(id);
         if (scenario == null) {
             ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
             return;
