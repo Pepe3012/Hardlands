@@ -1,6 +1,6 @@
 package com.hardlands.listener;
 
-import com.hardlands.util.HardlandsUtil;
+import com.hardlands.util.GlobalUtil;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -27,14 +27,14 @@ public final class PlayerListener implements Listener {
         if (deathMessage != null) {
             String plain = PlainTextComponentSerializer.plainText().serialize(deathMessage);
             String withKiller = causingEntity instanceof Player killer
-                    ? plain.replace(killer.getName(), HardlandsUtil.getPlayerHeadAndName(killer))
+                    ? plain.replace(killer.getName(), GlobalUtil.getPlayerHeadAndName(killer))
                     : plain;
-            String formatted = withKiller.replace(player.getName(), HardlandsUtil.getPlayerHeadAndName(player));
+            String formatted = withKiller.replace(player.getName(), GlobalUtil.getPlayerHeadAndName(player));
             event.deathMessage(MiniMessage.miniMessage().deserialize("<#B22222>" + formatted));
         }
 
         if (causingEntity instanceof Player killer && killer != player) {
-            killer.sendActionBar(MiniMessage.miniMessage().deserialize(KILL_MESSAGE.formatted(HardlandsUtil.getPlayerHeadAndName(player))));
+            killer.sendActionBar(MiniMessage.miniMessage().deserialize(KILL_MESSAGE.formatted(GlobalUtil.getPlayerHeadAndName(player))));
         }
 
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THUNDER, 0.75F, 1.75F);
@@ -51,11 +51,8 @@ public final class PlayerListener implements Listener {
         Location location = player.getLocation();
         World world = player.getWorld();
 
-        world.setBlockData(location, Material.BEDROCK.createBlockData());
-
-        Directional endRod = (Directional) Material.END_ROD.createBlockData();
-        endRod.setFacing(BlockFace.DOWN);
-        world.setBlockData(location.clone().add(0, 1, 0), endRod);
+        world.setBlockData(location, Material.GOLD_BLOCK.createBlockData());
+        world.setBlockData(location.clone().add(0, 1, 0), Material.IRON_BARS.createBlockData());
 
         Location skullLocation = location.clone().add(0, 2, 0);
         world.setBlockData(skullLocation, Material.PLAYER_HEAD.createBlockData());

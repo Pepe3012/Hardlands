@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class CutCleanScenario extends Scenario {
-    private static final Map<Material, SmeltResult> SMELT_MAP = BlockUtil.withDeepslateVariants(Map.of(
+    private static final Map<Material, SmeltResult> SMELT_MAP = BlockUtil.addDeepslateVariants(Map.of(
             Material.IRON_ORE, smeltsTo(Material.IRON_INGOT, 0.7F),
             Material.GOLD_ORE, smeltsTo(Material.GOLD_INGOT, 1.0F),
             Material.COPPER_ORE, smeltsTo(Material.COPPER_INGOT, 0.7F),

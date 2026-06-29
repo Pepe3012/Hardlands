@@ -1,6 +1,6 @@
 package com.hardlands.worldborder;
 
-import com.hardlands.util.HardlandsUtil;
+import com.hardlands.util.GlobalUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
@@ -14,8 +14,8 @@ public final class WorldBorderManager {
     private static final double DEFAULT_SURVIVAL_DIAMETER = 2_000.0D;
     private static final double DEFAULT_MEETUP_DIAMETER = 100.0D;
     private static final double DEFAULT_DEATHMATCH_DIAMETER = 40.0D;
-    private static final long DEFAULT_MEETUP_SHRINK_TICKS = HardlandsUtil.minutesToTicks(10);
-    private static final long DEFAULT_DEATHMATCH_SHRINK_TICKS = HardlandsUtil.minutesToTicks(5);
+    private static final long DEFAULT_MEETUP_SHRINK_TICKS = GlobalUtil.minutesToTicks(10);
+    private static final long DEFAULT_DEATHMATCH_SHRINK_TICKS = GlobalUtil.minutesToTicks(5);
 
     @Nullable private World world;
 

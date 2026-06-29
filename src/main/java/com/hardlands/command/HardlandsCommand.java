@@ -21,17 +21,12 @@ public final class HardlandsCommand extends BaseCommand {
     @Subcommand("scenarios list")
     private void onScenariosList(Player sender) {
         ScenarioManager manager = Hardlands.get().getScenarioManager();
-
         ChatMessenger.sendMessage(sender, "<gray>Scenarios:");
-
         ScenarioTypes[] types = ScenarioTypes.values();
         for (int i = 0; i < types.length; i++) {
             ScenarioTypes type = types[i];
             boolean active = manager.isActive(type);
-
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(
-                    "<gray>" + (i + 1) + ". <yellow>" + type.getId() + " <gray>- " + (active ? "<green>active" : "<red>inactive")
-            ));
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<gray>" + (i + 1) + ". <yellow>" + type.getId() + " <gray>- " + (active ? "<green>active" : "<red>inactive")));
         }
     }
 
@@ -39,12 +34,10 @@ public final class HardlandsCommand extends BaseCommand {
     @CommandCompletion("@registered_scenarios")
     private void onScenariosEnable(Player sender, @Single String id) {
         ScenarioTypes type = ScenarioTypes.byId(id);
-
         if (type == null) {
             ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
             return;
         }
-
         boolean success = Hardlands.get().getScenarioManager().enableScenario(type);
         ChatMessenger.sendMessage(sender, (success ? "<green>" : "<red>") + "Scenario '" + type.getId() + (success ? "' enabled." : "' is already active."));
     }
@@ -53,12 +46,10 @@ public final class HardlandsCommand extends BaseCommand {
     @CommandCompletion("@active_scenarios")
     private void onScenariosDisable(Player sender, @Single String id) {
         ScenarioTypes type = ScenarioTypes.byId(id);
-
         if (type == null) {
             ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
             return;
         }
-
         boolean success = Hardlands.get().getScenarioManager().disableScenario(type);
         ChatMessenger.sendMessage(sender, (success ? "<green>" : "<red>") + "Scenario '" + type.getId() + (success ? "' disabled." : "' is not active."));
     }
@@ -67,29 +58,24 @@ public final class HardlandsCommand extends BaseCommand {
     @CommandCompletion("@active_scenarios")
     private void onScenarioOption(Player sender, @Single String id, @Single String key, @Single String value) {
         ScenarioTypes type = ScenarioTypes.byId(id);
-
         if (type == null) {
             ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
             return;
         }
-
         Scenario scenario = Hardlands.get().getScenarioManager().getActiveScenario(type);
         if (scenario == null) {
             ChatMessenger.sendMessage(sender, "<red>Scenario '" + type.getId() + "' is not active.");
             return;
         }
-
         Scenario.Option<?> option = scenario.getOption(key);
         if (option == null) {
             ChatMessenger.sendMessage(sender, "<red>Option '" + key + "' not found.");
             return;
         }
-
         if (!setValue(option, value)) {
             ChatMessenger.sendMessage(sender, "<red>Invalid value '" + value + "' for " + key + ".");
             return;
         }
-
         ChatMessenger.sendMessage(sender, "<green>'" + key + "' set to '" + value + "'.");
     }
 

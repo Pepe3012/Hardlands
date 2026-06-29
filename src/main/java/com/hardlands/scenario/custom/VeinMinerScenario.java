@@ -15,27 +15,13 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public final class VeinMinerScenario extends Scenario {
-    private static final Set<Material> ORES = BlockUtil.withDeepslateVariants(EnumSet.of(
-            Material.COAL_ORE,
-            Material.IRON_ORE,
-            Material.COPPER_ORE,
-            Material.GOLD_ORE,
-            Material.REDSTONE_ORE,
-            Material.EMERALD_ORE,
-            Material.LAPIS_ORE,
-            Material.DIAMOND_ORE,
-            Material.NETHER_QUARTZ_ORE,
-            Material.NETHER_GOLD_ORE,
-            Material.ANCIENT_DEBRIS
-    ));
-
     private static final int ORE_LIMIT = 64;
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     private void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
 
-        if (!isOre(block.getType())) return;
+        if (!BlockUtil.isOre(block.getType())) return;
 
         event.setCancelled(true);
         this.mineVein(block, event.getPlayer());
@@ -51,9 +37,5 @@ public final class VeinMinerScenario extends Scenario {
             BlockUtil.breakWithDropEvent(block, player, tool);
             return true;
         });
-    }
-
-    private static boolean isOre(Material material) {
-        return ORES.contains(material);
     }
 }

@@ -23,14 +23,16 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public final class BlockUtil {
+    private static final Set<Material> ORES = addDeepslateVariants(EnumSet.of(Material.COAL_ORE, Material.IRON_ORE, Material.COPPER_ORE, Material.GOLD_ORE, Material.REDSTONE_ORE, Material.EMERALD_ORE, Material.LAPIS_ORE, Material.DIAMOND_ORE, Material.NETHER_QUARTZ_ORE, Material.NETHER_GOLD_ORE, Material.ANCIENT_DEBRIS));
     private static final String DEEPSLATE_PREFIX = "DEEPSLATE_";
-    private static final int RADIUS = 1;
+    private static final int CONNECTION_RADIUS = 1;
 
     private BlockUtil() {}
 
+    @SuppressWarnings("UnstableApiUsage")
     public static void breakWithDropEvent(@NotNull Block block, @NotNull Player player, @NotNull ItemStack tool) {
         BlockState state = block.getState();
-        List<Item> drops = createTemporaryDrops(block, tool);
+        List<Item> drops = spawnTemporaryDrops(block, tool);
 
         BlockDropItemEvent event = new BlockDropItemEvent(block, state, player, drops);
         Bukkit.getPluginManager().callEvent(event);
@@ -52,38 +54,42 @@ public final class BlockUtil {
         while (!pending.isEmpty()) {
             Block block = pending.removeFirst();
             if (visited.add(block.getLocation()) && action.test(block)) {
-                addNearby(block, pending);
+                enqueueNeighbors(block, pending);
             }
         }
     }
 
-    public static <V> Map<Material, V> withDeepslateVariants(@NotNull Map<Material, V> base) {
+    public static <V> Map<Material, V> addDeepslateVariants(@NotNull Map<Material, V> base) {
         EnumMap<Material, V> materials = new EnumMap<>(Material.class);
 
         base.forEach((material, value) -> {
             materials.put(material, value);
 
-            Material deepslate = getDeepslateVariant(material);
+            Material deepslate = findDeepslateVariant(material);
             if (deepslate != null) materials.put(deepslate, value);
         });
 
         return materials;
     }
 
-    public static Set<Material> withDeepslateVariants(@NotNull Set<Material> base) {
+    public static Set<Material> addDeepslateVariants(@NotNull Set<Material> base) {
         EnumSet<Material> materials = EnumSet.noneOf(Material.class);
 
         for (Material material : base) {
             materials.add(material);
 
-            Material deepslate = getDeepslateVariant(material);
+            Material deepslate = findDeepslateVariant(material);
             if (deepslate != null) materials.add(deepslate);
         }
 
         return materials;
     }
 
-    private static List<Item> createTemporaryDrops(Block block, ItemStack tool) {
+    public static boolean isOre(Material material) {
+        return ORES.contains(material);
+    }
+
+    private static List<Item> spawnTemporaryDrops(Block block, ItemStack tool) {
         List<Item> drops = new ArrayList<>();
 
         for (ItemStack drop : block.getDrops(tool)) {
@@ -95,10 +101,10 @@ public final class BlockUtil {
         return drops;
     }
 
-    private static void addNearby(Block block, Deque<Block> pending) {
-        for (int x = -BlockUtil.RADIUS; x <= BlockUtil.RADIUS; x++) {
-            for (int y = -BlockUtil.RADIUS; y <= BlockUtil.RADIUS; y++) {
-                for (int z = -BlockUtil.RADIUS; z <= BlockUtil.RADIUS; z++) {
+    private static void enqueueNeighbors(Block block, Deque<Block> pending) {
+        for (int x = -CONNECTION_RADIUS; x <= CONNECTION_RADIUS; x++) {
+            for (int y = -CONNECTION_RADIUS; y <= CONNECTION_RADIUS; y++) {
+                for (int z = -CONNECTION_RADIUS; z <= CONNECTION_RADIUS; z++) {
                     if (x != 0 || y != 0 || z != 0) {
                         pending.add(block.getRelative(x, y, z));
                     }
@@ -107,7 +113,7 @@ public final class BlockUtil {
         }
     }
 
-    private static Material getDeepslateVariant(Material material) {
+    private static Material findDeepslateVariant(Material material) {
         return Material.getMaterial(DEEPSLATE_PREFIX + material.name());
     }
 }
