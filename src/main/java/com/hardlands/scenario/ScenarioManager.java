@@ -1,45 +1,44 @@
 package com.hardlands.scenario;
 
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class ScenarioManager {
-    private final Map<String, Scenario> registeredScenarios = new HashMap<>();
-    private final Map<String, Scenario> activeScenarios = new HashMap<>();
+    private final Map<ScenarioTypes, Scenario> activeScenarios = new EnumMap<>(ScenarioTypes.class);
 
-    public boolean enableScenario(String id) {
-        Scenario scenario = this.registeredScenarios.get(id);
-        if (scenario == null || this.activeScenarios.containsKey(id)) return false;
-        this.activeScenarios.put(id, scenario);
+    public boolean enableScenario(@NotNull ScenarioTypes type) {
+        if (this.activeScenarios.containsKey(type)) return false;
+        Scenario scenario = type.createScenario();
+        this.activeScenarios.put(type, scenario);
         scenario.enable();
         return true;
     }
 
-    public boolean disableScenario(String id) {
-        Scenario scenario = this.activeScenarios.remove(id);
+    public boolean disableScenario(@NotNull ScenarioTypes type) {
+        Scenario scenario = this.activeScenarios.remove(type);
         if (scenario == null) return false;
         scenario.disable();
         return true;
     }
 
-    public void registerScenario(String id, Scenario scenario) {
-        this.registeredScenarios.put(id, scenario);
+    public boolean isActive(@NotNull ScenarioTypes type) {
+        return this.activeScenarios.containsKey(type);
     }
 
-    public @Nullable String getScenarioId(Scenario scenario) {
-        for (Map.Entry<String, Scenario> entry : this.registeredScenarios.entrySet()) {
-            if (entry.getValue().equals(scenario)) return entry.getKey();
-        }
-        return null;
+    public @Nullable Scenario getActiveScenario(@NotNull ScenarioTypes type) {
+        return this.activeScenarios.get(type);
     }
 
-    public Map<String, Scenario> getRegisteredScenarios() {
-        return registeredScenarios;
+    public List<Scenario> getActiveScenarios() {
+        return List.copyOf(this.activeScenarios.values());
     }
 
-    public Map<String, Scenario> getActiveScenarios() {
-        return activeScenarios;
+    public Set<ScenarioTypes> getActiveScenarioTypes() {
+        return Set.copyOf(this.activeScenarios.keySet());
     }
 }

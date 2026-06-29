@@ -6,18 +6,18 @@ import co.aikar.commands.PaperCommandManager;
 import com.hardlands.command.HardlandsCommand;
 import com.hardlands.listener.PlayerListener;
 import com.hardlands.scenario.ScenarioManager;
-import com.hardlands.scenario.Scenarios;
-import com.hardlands.game.GameManager;
+import com.hardlands.scenario.ScenarioTypes;
+import com.hardlands.worldborder.WorldBorderManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Hardlands extends JavaPlugin {
     private final ScenarioManager scenarioManager = new ScenarioManager();
-    private final GameManager gameManager = new GameManager();
+    private final WorldBorderManager worldBorderManager = new WorldBorderManager();
 
     @Override
     public void onEnable() {
-        Scenarios.initialize(this.scenarioManager);
+        this.worldBorderManager.initializeSurvivalBorder();
 
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 
@@ -36,19 +36,19 @@ public final class Hardlands extends JavaPlugin {
     private void registerCommandCompletions(PaperCommandManager manager) {
         CommandCompletions<BukkitCommandCompletionContext> completions = manager.getCommandCompletions();
 
-        completions.registerAsyncCompletion("registered_scenarios", _ -> this.scenarioManager.getRegisteredScenarios().keySet());
-        completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarios().keySet());
+        completions.registerAsyncCompletion("registered_scenarios", _ -> ScenarioTypes.getIds());
+        completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarioTypes().stream().map(ScenarioTypes::getId).toList());
     }
 
     public ScenarioManager getScenarioManager() {
         return this.scenarioManager;
     }
 
-    public GameManager getGame() {
-        return this.gameManager;
+    public WorldBorderManager getWorldBorderManager() {
+        return this.worldBorderManager;
     }
 
-    public static Hardlands getInstance() {
+    public static Hardlands get() {
         return JavaPlugin.getPlugin(Hardlands.class);
     }
 }

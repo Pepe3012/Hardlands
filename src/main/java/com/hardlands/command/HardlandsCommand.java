@@ -1,69 +1,95 @@
 package com.hardlands.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Single;
+import co.aikar.commands.annotation.Subcommand;
 import com.hardlands.Hardlands;
 import com.hardlands.scenario.Scenario;
-import com.hardlands.util.ChatMessenger;
 import com.hardlands.scenario.ScenarioManager;
+import com.hardlands.scenario.ScenarioTypes;
+import com.hardlands.util.ChatMessenger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @CommandAlias("hardlands")
 @CommandPermission("hardlands.admin")
-public class HardlandsCommand extends BaseCommand {
+public final class HardlandsCommand extends BaseCommand {
 
     @Subcommand("scenarios list")
     private void onScenariosList(Player sender) {
-        Map<String, Scenario> registered = Hardlands.getInstance().getScenarioManager().getRegisteredScenarios();
-        if (registered.isEmpty()) {
-            ChatMessenger.sendMessage(sender, "<red>No scenarios registered.");
-            return;
-        }
+        ScenarioManager manager = Hardlands.get().getScenarioManager();
+
         ChatMessenger.sendMessage(sender, "<gray>Scenarios:");
-        List<String> ids = new ArrayList<>(registered.keySet());
-        for (int i = 0; i < ids.size(); i++) {
-            String id = ids.get(i);
-            boolean active = Hardlands.getInstance().getScenarioManager().getActiveScenarios().containsKey(id);
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<gray>" + (i + 1) + ". <yellow>" + id + " <gray>- " + (active ? "<green>active" : "<red>inactive")));
+
+        ScenarioTypes[] types = ScenarioTypes.values();
+        for (int i = 0; i < types.length; i++) {
+            ScenarioTypes type = types[i];
+            boolean active = manager.isActive(type);
+
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(
+                    "<gray>" + (i + 1) + ". <yellow>" + type.getId() + " <gray>- " + (active ? "<green>active" : "<red>inactive")
+            ));
         }
     }
 
     @Subcommand("scenarios enable")
     @CommandCompletion("@registered_scenarios")
     private void onScenariosEnable(Player sender, @Single String id) {
-        boolean success = Hardlands.getInstance().getScenarioManager().enableScenario(id);
-        ChatMessenger.sendMessage(sender, (success ? "<green>" : "<red>") + "Scenario '" + id + (success ? "' enabled." : "' not found or already active."));
+        ScenarioTypes type = ScenarioTypes.byId(id);
+
+        if (type == null) {
+            ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
+            return;
+        }
+
+        boolean success = Hardlands.get().getScenarioManager().enableScenario(type);
+        ChatMessenger.sendMessage(sender, (success ? "<green>" : "<red>") + "Scenario '" + type.getId() + (success ? "' enabled." : "' is already active."));
     }
 
     @Subcommand("scenarios disable")
     @CommandCompletion("@active_scenarios")
     private void onScenariosDisable(Player sender, @Single String id) {
-        boolean success = Hardlands.getInstance().getScenarioManager().disableScenario(id);
-        ChatMessenger.sendMessage(sender, (success ? "<green>" : "<red>") + "Scenario '" + id + (success ? "' disabled." : "' not found or not active."));
-    }
+        ScenarioTypes type = ScenarioTypes.byId(id);
 
-    @Subcommand("scenarios option")
-    @CommandCompletion("@registered_scenarios")
-    private void onScenarioOption(Player sender, @Single String id, @Single String key, @Single String value) {
-        Scenario scenario = Hardlands.getInstance().getScenarioManager().getRegisteredScenarios().get(id);
-        if (scenario == null) {
+        if (type == null) {
             ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
             return;
         }
+
+        boolean success = Hardlands.get().getScenarioManager().disableScenario(type);
+        ChatMessenger.sendMessage(sender, (success ? "<green>" : "<red>") + "Scenario '" + type.getId() + (success ? "' disabled." : "' is not active."));
+    }
+
+    @Subcommand("scenarios option")
+    @CommandCompletion("@active_scenarios")
+    private void onScenarioOption(Player sender, @Single String id, @Single String key, @Single String value) {
+        ScenarioTypes type = ScenarioTypes.byId(id);
+
+        if (type == null) {
+            ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
+            return;
+        }
+
+        Scenario scenario = Hardlands.get().getScenarioManager().getActiveScenario(type);
+        if (scenario == null) {
+            ChatMessenger.sendMessage(sender, "<red>Scenario '" + type.getId() + "' is not active.");
+            return;
+        }
+
         Scenario.Option<?> option = scenario.getOption(key);
         if (option == null) {
             ChatMessenger.sendMessage(sender, "<red>Option '" + key + "' not found.");
             return;
         }
+
         if (!setValue(option, value)) {
             ChatMessenger.sendMessage(sender, "<red>Invalid value '" + value + "' for " + key + ".");
             return;
         }
+
         ChatMessenger.sendMessage(sender, "<green>'" + key + "' set to '" + value + "'.");
     }
 
@@ -73,11 +99,13 @@ public class HardlandsCommand extends BaseCommand {
             switch (option.getValue()) {
                 case Boolean _ -> ((Scenario.Option<Boolean>) option).setValue(Boolean.parseBoolean(value));
                 case Float _ -> ((Scenario.Option<Float>) option).setValue(Float.parseFloat(value));
+                case Integer _ -> ((Scenario.Option<Integer>) option).setValue(Integer.parseInt(value));
                 case String _ -> ((Scenario.Option<String>) option).setValue(value);
                 default -> {
                     return false;
                 }
             }
+
             return true;
         } catch (NumberFormatException _) {
             return false;

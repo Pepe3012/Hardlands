@@ -29,7 +29,7 @@ public abstract class Scenario implements Listener {
     }
 
     void enable() {
-        Bukkit.getPluginManager().registerEvents(this, Hardlands.getInstance());
+        Bukkit.getPluginManager().registerEvents(this, Hardlands.get());
         this.onEnable();
     }
 
