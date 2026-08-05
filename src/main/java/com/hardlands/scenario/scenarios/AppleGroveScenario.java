@@ -1,5 +1,6 @@
-package com.hardlands.scenario.custom;
+package com.hardlands.scenario.scenarios;
 
+import com.hardlands.option.Option;
 import com.hardlands.scenario.Scenario;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -11,32 +12,32 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class AppleGroveScenario extends Scenario {
-    private final Option<Float> appleRate = super.createOption("apple_rate", 0.1F);
-    private final Option<Float> goldenAppleRate = super.createOption("golden_apple_rate", 0.0F);
-    private final Option<Float> enchantedGoldenAppleRate = super.createOption("enchanted_golden_apple_rate", 0.0F);
-    private final Option<Boolean> allTrees = super.createOption("all_trees", true);
+public class AppleGroveScenario extends Scenario {
 
-    @EventHandler(ignoreCancelled = true)
+    private final Option<Float> appleRate = super.optionContainer.create("apple_rate", 0.1F);
+    private final Option<Float> goldenAppleRate = super.optionContainer.create("golden_apple_rate", 0.0F);
+    private final Option<Float> enchantedGoldenAppleRate = super.optionContainer.create("enchanted_golden_apple_rate", 0.0F);
+    private final Option<Boolean> allTrees = super.optionContainer.create("all_trees", true);
+
+    @EventHandler
     private void onLeavesDecay(LeavesDecayEvent event) {
         this.tryDropApple(event.getBlock());
     }
 
     @EventHandler(ignoreCancelled = true)
     private void onBlockDropItem(BlockDropItemEvent event) {
-        if (this.isValidLeaves(event.getBlockState().getType())) {
-            this.tryDropApple(event.getBlock());
-        }
+        this.tryDropApple(event.getBlock());
     }
 
     private void tryDropApple(Block block) {
-        if (!isValidLeaves(block.getType())) return;
+        if (!this.validateBlock(block.getType())) return;
+
         Material apple = this.rollApple();
         if (apple == null) return;
         block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(apple));
     }
 
-    private boolean isValidLeaves(Material material) {
+    private boolean validateBlock(Material material) {
         if (!Tag.LEAVES.isTagged(material)) return false;
         return Boolean.TRUE.equals(this.allTrees.getValue()) || material == Material.OAK_LEAVES;
     }

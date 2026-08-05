@@ -1,62 +1,29 @@
 package com.hardlands.scenario;
 
-import com.hardlands.Hardlands;
+import com.hardlands.HardlandsPlugin;
+import com.hardlands.option.OptionContainer;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
-import java.util.*;
-
 public abstract class Scenario implements Listener {
-    private final Map<String, Option<?>> options = new LinkedHashMap<>();
 
-    @SuppressWarnings("unchecked")
-    public <T> Option<T> getOption(String key) {
-        return (Option<T>) this.options.get(key);
+    @Getter protected final OptionContainer optionContainer = new OptionContainer();
+
+    protected void onEnable() {
     }
 
-    public Collection<Option<?>> getOptions() {
-        return Collections.unmodifiableCollection(this.options.values());
-    }
-
-    protected void onEnable() {}
-    protected void onDisable() {}
-
-    protected <T> Option<T> createOption(String key, T defaultValue) {
-        Option<T> option = new Option<>(key, defaultValue);
-        this.options.put(key, option);
-        return option;
+    protected void onDisable() {
     }
 
     void enable() {
-        Bukkit.getPluginManager().registerEvents(this, Hardlands.get());
+        Bukkit.getPluginManager().registerEvents(this, HardlandsPlugin.INSTANCE);
         this.onEnable();
     }
 
     void disable() {
         HandlerList.unregisterAll(this);
         this.onDisable();
-    }
-
-    public static class Option<T> {
-        private final String key;
-        private T value;
-
-        Option(String key, T value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public void setValue(T value) {
-            this.value = value;
-        }
-
-        public String getKey() {
-            return this.key;
-        }
-
-        public T getValue() {
-            return this.value;
-        }
     }
 }

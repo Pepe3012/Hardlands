@@ -1,5 +1,6 @@
-package com.hardlands.scenario.custom;
+package com.hardlands.scenario.scenarios;
 
+import com.hardlands.option.Option;
 import com.hardlands.scenario.Scenario;
 import com.hardlands.util.BlockUtil;
 import com.hardlands.util.BoundedCounter;
@@ -12,20 +13,19 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-public final class TimberScenario extends Scenario {
-    private static final int LOG_LIMIT = 100;
-    private static final int LEAVES_LIMIT = 200;
+public class TimberScenario extends Scenario {
 
-    private final Option<Boolean> breakLeaves = super.createOption("break_leaves", false);
+    private final Option<Boolean> breakLeaves = super.optionContainer.create("break_leaves", false);
+    private final Option<Integer> logLimit = super.optionContainer.create("log_limit", 200);
+    private final Option<Integer> leaveLimit = super.optionContainer.create("leave_limit", 300);
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST)
     private void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
         if (!hasAxe(player) || !isLog(block.getType())) return;
 
-        event.setCancelled(true);
         this.breakTree(block, player);
     }
 
@@ -33,8 +33,8 @@ public final class TimberScenario extends Scenario {
         ItemStack tool = player.getInventory().getItemInMainHand();
         boolean shouldBreakLeaves = Boolean.TRUE.equals(this.breakLeaves.getValue());
 
-        BoundedCounter logs = new BoundedCounter(LOG_LIMIT);
-        BoundedCounter leaves = new BoundedCounter(LEAVES_LIMIT);
+        BoundedCounter logs = new BoundedCounter(this.logLimit.getValue());
+        BoundedCounter leaves = new BoundedCounter(this.leaveLimit.getValue());
 
         BlockUtil.breakConnected(origin, block -> {
             if (!canBreak(block.getType(), logs, leaves, shouldBreakLeaves)) return false;

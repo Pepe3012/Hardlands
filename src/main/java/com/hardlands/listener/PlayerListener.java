@@ -1,21 +1,20 @@
 package com.hardlands.listener;
 
-import com.hardlands.util.GlobalUtil;
+import com.hardlands.HardlandsPlugin;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.*;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.Skull;
-import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-public final class PlayerListener implements Listener {
+public class PlayerListener implements Listener {
+
     private static final String KILL_MESSAGE = "<#FFFFFF>☠ <#B22222>¡Has eliminado a <#FFFFFF>%s<#B22222>! <#FFFFFF>☠";
 
     @EventHandler
@@ -27,14 +26,14 @@ public final class PlayerListener implements Listener {
         if (deathMessage != null) {
             String plain = PlainTextComponentSerializer.plainText().serialize(deathMessage);
             String withKiller = causingEntity instanceof Player killer
-                    ? plain.replace(killer.getName(), GlobalUtil.getPlayerHeadAndName(killer))
+                    ? plain.replace(killer.getName(), HardlandsPlugin.getPlayerHeadAndName(killer))
                     : plain;
-            String formatted = withKiller.replace(player.getName(), GlobalUtil.getPlayerHeadAndName(player));
+            String formatted = withKiller.replace(player.getName(), HardlandsPlugin.getPlayerHeadAndName(player));
             event.deathMessage(MiniMessage.miniMessage().deserialize("<#B22222>" + formatted));
         }
 
         if (causingEntity instanceof Player killer && killer != player) {
-            killer.sendActionBar(MiniMessage.miniMessage().deserialize(KILL_MESSAGE.formatted(GlobalUtil.getPlayerHeadAndName(player))));
+            killer.sendActionBar(MiniMessage.miniMessage().deserialize(KILL_MESSAGE.formatted(HardlandsPlugin.getPlayerHeadAndName(player))));
         }
 
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THUNDER, 0.75F, 1.75F);

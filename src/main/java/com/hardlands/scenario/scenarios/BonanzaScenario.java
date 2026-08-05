@@ -1,24 +1,22 @@
-package com.hardlands.scenario.custom;
+package com.hardlands.scenario.scenarios;
 
+import com.hardlands.option.Option;
 import com.hardlands.scenario.Scenario;
 import com.hardlands.util.BlockUtil;
-import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 
-public final class BonanzaScenario extends Scenario {
-    private final Option<Float> multiplier = super.createOption("multiplier", 2.0F);
+public class BonanzaScenario extends Scenario {
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    private final Option<Float> multiplier = super.optionContainer.create("multiplier", 2.0F);
+
+    @EventHandler(priority = EventPriority.LOWEST)
     private void onBlockDropItem(BlockDropItemEvent event) {
-        BlockState state = event.getBlockState();
-
-        if (!BlockUtil.isOre(state.getType())) return;
+        if (!BlockUtil.isOre(event.getBlockState().getType())) return;
 
         float multiplierValue = Math.max(1.0F, this.multiplier.getValue());
-
         event.getItems().forEach(item -> {
             ItemStack stack = item.getItemStack();
             stack.setAmount(calculateAmount(stack.getAmount(), multiplierValue));

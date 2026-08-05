@@ -6,19 +6,24 @@ import co.aikar.commands.PaperCommandManager;
 import com.hardlands.command.HardlandsCommand;
 import com.hardlands.listener.PlayerListener;
 import com.hardlands.scenario.ScenarioManager;
-import com.hardlands.scenario.ScenarioTypes;
-import com.hardlands.worldborder.WorldBorderManager;
+import com.hardlands.scenario.ScenarioType;
+import com.hardlands.uhc.UHC;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class Hardlands extends JavaPlugin {
-    private final ScenarioManager scenarioManager = new ScenarioManager();
-    private final WorldBorderManager worldBorderManager = new WorldBorderManager();
+public final class HardlandsPlugin extends JavaPlugin {
+
+    public static final HardlandsPlugin INSTANCE = JavaPlugin.getPlugin(HardlandsPlugin.class);
+
+    @Getter private final ScenarioManager scenarioManager = new ScenarioManager();
+
+    @Getter @Setter private UHC uhc; //store the current uhc game being played, null if there are no games being played
 
     @Override
     public void onEnable() {
-        this.worldBorderManager.initializeSurvivalBorder();
-
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 
         PaperCommandManager paperCommandManager = new PaperCommandManager(this);
@@ -36,19 +41,11 @@ public final class Hardlands extends JavaPlugin {
     private void registerCommandCompletions(PaperCommandManager manager) {
         CommandCompletions<BukkitCommandCompletionContext> completions = manager.getCommandCompletions();
 
-        completions.registerAsyncCompletion("registered_scenarios", _ -> ScenarioTypes.getIds());
-        completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarioTypes().stream().map(ScenarioTypes::getId).toList());
+        completions.registerAsyncCompletion("registered_scenarios", _ -> ScenarioType.IDS);
+        completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarioTypes().stream().map(ScenarioType::getId).toList());
     }
 
-    public ScenarioManager getScenarioManager() {
-        return this.scenarioManager;
-    }
-
-    public WorldBorderManager getWorldBorderManager() {
-        return this.worldBorderManager;
-    }
-
-    public static Hardlands get() {
-        return JavaPlugin.getPlugin(Hardlands.class);
+    public static String getPlayerHeadAndName(Player player) {
+        return "<white><head:%s></white> %s".formatted(player.getUniqueId(), player.getName());
     }
 }

@@ -1,5 +1,6 @@
-package com.hardlands.scenario.custom;
+package com.hardlands.scenario.scenarios;
 
+import com.hardlands.option.Option;
 import com.hardlands.scenario.Scenario;
 import com.hardlands.util.BlockUtil;
 import org.bukkit.Location;
@@ -18,8 +19,9 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class CutCleanScenario extends Scenario {
-    private static final Map<Material, SmeltResult> SMELT_MAP = BlockUtil.addDeepslateVariants(Map.of(
+public class CutCleanScenario extends Scenario {
+
+    private static final Map<Material, SmeltResult> SMELT_MAP = BlockUtil.withDeepslateVariants(Map.of(
             Material.IRON_ORE, smeltsTo(Material.IRON_INGOT, 0.7F),
             Material.GOLD_ORE, smeltsTo(Material.GOLD_INGOT, 1.0F),
             Material.COPPER_ORE, smeltsTo(Material.COPPER_INGOT, 0.7F),
@@ -37,24 +39,23 @@ public final class CutCleanScenario extends Scenario {
             Material.COD, Material.COOKED_COD
     ));
 
-    private final Option<Boolean> dropExperience = super.createOption("drop_experience", true);
+    private final Option<Boolean> dropExperience = super.optionContainer.create("drop_experience", true);
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     private void onBlockDropItem(BlockDropItemEvent event) {
-        SmeltResult result = SMELT_MAP.get(event.getBlockState().getType());
-        if (result == null) return;
+        SmeltResult smelted = SMELT_MAP.get(event.getBlockState().getType());
+        if (smelted == null) return;
 
         int totalAmount = 0;
 
         for (Item item : event.getItems()) {
             int amount = item.getItemStack().getAmount();
-
-            item.setItemStack(new ItemStack(result.material(), amount));
+            item.setItemStack(new ItemStack(smelted.material(), amount));
             totalAmount += amount;
         }
 
         if (Boolean.TRUE.equals(this.dropExperience.getValue())) {
-            this.dropExperience(event, totalAmount, result.experience());
+            this.dropExperience(event, totalAmount, smelted.experience());
         }
     }
 

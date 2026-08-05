@@ -1,7 +1,7 @@
 name: Hardlands
 version: '${version}'
 
-main: com.hardlands.Hardlands
+main: com.hardlands.HardlandsPlugin
 api-version: '26.2'
 load: POSTWORLD
 

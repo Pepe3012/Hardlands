@@ -10,20 +10,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public final class BlockUtil {
-    private static final Set<Material> ORES = addDeepslateVariants(EnumSet.of(Material.COAL_ORE, Material.IRON_ORE, Material.COPPER_ORE, Material.GOLD_ORE, Material.REDSTONE_ORE, Material.EMERALD_ORE, Material.LAPIS_ORE, Material.DIAMOND_ORE, Material.NETHER_QUARTZ_ORE, Material.NETHER_GOLD_ORE, Material.ANCIENT_DEBRIS));
+    private static final Set<Material> ORES = withDeepslateVariants(EnumSet.of(
+            Material.COAL_ORE,
+            Material.IRON_ORE,
+            Material.COPPER_ORE,
+            Material.GOLD_ORE,
+            Material.REDSTONE_ORE,
+            Material.EMERALD_ORE,
+            Material.LAPIS_ORE,
+            Material.DIAMOND_ORE,
+            Material.NETHER_QUARTZ_ORE,
+            Material.NETHER_GOLD_ORE,
+            Material.ANCIENT_DEBRIS
+    ));
+
     private static final String DEEPSLATE_PREFIX = "DEEPSLATE_";
     private static final int CONNECTION_RADIUS = 1;
 
@@ -59,7 +65,7 @@ public final class BlockUtil {
         }
     }
 
-    public static <V> Map<Material, V> addDeepslateVariants(@NotNull Map<Material, V> base) {
+    public static <V> Map<Material, V> withDeepslateVariants(@NotNull Map<Material, V> base) {
         EnumMap<Material, V> materials = new EnumMap<>(Material.class);
 
         base.forEach((material, value) -> {
@@ -72,7 +78,7 @@ public final class BlockUtil {
         return materials;
     }
 
-    public static Set<Material> addDeepslateVariants(@NotNull Set<Material> base) {
+    public static @NonNull Set<Material> withDeepslateVariants(@NotNull Set<Material> base) {
         EnumSet<Material> materials = EnumSet.noneOf(Material.class);
 
         for (Material material : base) {
@@ -89,6 +95,7 @@ public final class BlockUtil {
         return ORES.contains(material);
     }
 
+    // Utility methods
     private static List<Item> spawnTemporaryDrops(Block block, ItemStack tool) {
         List<Item> drops = new ArrayList<>();
 
