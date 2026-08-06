@@ -1,6 +1,6 @@
 package com.hardlands.scenario.scenarios;
 
-import com.hardlands.option.Option;
+import com.hardlands.util.option.Option;
 import com.hardlands.scenario.Scenario;
 import com.hardlands.util.BlockUtil;
 import org.bukkit.Location;

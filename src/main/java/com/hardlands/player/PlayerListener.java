@@ -1,6 +1,6 @@
-package com.hardlands.listener;
+package com.hardlands.player;
 
-import com.hardlands.HardlandsPlugin;
+import com.hardlands.util.TextFormatter;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class PlayerListener implements Listener {
 
@@ -26,14 +27,14 @@ public class PlayerListener implements Listener {
         if (deathMessage != null) {
             String plain = PlainTextComponentSerializer.plainText().serialize(deathMessage);
             String withKiller = causingEntity instanceof Player killer
-                    ? plain.replace(killer.getName(), HardlandsPlugin.getPlayerHeadAndName(killer))
+                    ? plain.replace(killer.getName(), TextFormatter.getPlayerHeadAndName(killer))
                     : plain;
-            String formatted = withKiller.replace(player.getName(), HardlandsPlugin.getPlayerHeadAndName(player));
+            String formatted = withKiller.replace(player.getName(), TextFormatter.getPlayerHeadAndName(player));
             event.deathMessage(MiniMessage.miniMessage().deserialize("<#B22222>" + formatted));
         }
 
         if (causingEntity instanceof Player killer && killer != player) {
-            killer.sendActionBar(MiniMessage.miniMessage().deserialize(KILL_MESSAGE.formatted(HardlandsPlugin.getPlayerHeadAndName(player))));
+            killer.sendActionBar(MiniMessage.miniMessage().deserialize(KILL_MESSAGE.formatted(TextFormatter.getPlayerHeadAndName(player))));
         }
 
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_TRIDENT_THUNDER, 0.75F, 1.75F);

@@ -1,8 +1,8 @@
 package com.hardlands.uhc;
 
-import com.hardlands.option.Option;
-import com.hardlands.option.OptionContainer;
-import com.hardlands.option.OptionValidators;
+import com.hardlands.util.option.Option;
+import com.hardlands.util.option.OptionContainer;
+import com.hardlands.util.option.OptionValidators;
 import com.hardlands.util.TickConverter;
 import lombok.Getter;
 import org.bukkit.Bukkit;

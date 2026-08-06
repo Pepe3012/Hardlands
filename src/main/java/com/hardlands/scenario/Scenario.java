@@ -1,7 +1,7 @@
 package com.hardlands.scenario;
 
 import com.hardlands.HardlandsPlugin;
-import com.hardlands.option.OptionContainer;
+import com.hardlands.util.option.OptionContainer;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
@@ -18,7 +18,7 @@ public abstract class Scenario implements Listener {
     }
 
     void enable() {
-        Bukkit.getPluginManager().registerEvents(this, HardlandsPlugin.INSTANCE);
+        Bukkit.getPluginManager().registerEvents(this, HardlandsPlugin.getInstance());
         this.onEnable();
     }
 

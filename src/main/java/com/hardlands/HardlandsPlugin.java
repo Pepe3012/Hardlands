@@ -4,32 +4,50 @@ import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.CommandCompletions;
 import co.aikar.commands.PaperCommandManager;
 import com.hardlands.command.HardlandsCommand;
-import com.hardlands.listener.PlayerListener;
+import com.hardlands.inventory.InventoryListener;
+import com.hardlands.player.PlayerListener;
 import com.hardlands.scenario.ScenarioManager;
 import com.hardlands.scenario.ScenarioType;
 import com.hardlands.uhc.UHC;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 public final class HardlandsPlugin extends JavaPlugin {
 
-    public static final HardlandsPlugin INSTANCE = JavaPlugin.getPlugin(HardlandsPlugin.class);
+    @Getter @Setter private static HardlandsPlugin instance;
 
     @Getter private final ScenarioManager scenarioManager = new ScenarioManager();
 
-    @Getter @Setter private UHC uhc; //store the current uhc game being played, null if there are no games being played
+    @Getter @Setter private UHC uhc;
 
     @Override
     public void onEnable() {
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        super.getLogger().info("Initializing plugin...");
+
+        setInstance(this);
+
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        pluginManager.registerEvents(new PlayerListener(), this);
+        pluginManager.registerEvents(new InventoryListener(this ), this);
 
         PaperCommandManager paperCommandManager = new PaperCommandManager(this);
         this.registerCommandCompletions(paperCommandManager);
         paperCommandManager.registerCommand(new HardlandsCommand());
 
+        super.getLogger().info(System.lineSeparator() + """
+          _    _          _____  _____  _               _   _ _____   _____
+         | |  | |   /\\   |  __ \\|  __ \\| |        /\\   | \\ | |  __ \\ / ____|
+         | |__| |  /  \\  | |__) | |  | | |       /  \\  |  \\| | |  | | (___
+         |  __  | / /\\ \\ |  _  /| |  | | |      / /\\ \\ | . ` | |  | |\\___ \\
+         | |  | |/ ____ \\| | \\ \\| |__| | |____ / ____ \\| |\\  | |__| |____) |
+         |_|  |_/_/    \\_\\_|  \\_\\_____/|______/_/    \\_\\_| \\_|_____/|_____/
+        """);
         super.getLogger().info("The plugin has been successfully enabled.");
     }
 
@@ -42,10 +60,19 @@ public final class HardlandsPlugin extends JavaPlugin {
         CommandCompletions<BukkitCommandCompletionContext> completions = manager.getCommandCompletions();
 
         completions.registerAsyncCompletion("registered_scenarios", _ -> ScenarioType.IDS);
-        completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarioTypes().stream().map(ScenarioType::getId).toList());
-    }
+        completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarioTypes()
+                .stream()
+                .map(ScenarioType::getId)
+                .toList());
 
-    public static String getPlayerHeadAndName(Player player) {
-        return "<white><head:%s></white> %s".formatted(player.getUniqueId(), player.getName());
+        completions.registerAsyncCompletion("uhc_options", _ -> {
+            UHC uhc = this.uhc;
+            if (uhc == null) return List.of();
+
+            return Stream.concat(
+                    uhc.getOptionContainer().getOptions().keySet().stream(),
+                    uhc.getWorldBorderManager().getOptionContainer().getOptions().keySet().stream()
+            ).toList();
+        });
     }
 }

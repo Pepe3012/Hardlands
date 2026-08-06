@@ -1,4 +1,4 @@
-package com.hardlands.option;
+package com.hardlands.util.option;
 
 import java.util.Objects;
 import java.util.function.Predicate;

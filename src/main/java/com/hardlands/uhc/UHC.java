@@ -1,9 +1,9 @@
 package com.hardlands.uhc;
 
 import com.hardlands.HardlandsPlugin;
-import com.hardlands.option.Option;
-import com.hardlands.option.OptionContainer;
-import com.hardlands.option.OptionValidators;
+import com.hardlands.util.option.Option;
+import com.hardlands.util.option.OptionContainer;
+import com.hardlands.util.option.OptionValidators;
 import com.hardlands.util.TickConverter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,60 +14,59 @@ public final class UHC {
 
     @Getter private final WorldBorderManager worldBorderManager = new WorldBorderManager();
     @Getter private final PreparationManager preparationManager = new PreparationManager(this.worldBorderManager);
+    @Getter private final OptionContainer optionContainer = new OptionContainer();
 
-    private final OptionContainer optionContainer = new OptionContainer();
-    private final Option<Integer> pactDurationOption = this.optionContainer.create("pact-duration", 900, OptionValidators.Integers.NON_NEGATIVE);
-    private final Option<Integer> survivalDurationOption = this.optionContainer.create("survival-duration", 1800, OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> pactDurationOption = this.optionContainer.create("pact-duration", TickConverter.minutesToTicks(15), OptionValidators.Integers.NON_NEGATIVE);
+    private final Option<Integer> survivalDurationOption = this.optionContainer.create("survival-duration", TickConverter.minutesToTicks(30), OptionValidators.Integers.POSITIVE);
     private final Option<MeetupDuration> meetupDurationOption = this.optionContainer.create("meetup-duration", MeetupDuration.ofMinutes(15));
-    
+
     private final HardlandsPlugin plugin;
 
-    private Phase phase = Phase.LOBBY;
+    @Getter private Phase phase = Phase.LOBBY;
+
     private BukkitTask currentTask;
-    
-    public UHC(final HardlandsPlugin plugin) {
+    private long phaseEndsAtMillis = -1L;
+
+    public UHC(HardlandsPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void start() {
-        if (this.phase != Phase.LOBBY) {
-            throw new IllegalStateException("The UHC cannot start from the " + this.phase.getDisplayName() + " phase");
-        }
+        if (this.phase != Phase.LOBBY) throw new IllegalStateException("The UHC cannot start from the " + this.phase.getDisplayName() + " phase");
+        if (!this.preparationManager.isCompleted()) throw new IllegalStateException("The UHC preparation has not been completed");
 
-        if (!this.preparationManager.isCompleted()) {
-            throw new IllegalStateException("The UHC preparation has not been completed");
-        }
-
-        this.validateConfiguration();
+        this.requireValidConfiguration();
         this.transitionToPhase(Phase.SURVIVAL_GRACE_PERIOD);
-
-        this.plugin.setUhc(this);
     }
 
     public void stop() {
-        if (!this.isRunning()) {
-            throw new IllegalStateException("The UHC is not running");
-        }
+        if (!this.isRunning()) throw new IllegalStateException("The UHC is not running");
 
         this.transitionToPhase(Phase.FINISHED);
-
-        this.plugin.setUhc(null);
     }
 
     public void reset() {
-        if (this.isRunning()) {
-            throw new IllegalStateException("The UHC cannot be reset while running");
-        }
+        if (this.isRunning()) throw new IllegalStateException("The UHC cannot be reset while running");
 
         this.cancelCurrentTask();
         this.preparationManager.resetPreparation();
         this.phase = Phase.LOBBY;
     }
 
+    public void advancePhase() {
+        Phase nextPhase = switch (this.phase) {
+            case SURVIVAL_GRACE_PERIOD -> Phase.SURVIVAL_PVP;
+            case SURVIVAL_PVP -> Phase.BORDER_SHRINK;
+            case BORDER_SHRINK -> Phase.MEETUP;
+            case MEETUP -> Phase.DEATHMATCH;
+            default -> throw new IllegalStateException("The " + this.phase.getDisplayName() + " phase cannot be advanced");
+        };
+
+        this.transitionToPhase(nextPhase);
+    }
+
     public void transitionToPhase(Phase nextPhase) {
-        if (!this.canTransitionTo(nextPhase)) {
-            throw new IllegalStateException("Cannot transition from " + this.phase.getDisplayName() + " to " + nextPhase.getDisplayName());
-        }
+        if (!this.canTransitionTo(nextPhase)) throw new IllegalStateException("Cannot transition from " + this.phase.getDisplayName() + " to " + nextPhase.getDisplayName());
 
         this.cancelCurrentTask();
         this.phase = nextPhase;
@@ -94,18 +93,18 @@ public final class UHC {
         return this.phase.isPvpEnabled();
     }
 
-    private void validateConfiguration() {
-        if (!this.optionContainer.validate()) {
-            throw new IllegalStateException("The UHC configuration is invalid");
-        }
+    public boolean isConfigurationValid() {
+        return this.optionContainer.validate() && this.worldBorderManager.validate() && this.pactDurationOption.getValue() <= this.survivalDurationOption.getValue();
+    }
 
-        if (!this.worldBorderManager.validate()) {
-            throw new IllegalStateException("The world border configuration is invalid");
-        }
+    public long getRemainingPhaseTicks() {
+        return this.phaseEndsAtMillis < 0L ? -1L : Math.max(0L, (this.phaseEndsAtMillis - System.currentTimeMillis() + 49L) / 50L);
+    }
 
-        if (this.pactDurationOption.getValue() > this.survivalDurationOption.getValue()) {
-            throw new IllegalStateException("Pact duration cannot exceed survival duration");
-        }
+    private void requireValidConfiguration() {
+        if (!this.optionContainer.validate()) throw new IllegalStateException("The UHC configuration is invalid");
+        if (!this.worldBorderManager.validate()) throw new IllegalStateException("The world border configuration is invalid");
+        if (this.pactDurationOption.getValue() > this.survivalDurationOption.getValue()) throw new IllegalStateException("Pact duration cannot exceed survival duration");
     }
 
     private boolean canTransitionTo(Phase nextPhase) {
@@ -122,22 +121,22 @@ public final class UHC {
     }
 
     private void scheduleDelayedTask(Runnable action, long delay) {
-        if (delay < 0) {
-            throw new IllegalArgumentException("Task delay cannot be negative");
-        }
+        if (delay < 0L) throw new IllegalArgumentException("Task delay cannot be negative");
 
         this.cancelCurrentTask();
+        this.phaseEndsAtMillis = System.currentTimeMillis() + delay * 50L;
         this.currentTask = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             this.currentTask = null;
+            this.phaseEndsAtMillis = -1L;
             action.run();
         }, delay);
     }
 
     private void cancelCurrentTask() {
-        if (this.currentTask == null) return;
+        if (this.currentTask != null) this.currentTask.cancel();
 
-        this.currentTask.cancel();
         this.currentTask = null;
+        this.phaseEndsAtMillis = -1L;
     }
 
     private void enterSurvivalGracePeriod() {
@@ -145,21 +144,17 @@ public final class UHC {
     }
 
     private void enterSurvivalPvp() {
-        int remainingDuration = this.survivalDurationOption.getValue() - this.pactDurationOption.getValue();
-        this.scheduleDelayedTask(() -> this.transitionToPhase(Phase.BORDER_SHRINK), remainingDuration);
+        this.scheduleDelayedTask(() -> this.transitionToPhase(Phase.BORDER_SHRINK), this.survivalDurationOption.getValue() - this.pactDurationOption.getValue());
     }
 
     private void enterBorderShrink() {
-        int duration = this.worldBorderManager.shrinkForMeetup();
-        this.scheduleDelayedTask(() -> this.transitionToPhase(Phase.MEETUP), duration);
+        this.scheduleDelayedTask(() -> this.transitionToPhase(Phase.MEETUP), this.worldBorderManager.shrinkForMeetup());
     }
 
     private void enterMeetup() {
         MeetupDuration duration = this.meetupDurationOption.getValue();
 
-        if (!duration.isInfinite()) {
-            this.scheduleDelayedTask(() -> this.transitionToPhase(Phase.DEATHMATCH), duration.ticks());
-        }
+        if (!duration.isInfinite()) this.scheduleDelayedTask(() -> this.transitionToPhase(Phase.DEATHMATCH), duration.ticks());
     }
 
     private void enterDeathmatch() {
@@ -171,18 +166,16 @@ public final class UHC {
     }
 
     public record MeetupDuration(int ticks) {
+
         public static final MeetupDuration INFINITE = new MeetupDuration(-1);
 
         public MeetupDuration {
-            if (ticks < -1) {
-                throw new IllegalArgumentException("Ticks cannot be less than -1");
-            }
+            if (ticks < -1) throw new IllegalArgumentException("Ticks cannot be less than -1");
         }
 
         public static MeetupDuration ofMinutes(int minutes) {
-            if (minutes < 0) {
-                throw new IllegalArgumentException("Minutes cannot be negative");
-            }
+            if (minutes < 0) throw new IllegalArgumentException("Minutes cannot be negative");
+
             return new MeetupDuration(TickConverter.minutesToTicks(minutes));
         }
 
@@ -190,7 +183,7 @@ public final class UHC {
             return this.ticks == INFINITE.ticks;
         }
     }
-    
+
     @Getter
     @RequiredArgsConstructor
     public enum Phase {
