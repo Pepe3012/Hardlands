@@ -1,22 +1,17 @@
 package com.hardlands;
 
-import co.aikar.commands.BukkitCommandCompletionContext;
-import co.aikar.commands.CommandCompletions;
-import co.aikar.commands.PaperCommandManager;
-import com.hardlands.command.HardlandsCommand;
+import com.hardlands.command.CommandInitializer;
 import com.hardlands.inventory.InventoryListener;
 import com.hardlands.player.PlayerListener;
+import com.hardlands.player.PlayerRepeatingTask;
 import com.hardlands.scenario.ScenarioManager;
-import com.hardlands.scenario.ScenarioType;
 import com.hardlands.uhc.UHC;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.List;
-import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
 
 public final class HardlandsPlugin extends JavaPlugin {
 
@@ -31,14 +26,12 @@ public final class HardlandsPlugin extends JavaPlugin {
         super.getLogger().info("Initializing plugin...");
 
         setInstance(this);
+        this.uhc = new UHC(this);
 
-        PluginManager pluginManager = Bukkit.getPluginManager();
-        pluginManager.registerEvents(new PlayerListener(), this);
-        pluginManager.registerEvents(new InventoryListener(this ), this);
+        this.registerListeners(Bukkit.getPluginManager());
+        new CommandInitializer(this).register();
 
-        PaperCommandManager paperCommandManager = new PaperCommandManager(this);
-        this.registerCommandCompletions(paperCommandManager);
-        paperCommandManager.registerCommand(new HardlandsCommand());
+        PlayerRepeatingTask.initialize(this);
 
         super.getLogger().info(System.lineSeparator() + """
           _    _          _____  _____  _               _   _ _____   _____
@@ -56,23 +49,8 @@ public final class HardlandsPlugin extends JavaPlugin {
         super.getLogger().info("The plugin has been successfully disabled.");
     }
 
-    private void registerCommandCompletions(PaperCommandManager manager) {
-        CommandCompletions<BukkitCommandCompletionContext> completions = manager.getCommandCompletions();
-
-        completions.registerAsyncCompletion("registered_scenarios", _ -> ScenarioType.IDS);
-        completions.registerAsyncCompletion("active_scenarios", _ -> this.scenarioManager.getActiveScenarioTypes()
-                .stream()
-                .map(ScenarioType::getId)
-                .toList());
-
-        completions.registerAsyncCompletion("uhc_options", _ -> {
-            UHC uhc = this.uhc;
-            if (uhc == null) return List.of();
-
-            return Stream.concat(
-                    uhc.getOptionContainer().getOptions().keySet().stream(),
-                    uhc.getWorldBorderManager().getOptionContainer().getOptions().keySet().stream()
-            ).toList();
-        });
+    private void registerListeners(PluginManager pluginManager) {
+        pluginManager.registerEvents(new PlayerListener(), this);
+        pluginManager.registerEvents(new InventoryListener(), this);
     }
 }

@@ -5,39 +5,51 @@ import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public final class MenuInventory<T> implements InventoryHolder {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-    @Getter private final T menu;
+public final class MenuInventory implements InventoryHolder {
+
+    @Getter private final Menu menu;
     @Getter private final Inventory inventory;
-    @Getter private final @Nullable MenuInventory<T> previous;
-    private final @Nullable Sound openingSound;
+    @Getter @Nullable private final MenuInventory previous;
+    private final Map<Integer, BiConsumer<Player, ClickType>> actions = new HashMap<>();
 
-    public MenuInventory(T menu, Size size, Component title, Style style, @Nullable MenuInventory<T> previous) {
+    public MenuInventory(Menu menu, Size size, Component title, Material outline, @Nullable MenuInventory previous) {
         this.menu = menu;
-        this.previous = previous;
-        this.openingSound = style.sound();
         this.inventory = Bukkit.createInventory(this, size.slots, title);
-
-        this.renderOutline(style.outline());
+        this.previous = previous;
+        this.renderOutline(outline);
     }
 
-    public void openInventory(Player player) {
+    public void open(Player player) {
         player.openInventory(this.inventory);
-        if (this.openingSound != null) {
-            player.playSound(player, this.openingSound, SoundCategory.UI, 0.75F, 1.25F);
-        }
+    }
+
+    public void item(int slot, ItemStack item, Consumer<Player> action) {
+        this.item(slot, item, (player, click) -> action.accept(player));
+    }
+
+    public void item(int slot, ItemStack item, BiConsumer<Player, ClickType> action) {
+        this.inventory.setItem(slot, item);
+        this.actions.put(slot, action);
     }
 
     public void setItem(int slot, @Nullable ItemStack item) {
         this.inventory.setItem(slot, item);
+    }
+
+    @Nullable BiConsumer<Player, ClickType> getAction(int slot) {
+        return this.actions.get(slot);
     }
 
     private void renderOutline(Material material) {
@@ -54,13 +66,6 @@ public final class MenuInventory<T> implements InventoryHolder {
         }
     }
 
-    public record Style(Material outline, @Nullable Sound sound) {
-
-        public Style(Material outline) {
-            this(outline, null);
-        }
-    }
-
     @RequiredArgsConstructor
     public enum Size {
 
@@ -72,5 +77,14 @@ public final class MenuInventory<T> implements InventoryHolder {
         SIX_ROWS(54);
 
         private final int slots;
+
+        public int slot(int row, int column) {
+            int rowCount = this.slots / 9;
+
+            if (row < 1 || row > rowCount) throw new IllegalArgumentException("Row " + row + " is out of bounds for " + this.name() + " (1-" + rowCount + ")");
+            if (column < 0 || column > 8) throw new IllegalArgumentException("Column " + column + " is out of bounds (0-8)");
+
+            return (row - 1) * 9 + column;
+        }
     }
 }

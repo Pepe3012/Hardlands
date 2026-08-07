@@ -1,10 +1,14 @@
 package com.hardlands.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Single;
+import co.aikar.commands.annotation.Subcommand;
 import com.hardlands.HardlandsPlugin;
 import com.hardlands.inventory.HardlandsMenu;
-import com.hardlands.util.option.Option;
 import com.hardlands.scenario.Scenario;
 import com.hardlands.scenario.ScenarioManager;
 import com.hardlands.scenario.ScenarioType;
@@ -12,6 +16,7 @@ import com.hardlands.uhc.PreparationManager;
 import com.hardlands.uhc.UHC;
 import com.hardlands.util.ChatMessenger;
 import com.hardlands.util.TickConverter;
+import com.hardlands.util.option.Option;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -24,14 +29,16 @@ import java.util.Locale;
 @CommandPermission("hardlands.admin")
 public final class HardlandsCommand extends BaseCommand {
 
+    private static final MiniMessage MM = MiniMessage.miniMessage();
+
     @Default
     private void onUhc(Player player) {
         HardlandsMenu.MAIN.open(player);
     }
-    
+
     @Subcommand("scenarios list")
     private void onScenariosList(CommandSender sender) {
-        ScenarioManager manager = HardlandsPlugin.getInstance().getScenarioManager();
+        ScenarioManager manager = plugin().getScenarioManager();
         ScenarioType[] types = ScenarioType.values();
 
         ChatMessenger.sendMessage(sender, "<gray>Scenarios:");
@@ -39,7 +46,7 @@ public final class HardlandsCommand extends BaseCommand {
         for (int i = 0; i < types.length; i++) {
             ScenarioType type = types[i];
             String state = manager.isActive(type) ? "<green>active" : "<red>inactive";
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<gray>" + (i + 1) + ". <yellow>" + type.getId() + " <gray>- " + state));
+            sender.sendMessage(MM.deserialize("<gray>" + (i + 1) + ". <yellow>" + type.getId() + " <gray>- " + state));
         }
     }
 
@@ -55,7 +62,7 @@ public final class HardlandsCommand extends BaseCommand {
             return;
         }
 
-        boolean enabled = HardlandsPlugin.getInstance().getScenarioManager().enable(type);
+        boolean enabled = plugin().getScenarioManager().enable(type);
         ChatMessenger.sendMessage(sender, enabled ? "<green>Scenario '" + type.getId() + "' enabled." : "<red>Scenario '" + type.getId() + "' is already active.");
     }
 
@@ -71,7 +78,7 @@ public final class HardlandsCommand extends BaseCommand {
             return;
         }
 
-        boolean disabled = HardlandsPlugin.getInstance().getScenarioManager().disable(type);
+        boolean disabled = plugin().getScenarioManager().disable(type);
         ChatMessenger.sendMessage(sender, disabled ? "<green>Scenario '" + type.getId() + "' disabled." : "<red>Scenario '" + type.getId() + "' is not active.");
     }
 
@@ -87,7 +94,7 @@ public final class HardlandsCommand extends BaseCommand {
             return;
         }
 
-        Scenario scenario = HardlandsPlugin.getInstance().getScenarioManager().getActive(type);
+        Scenario scenario = plugin().getScenarioManager().getActive(type);
 
         if (scenario == null) {
             ChatMessenger.sendMessage(sender, "<red>Scenario '" + type.getId() + "' is not active.");
@@ -127,12 +134,12 @@ public final class HardlandsCommand extends BaseCommand {
 
     @Subcommand("uhc create")
     private void onUhcCreate(CommandSender sender) {
-        if (HardlandsPlugin.getInstance().getUhc() != null) {
+        if (plugin().getUhc() != null) {
             ChatMessenger.sendMessage(sender, "<red>A UHC session already exists. Reset or delete it first.");
             return;
         }
 
-        HardlandsPlugin.getInstance().setUhc(new UHC(HardlandsPlugin.getInstance()));
+        plugin().setUhc(new UHC(plugin()));
         ChatMessenger.sendMessage(sender, "<green>UHC session created. Configure it and run <yellow>/hardlands uhc prepare<green>.");
     }
 
@@ -151,7 +158,7 @@ public final class HardlandsCommand extends BaseCommand {
             return;
         }
 
-        HardlandsPlugin.getInstance().setUhc(null);
+        plugin().setUhc(null);
         ChatMessenger.sendMessage(sender, "<green>UHC session deleted.");
     }
 
@@ -251,7 +258,7 @@ public final class HardlandsCommand extends BaseCommand {
         sendLine(sender, "PvP", uhc.isPvpEnabled() ? "<green>enabled" : "<red>disabled");
         sendLine(sender, "Preparation", preparation.getState().getDisplayName());
         sendLine(sender, "Configuration", uhc.isConfigurationValid() ? "<green>valid" : "<red>invalid");
-        sendLine(sender, "Active scenarios", String.valueOf(HardlandsPlugin.getInstance().getScenarioManager().getActive().size()));
+        sendLine(sender, "Active scenarios", String.valueOf(plugin().getScenarioManager().getActive().size()));
 
         if (preparation.getActiveWorldName() != null) sendLine(sender, "Preparing world", preparation.getActiveWorldName());
 
@@ -312,8 +319,12 @@ public final class HardlandsCommand extends BaseCommand {
         ChatMessenger.sendMessage(sender, "<green>Option '" + key + "' set to <yellow>" + formatOptionValue(key, option.getValue()) + "<green>.");
     }
 
+    private static HardlandsPlugin plugin() {
+        return HardlandsPlugin.getInstance();
+    }
+
     private static boolean canModifyScenarios(CommandSender sender) {
-        UHC uhc = HardlandsPlugin.getInstance().getUhc();
+        UHC uhc = plugin().getUhc();
         if (uhc == null || !uhc.isRunning()) return true;
 
         ChatMessenger.sendMessage(sender, "<red>Scenarios cannot be changed while the UHC is running.");
@@ -321,35 +332,38 @@ public final class HardlandsCommand extends BaseCommand {
     }
 
     private static UHC requireUhc(CommandSender sender) {
-        UHC uhc = HardlandsPlugin.getInstance().getUhc();
+        UHC uhc = plugin().getUhc();
 
         if (uhc == null) ChatMessenger.sendMessage(sender, "<red>No UHC session exists. Run <yellow>/hardlands uhc create<red> first.");
 
         return uhc;
     }
 
+    @SuppressWarnings("unchecked")
     private static boolean setSimpleValue(Option<?> option, String value) {
         Object previousValue = option.getValue();
 
         try {
             switch (previousValue) {
-                case Boolean _ -> ((Option<Boolean>) option).setValue(parseBoolean(value));
-                case Float _ -> ((Option<Float>) option).setValue(Float.parseFloat(value));
-                case Double _ -> ((Option<Double>) option).setValue(Double.parseDouble(value));
-                case Integer _ -> ((Option<Integer>) option).setValue(Integer.parseInt(value));
-                case String _ -> ((Option<String>) option).setValue(value);
+                case Boolean ignored -> ((Option<Boolean>) option).setValue(parseBoolean(value));
+                case Float ignored -> ((Option<Float>) option).setValue(Float.parseFloat(value));
+                case Double ignored -> ((Option<Double>) option).setValue(Double.parseDouble(value));
+                case Integer ignored -> ((Option<Integer>) option).setValue(Integer.parseInt(value));
+                case String ignored -> ((Option<String>) option).setValue(value);
                 case null, default -> {
                     return false;
                 }
             }
 
             if (option.isValid()) return true;
-        } catch (IllegalArgumentException _) {}
+        } catch (IllegalArgumentException ignored) {
+        }
 
         restoreValue(option, previousValue);
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private static boolean setUhcValue(Option<?> option, String key, String value) {
         try {
             Object currentValue = option.getValue();
@@ -433,7 +447,7 @@ public final class HardlandsCommand extends BaseCommand {
     }
 
     private static void sendLine(CommandSender sender, String label, String value) {
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray> • <gray>" + label + ": <white>" + value));
+        sender.sendMessage(MM.deserialize("<dark_gray> • <gray>" + label + ": <white>" + value));
     }
 
     private static void sendFailure(CommandSender sender, IllegalStateException exception) {

@@ -1,48 +1,54 @@
 package com.hardlands.inventory;
 
-import lombok.RequiredArgsConstructor;
-import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-@RequiredArgsConstructor
-public final class InventoryListener implements Listener {
+import java.util.function.BiConsumer;
 
-    private final Plugin plugin;
+public final class InventoryListener implements Listener {
 
     @EventHandler
     private void onInventoryClick(InventoryClickEvent event) {
         Inventory topInventory = event.getView().getTopInventory();
-        MenuInventory<?> inventory = getMenuInventory(topInventory);
+        MenuInventory menuInventory = getMenuInventory(topInventory);
 
-        if (inventory == null) return;
+        if (menuInventory == null || !(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
 
+        boolean clickedTop = event.getClickedInventory() == topInventory;
+        boolean canReachTop = event.getClick().isShiftClick() || event.getClick() == ClickType.DOUBLE_CLICK;
+
+        if (!clickedTop && !canReachTop) return;
         event.setCancelled(true);
+        if (!clickedTop) return;
 
-        if (!(event.getWhoClicked() instanceof Player player) || event.getClickedInventory() != topInventory) return;
+        BiConsumer<Player, ClickType> action = menuInventory.getAction(event.getRawSlot());
+        if (action == null) return;
 
-        player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0F, 1.0F);
-
-        HardlandsMenu menu = (HardlandsMenu) inventory.getMenu();
-        int slot = event.getRawSlot();
-
-        Bukkit.getScheduler().runTask(this.plugin, () -> menu.handleClick(player, inventory, slot, event.getClick()));
+        player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.0F);
+        action.accept(player, event.getClick());
     }
 
     @EventHandler
     private void onInventoryDrag(InventoryDragEvent event) {
-        if (getMenuInventory(event.getView().getTopInventory()) != null) event.setCancelled(true);
+        Inventory topInventory = event.getView().getTopInventory();
+        if (getMenuInventory(topInventory) == null) return;
+
+        int topSize = topInventory.getSize();
+        if (event.getRawSlots().stream().anyMatch(slot -> slot < topSize)) {
+            event.setCancelled(true);
+        }
     }
 
-    private static @Nullable MenuInventory<?> getMenuInventory(Inventory inventory) {
-        if (!(inventory.getHolder() instanceof MenuInventory<?> holder)) return null;
-        return holder.getMenu() instanceof HardlandsMenu ? holder : null;
+    private static @Nullable MenuInventory getMenuInventory(Inventory inventory) {
+        return inventory.getHolder() instanceof MenuInventory holder ? holder : null;
     }
 }

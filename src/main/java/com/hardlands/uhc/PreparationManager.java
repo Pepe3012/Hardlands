@@ -3,6 +3,7 @@ package com.hardlands.uhc;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.popcraft.chunky.api.ChunkyAPI;
 import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
 
@@ -101,10 +102,13 @@ public final class PreparationManager {
     @RequiredArgsConstructor
     public enum PreparationState {
 
-        NOT_STARTED("No iniciada"),
-        IN_PROGRESS("Pregenerando"),
-        COMPLETED("Lista");
+        NOT_STARTED(Material.BEDROCK, "<red>", "Sin iniciar", "<yellow>Haz clic para iniciar la preparación."),
+        IN_PROGRESS(Material.DIRT, "<yellow>", "En progreso", "<yellow>La pregeneración está en curso."),
+        COMPLETED(Material.GRASS_BLOCK, "<green>", "Completado", "<green>El mundo está listo para iniciar.");
 
+        private final Material material;
+        private final String color;
         private final String displayName;
+        private final String description;
     }
 }
