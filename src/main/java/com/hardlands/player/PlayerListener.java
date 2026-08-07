@@ -1,6 +1,6 @@
 package com.hardlands.player;
 
-import com.hardlands.util.TextFormatter;
+import com.hardlands.util.formatter.TextFormatter;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public final class PlayerListener implements Listener {
 

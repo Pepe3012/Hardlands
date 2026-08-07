@@ -1,9 +1,9 @@
 package com.hardlands.uhc;
 
 import com.hardlands.util.option.Option;
-import com.hardlands.util.option.OptionContainer;
-import com.hardlands.util.option.OptionValidators;
-import com.hardlands.util.TickConverter;
+import com.hardlands.util.option.Container;
+import com.hardlands.util.option.Validators;
+import com.hardlands.util.formatter.TickConverter;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -11,15 +11,15 @@ import org.bukkit.WorldBorder;
 
 public final class WorldBorderManager {
 
-    @Getter private final OptionContainer optionContainer = new OptionContainer();
-    private final Option<World> worldOption = this.optionContainer.create("world", Bukkit.getWorld("world"));
-    private final Option<Integer> centerXOption = this.optionContainer.create("center-x", 0);
-    private final Option<Integer> centerZOption = this.optionContainer.create("center-z", 0);
-    private final Option<Integer> survivalSizeOption = this.optionContainer.create("survival-size", 3_000, OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupSizeOption = this.optionContainer.create("meetup-size", 300, OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> deathmatchSizeOption = this.optionContainer.create("deathmatch-size", 50, OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupShrinkTimeOption = this.optionContainer.create("meetup-shrink-time", TickConverter.minutesToTicks(10), OptionValidators.Integers.NON_NEGATIVE);
-    private final Option<Integer> deathmatchShrinkTimeOption = this.optionContainer.create("deathmatch-shrink-time", TickConverter.minutesToTicks(5), OptionValidators.Integers.NON_NEGATIVE);
+    @Getter private final Container container = new Container();
+    private final Option<World> worldOption = this.container.create("world", Bukkit.getWorld("world"));
+    private final Option<Integer> centerXOption = this.container.create("center-x", 0);
+    private final Option<Integer> centerZOption = this.container.create("center-z", 0);
+    private final Option<Integer> survivalSizeOption = this.container.create("survival-size", 3_000, Validators.Integers.POSITIVE);
+    private final Option<Integer> meetupSizeOption = this.container.create("meetup-size", 300, Validators.Integers.POSITIVE);
+    private final Option<Integer> deathmatchSizeOption = this.container.create("deathmatch-size", 50, Validators.Integers.POSITIVE);
+    private final Option<Integer> meetupShrinkTimeOption = this.container.create("meetup-shrink-time", TickConverter.minutesToTicks(10), Validators.Integers.NON_NEGATIVE);
+    private final Option<Integer> deathmatchShrinkTimeOption = this.container.create("deathmatch-shrink-time", TickConverter.minutesToTicks(5), Validators.Integers.NON_NEGATIVE);
 
     public void initializeForSurvival() {
         this.requireValidConfiguration();
@@ -38,7 +38,7 @@ public final class WorldBorderManager {
     }
 
     public boolean validate() {
-        if (!this.optionContainer.validate()) return false;
+        if (!this.container.isValid()) return false;
         if (this.worldOption.getValue() == null) return false;
 
         int survivalSize = this.survivalSizeOption.getValue();

@@ -1,4 +1,4 @@
-package com.hardlands.util;
+package com.hardlands.util.formatter;
 
 import org.bukkit.entity.Player;
 

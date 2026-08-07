@@ -35,8 +35,8 @@ public final class CommandInitializer {
                 .toList());
 
         completions.registerAsyncCompletion("uhc_options", context -> Stream.concat(
-                this.plugin.getUhc().getOptionContainer().getOptions().keySet().stream(),
-                this.plugin.getUhc().getWorldBorderManager().getOptionContainer().getOptions().keySet().stream()
+                this.plugin.getUhc().getContainer().getOptions().keySet().stream(),
+                this.plugin.getUhc().getWorldBorderManager().getContainer().getOptions().keySet().stream()
         ).toList());
     }
 

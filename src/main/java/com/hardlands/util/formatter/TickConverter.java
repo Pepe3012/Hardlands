@@ -1,4 +1,4 @@
-package com.hardlands.util;
+package com.hardlands.util.formatter;
 
 /**
  * Provides conversions between Minecraft ticks and common time units.

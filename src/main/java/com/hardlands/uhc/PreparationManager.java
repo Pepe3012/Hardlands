@@ -102,13 +102,12 @@ public final class PreparationManager {
     @RequiredArgsConstructor
     public enum PreparationState {
 
-        NOT_STARTED(Material.BEDROCK, "<red>", "Sin iniciar", "<yellow>Haz clic para iniciar la preparación."),
-        IN_PROGRESS(Material.DIRT, "<yellow>", "En progreso", "<yellow>La pregeneración está en curso."),
-        COMPLETED(Material.GRASS_BLOCK, "<green>", "Completado", "<green>El mundo está listo para iniciar.");
+        NOT_STARTED(Material.BEDROCK, "<red>", "Sin iniciar"),
+        IN_PROGRESS(Material.DIRT, "<yellow>", "En progreso"),
+        COMPLETED(Material.GRASS_BLOCK, "<green>", "Completado");
 
         private final Material material;
         private final String color;
         private final String displayName;
-        private final String description;
     }
 }

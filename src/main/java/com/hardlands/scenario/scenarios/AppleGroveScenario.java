@@ -1,7 +1,7 @@
 package com.hardlands.scenario.scenarios;
 
-import com.hardlands.util.option.Option;
 import com.hardlands.scenario.Scenario;
+import com.hardlands.util.option.Option;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -9,15 +9,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AppleGroveScenario extends Scenario {
+public final class AppleGroveScenario extends Scenario {
 
-    private final Option<Float> appleRate = super.optionContainer.create("apple_rate", 0.1F);
-    private final Option<Float> goldenAppleRate = super.optionContainer.create("golden_apple_rate", 0.0F);
-    private final Option<Float> enchantedGoldenAppleRate = super.optionContainer.create("enchanted_golden_apple_rate", 0.0F);
-    private final Option<Boolean> allTrees = super.optionContainer.create("all_trees", true);
+    private final Option<Boolean> allTrees = super.option("all_trees", true);
+    private final Option<Float> appleRate = super.option("apple_rate", 0.1F);
+    private final Option<Float> goldenAppleRate = super.option("golden_apple_rate", 0.0F);
+    private final Option<Float> enchantedGoldenAppleRate = super.option("enchanted_golden_apple_rate", 0.0F);
 
     @EventHandler
     private void onLeavesDecay(LeavesDecayEvent event) {
@@ -30,21 +31,18 @@ public class AppleGroveScenario extends Scenario {
     }
 
     private void tryDropApple(Block block) {
-        if (!this.validateBlock(block.getType())) return;
+        if (!this.isEligibleLeaf(block.getType())) return;
 
         Material apple = this.rollApple();
-        if (apple == null) return;
-        block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(apple));
+        if (apple != null) block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(apple));
     }
 
-    private boolean validateBlock(Material material) {
-        if (!Tag.LEAVES.isTagged(material)) return false;
-        return Boolean.TRUE.equals(this.allTrees.getValue()) || material == Material.OAK_LEAVES;
+    private boolean isEligibleLeaf(Material material) {
+        return Tag.LEAVES.isTagged(material) && (Boolean.TRUE.equals(this.allTrees.getValue()) || material == Material.OAK_LEAVES);
     }
 
-    private Material rollApple() {
+    private @Nullable Material rollApple() {
         float roll = ThreadLocalRandom.current().nextFloat();
-
         float enchantedRate = clampRate(this.enchantedGoldenAppleRate.getValue());
         float goldenRate = enchantedRate + clampRate(this.goldenAppleRate.getValue());
         float normalRate = goldenRate + clampRate(this.appleRate.getValue());
@@ -52,7 +50,6 @@ public class AppleGroveScenario extends Scenario {
         if (roll < enchantedRate) return Material.ENCHANTED_GOLDEN_APPLE;
         if (roll < goldenRate) return Material.GOLDEN_APPLE;
         if (roll < normalRate) return Material.APPLE;
-
         return null;
     }
 

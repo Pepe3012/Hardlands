@@ -2,9 +2,9 @@ package com.hardlands.uhc;
 
 import com.hardlands.HardlandsPlugin;
 import com.hardlands.util.option.Option;
-import com.hardlands.util.option.OptionContainer;
-import com.hardlands.util.option.OptionValidators;
-import com.hardlands.util.TickConverter;
+import com.hardlands.util.option.Container;
+import com.hardlands.util.option.Validators;
+import com.hardlands.util.formatter.TickConverter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
@@ -14,11 +14,11 @@ public final class UHC {
 
     @Getter private final WorldBorderManager worldBorderManager = new WorldBorderManager();
     @Getter private final PreparationManager preparationManager = new PreparationManager(this.worldBorderManager);
-    @Getter private final OptionContainer optionContainer = new OptionContainer();
+    @Getter private final Container container = new Container();
 
-    private final Option<Integer> pactDurationOption = this.optionContainer.create("pact-duration", TickConverter.minutesToTicks(15), OptionValidators.Integers.NON_NEGATIVE);
-    private final Option<Integer> survivalDurationOption = this.optionContainer.create("survival-duration", TickConverter.minutesToTicks(30), OptionValidators.Integers.POSITIVE);
-    private final Option<MeetupDuration> meetupDurationOption = this.optionContainer.create("meetup-duration", MeetupDuration.ofMinutes(15));
+    private final Option<Integer> pactDurationOption = this.container.create("pact-duration", TickConverter.minutesToTicks(15), Validators.Integers.NON_NEGATIVE);
+    private final Option<Integer> survivalDurationOption = this.container.create("survival-duration", TickConverter.minutesToTicks(30), Validators.Integers.POSITIVE);
+    private final Option<MeetupDuration> meetupDurationOption = this.container.create("meetup-duration", MeetupDuration.ofMinutes(15));
 
     private final HardlandsPlugin plugin;
 
@@ -94,7 +94,7 @@ public final class UHC {
     }
 
     public boolean isConfigurationValid() {
-        return this.optionContainer.validate() && this.worldBorderManager.validate() && this.pactDurationOption.getValue() <= this.survivalDurationOption.getValue();
+        return this.container.isValid() && this.worldBorderManager.validate() && this.pactDurationOption.getValue() <= this.survivalDurationOption.getValue();
     }
 
     public long getRemainingPhaseTicks() {
@@ -102,7 +102,7 @@ public final class UHC {
     }
 
     private void requireValidConfiguration() {
-        if (!this.optionContainer.validate()) throw new IllegalStateException("The UHC configuration is invalid");
+        if (!this.container.isValid()) throw new IllegalStateException("The UHC configuration is invalid");
         if (!this.worldBorderManager.validate()) throw new IllegalStateException("The world border configuration is invalid");
         if (this.pactDurationOption.getValue() > this.survivalDurationOption.getValue()) throw new IllegalStateException("Pact duration cannot exceed survival duration");
     }

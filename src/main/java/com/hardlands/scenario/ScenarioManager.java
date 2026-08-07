@@ -1,46 +1,70 @@
 package com.hardlands.scenario;
 
-import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public final class ScenarioManager {
 
-    private final Map<ScenarioType, Scenario> active = new EnumMap<>(ScenarioType.class);
+    private final Map<ScenarioType, Scenario> scenarios = new EnumMap<>(ScenarioType.class);
+    private final Set<ScenarioType> activeTypes = EnumSet.noneOf(ScenarioType.class);
+    private final List<ScenarioType> registeredTypes = List.of(ScenarioType.values());
+
+    public ScenarioManager() {
+        for (ScenarioType type : this.registeredTypes) {
+            this.scenarios.put(type, type.create());
+        }
+    }
 
     public boolean enable(ScenarioType type) {
-        if (this.active.containsKey(type)) return false;
-        Scenario scenario = type.create();
-        this.active.put(type, scenario);
-        scenario.enable();
+        if (!this.activeTypes.add(type)) return false;
+
+        this.scenarios.get(type).enable();
         return true;
     }
 
     public boolean disable(ScenarioType type) {
-        Scenario scenario = this.active.remove(type);
-        if (scenario == null) return false;
-        scenario.disable();
+        if (!this.activeTypes.remove(type)) return false;
+
+        this.scenarios.get(type).disable();
+        return true;
+    }
+
+    public boolean toggle(ScenarioType type) {
+        if (this.isActive(type)) {
+            this.disable(type);
+            return false;
+        }
+
+        this.enable(type);
         return true;
     }
 
     public boolean isActive(ScenarioType type) {
-        return this.active.containsKey(type);
+        return this.activeTypes.contains(type);
     }
 
-    public Scenario getActive(ScenarioType type) {
-        return this.active.get(type);
+    public Scenario get(ScenarioType type) {
+        return this.scenarios.get(type);
     }
 
-    @Unmodifiable
+    public @Nullable Scenario getActive(ScenarioType type) {
+        return this.isActive(type) ? this.scenarios.get(type) : null;
+    }
+
+    public List<ScenarioType> getRegisteredScenarioTypes() {
+        return this.registeredTypes;
+    }
+
     public List<Scenario> getActive() {
-        return List.copyOf(this.active.values());
+        return this.activeTypes.stream().map(this.scenarios::get).toList();
     }
 
-    @Unmodifiable
     public Set<ScenarioType> getActiveScenarioTypes() {
-        return Set.copyOf(this.active.keySet());
+        return Set.copyOf(this.activeTypes);
     }
 }

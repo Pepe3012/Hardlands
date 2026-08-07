@@ -8,14 +8,14 @@ import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Single;
 import co.aikar.commands.annotation.Subcommand;
 import com.hardlands.HardlandsPlugin;
-import com.hardlands.inventory.HardlandsMenu;
+import com.hardlands.menu.screen.HardlandsMenu;
 import com.hardlands.scenario.Scenario;
 import com.hardlands.scenario.ScenarioManager;
 import com.hardlands.scenario.ScenarioType;
 import com.hardlands.uhc.PreparationManager;
 import com.hardlands.uhc.UHC;
 import com.hardlands.util.ChatMessenger;
-import com.hardlands.util.TickConverter;
+import com.hardlands.util.formatter.TickConverter;
 import com.hardlands.util.option.Option;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -83,37 +83,53 @@ public final class HardlandsCommand extends BaseCommand {
     }
 
     @Subcommand("scenarios option")
-    @CommandCompletion("@active_scenarios")
-    private void onScenarioOption(CommandSender sender, @Single String id, @Single String key, @Single String value) {
+    @CommandCompletion("@registered_scenarios")
+    private void onScenarioOption(
+            CommandSender sender,
+            @Single String id,
+            @Single String key,
+            @Single String value
+    ) {
         if (!canModifyScenarios(sender)) return;
 
         ScenarioType type = ScenarioType.fromId(id);
 
         if (type == null) {
-            ChatMessenger.sendMessage(sender, "<red>Scenario '" + id + "' not found.");
+            ChatMessenger.sendMessage(
+                    sender,
+                    "<red>Scenario '" + id + "' not found."
+            );
             return;
         }
 
-        Scenario scenario = plugin().getScenarioManager().getActive(type);
+        Scenario scenario = plugin()
+                .getScenarioManager()
+                .get(type);
 
-        if (scenario == null) {
-            ChatMessenger.sendMessage(sender, "<red>Scenario '" + type.getId() + "' is not active.");
-            return;
-        }
-
-        Option<?> option = scenario.getOptionContainer().get(key);
+        Option<?> option = scenario
+                .getContainer()
+                .get(key);
 
         if (option == null) {
-            ChatMessenger.sendMessage(sender, "<red>Option '" + key + "' not found.");
+            ChatMessenger.sendMessage(
+                    sender,
+                    "<red>Option '" + key + "' not found."
+            );
             return;
         }
 
         if (!setSimpleValue(option, value)) {
-            ChatMessenger.sendMessage(sender, "<red>Invalid value '" + value + "' for '" + key + "'.");
+            ChatMessenger.sendMessage(
+                    sender,
+                    "<red>Invalid value '" + value + "' for '" + key + "'."
+            );
             return;
         }
 
-        ChatMessenger.sendMessage(sender, "<green>Option '" + key + "' set to <yellow>" + value + "<green>.");
+        ChatMessenger.sendMessage(
+                sender,
+                "<green>Option '" + key + "' set to <yellow>" + value + "<green>."
+        );
     }
 
     @Subcommand("uhc")
@@ -273,10 +289,10 @@ public final class HardlandsCommand extends BaseCommand {
         if (uhc == null) return;
 
         ChatMessenger.sendMessage(sender, "<gray>UHC options:");
-        uhc.getOptionContainer().getOptions().forEach((key, option) -> sendLine(sender, key, formatOptionValue(key, option.getValue())));
+        uhc.getContainer().getOptions().forEach((key, option) -> sendLine(sender, key, formatOptionValue(key, option.getValue())));
 
         ChatMessenger.sendMessage(sender, "<gray>World border options:");
-        uhc.getWorldBorderManager().getOptionContainer().getOptions().forEach((key, option) -> sendLine(sender, key, formatOptionValue(key, option.getValue())));
+        uhc.getWorldBorderManager().getContainer().getOptions().forEach((key, option) -> sendLine(sender, key, formatOptionValue(key, option.getValue())));
     }
 
     @Subcommand("uhc options set")
@@ -290,11 +306,11 @@ public final class HardlandsCommand extends BaseCommand {
             return;
         }
 
-        Option<?> option = uhc.getOptionContainer().get(key);
+        Option<?> option = uhc.getContainer().get(key);
         boolean borderOption = false;
 
         if (option == null) {
-            option = uhc.getWorldBorderManager().getOptionContainer().get(key);
+            option = uhc.getWorldBorderManager().getContainer().get(key);
             borderOption = option != null;
         }
 

@@ -1,4 +1,4 @@
-package com.hardlands.inventory;
+package com.hardlands.menu;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -10,31 +10,27 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.BiConsumer;
-
-public final class InventoryListener implements Listener {
+public final class MenuInventoryListener implements Listener {
 
     @EventHandler
     private void onInventoryClick(InventoryClickEvent event) {
         Inventory topInventory = event.getView().getTopInventory();
-        MenuInventory menuInventory = getMenuInventory(topInventory);
+        MenuInventory menu = getMenuInventory(topInventory);
 
-        if (menuInventory == null || !(event.getWhoClicked() instanceof Player player)) {
-            return;
-        }
+        if (menu == null || !(event.getWhoClicked() instanceof Player player)) return;
 
         boolean clickedTop = event.getClickedInventory() == topInventory;
-        boolean canReachTop = event.getClick().isShiftClick() || event.getClick() == ClickType.DOUBLE_CLICK;
+        boolean affectsTop = clickedTop || event.getClick().isShiftClick() || event.getClick() == ClickType.DOUBLE_CLICK;
 
-        if (!clickedTop && !canReachTop) return;
+        if (!affectsTop) return;
+
         event.setCancelled(true);
         if (!clickedTop) return;
 
-        BiConsumer<Player, ClickType> action = menuInventory.getAction(event.getRawSlot());
-        if (action == null) return;
+        MenuAction action = menu.getAction(event.getRawSlot());
+        if (action == null || !action.execute(player, event.getClick())) return;
 
         player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.0F);
-        action.accept(player, event.getClick());
     }
 
     @EventHandler
@@ -42,13 +38,10 @@ public final class InventoryListener implements Listener {
         Inventory topInventory = event.getView().getTopInventory();
         if (getMenuInventory(topInventory) == null) return;
 
-        int topSize = topInventory.getSize();
-        if (event.getRawSlots().stream().anyMatch(slot -> slot < topSize)) {
-            event.setCancelled(true);
-        }
+        if (event.getRawSlots().stream().anyMatch(slot -> slot < topInventory.getSize())) event.setCancelled(true);
     }
 
     private static @Nullable MenuInventory getMenuInventory(Inventory inventory) {
-        return inventory.getHolder() instanceof MenuInventory holder ? holder : null;
+        return inventory.getHolder() instanceof MenuInventory menu ? menu : null;
     }
 }

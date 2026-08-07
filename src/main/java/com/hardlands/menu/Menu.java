@@ -1,4 +1,4 @@
-package com.hardlands.inventory;
+package com.hardlands.menu;
 
 import com.hardlands.item.InventoryItem;
 import net.kyori.adventure.text.Component;
@@ -11,8 +11,6 @@ import java.util.Deque;
 
 public interface Menu {
 
-    int BACK_SLOT = 45;
-
     String displayName();
 
     Material outline();
@@ -21,21 +19,18 @@ public interface Menu {
 
     @Nullable Menu parent();
 
-    default void build(MenuInventory menu, Player player) {
-    }
+    default void build(MenuInventory menu, Player player) {}
 
     default void open(Player player) {
-        open(player, null);
+        this.open(player, null);
     }
 
     default void open(Player player, @Nullable MenuInventory previous) {
-        MenuInventory menu = new MenuInventory(this, size(), title(), outline(), previous);
+        MenuInventory menu = new MenuInventory(this, this.size(), this.title(), this.outline(), previous);
 
-        if (previous != null) {
-            menu.item(BACK_SLOT, InventoryItem.PREVIOUS.getItem(), previous::open);
-        }
+        if (previous != null) menu.item(menu.getInventory().getSize() - 9, InventoryItem.PREVIOUS.getItem(), MenuAction.click("regresar", previous::open));
 
-        build(menu, player);
+        this.build(menu, player);
         menu.open(player);
     }
 

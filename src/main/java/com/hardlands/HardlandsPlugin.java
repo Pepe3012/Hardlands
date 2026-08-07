@@ -1,7 +1,7 @@
 package com.hardlands;
 
 import com.hardlands.command.CommandInitializer;
-import com.hardlands.inventory.InventoryListener;
+import com.hardlands.menu.MenuInventoryListener;
 import com.hardlands.player.PlayerListener;
 import com.hardlands.player.PlayerRepeatingTask;
 import com.hardlands.scenario.ScenarioManager;
@@ -9,48 +9,51 @@ import com.hardlands.uhc.UHC;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 
 public final class HardlandsPlugin extends JavaPlugin {
+
+    private static final String BANNER = """
+              _    _          _____  _____  _               _   _ _____   _____
+             | |  | |   /\\   |  __ \\|  __ \\| |        /\\   | \\ | |  __ \\ / ____|
+             | |__| |  /  \\  | |__) | |  | | |       /  \\  |  \\| | |  | | (___
+             |  __  | / /\\ \\ |  _  /| |  | | |      / /\\ \\ | . ` | |  | |\\___ \\
+             | |  | |/ ____ \\| | \\ \\| |__| | |____ / ____ \\| |\\  | |__| |____) |
+             |_|  |_/_/    \\_\\_|  \\_\\_____/|______/_/    \\_\\_| \\_|_____/|_____/
+            """;
 
     @Getter @Setter private static HardlandsPlugin instance;
 
     @Getter private final ScenarioManager scenarioManager = new ScenarioManager();
-
-    @Getter @Setter private UHC uhc;
+    @Getter private UHC uhc;
 
     @Override
     public void onEnable() {
-        super.getLogger().info("Initializing plugin...");
-
         setInstance(this);
+
+        this.getLogger().info("Initializing UHC...");
         this.uhc = new UHC(this);
 
-        this.registerListeners(Bukkit.getPluginManager());
+        this.getLogger().info("Registering listeners...");
+        this.registerListeners();
+
+        this.getLogger().info("Registering commands...");
         new CommandInitializer(this).register();
 
+        this.getLogger().info("Initializing repeating tasks...");
         PlayerRepeatingTask.initialize(this);
 
-        super.getLogger().info(System.lineSeparator() + """
-          _    _          _____  _____  _               _   _ _____   _____
-         | |  | |   /\\   |  __ \\|  __ \\| |        /\\   | \\ | |  __ \\ / ____|
-         | |__| |  /  \\  | |__) | |  | | |       /  \\  |  \\| | |  | | (___
-         |  __  | / /\\ \\ |  _  /| |  | | |      / /\\ \\ | . ` | |  | |\\___ \\
-         | |  | |/ ____ \\| | \\ \\| |__| | |____ / ____ \\| |\\  | |__| |____) |
-         |_|  |_/_/    \\_\\_|  \\_\\_____/|______/_/    \\_\\_| \\_|_____/|_____/
-        """);
-        super.getLogger().info("The plugin has been successfully enabled.");
+        this.getLogger().info(System.lineSeparator() + BANNER);
+        this.getLogger().info("The plugin has been successfully enabled.");
     }
 
     @Override
     public void onDisable() {
-        super.getLogger().info("The plugin has been successfully disabled.");
+        this.getLogger().info("The plugin has been successfully disabled.");
     }
 
-    private void registerListeners(PluginManager pluginManager) {
-        pluginManager.registerEvents(new PlayerListener(), this);
-        pluginManager.registerEvents(new InventoryListener(), this);
+    private void registerListeners() {
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new MenuInventoryListener(), this);
     }
 }
