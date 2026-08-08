@@ -1,7 +1,6 @@
 package com.hardlands.player;
 
 import com.hardlands.HardlandsPlugin;
-import com.hardlands.menu.screen.HardlandsMenu;
 import com.hardlands.menu.MenuInventory;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

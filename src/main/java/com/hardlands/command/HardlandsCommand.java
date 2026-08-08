@@ -8,7 +8,6 @@ import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Single;
 import co.aikar.commands.annotation.Subcommand;
 import com.hardlands.HardlandsPlugin;
-import com.hardlands.menu.screen.HardlandsMenu;
 import com.hardlands.scenario.Scenario;
 import com.hardlands.scenario.ScenarioManager;
 import com.hardlands.scenario.ScenarioType;

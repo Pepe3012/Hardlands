@@ -21,12 +21,14 @@ public final class MenuInventory implements InventoryHolder {
 
     @Getter private final Menu menu;
     @Getter private final Inventory inventory;
+    @Getter private final Size size;
     @Getter @Nullable private final MenuInventory previous;
 
     private final Map<Integer, MenuAction> actions = new HashMap<>();
 
     public MenuInventory(Menu menu, Size size, Component title, Material outline, @Nullable MenuInventory previous) {
         this.menu = menu;
+        this.size = size;
         this.inventory = Bukkit.createInventory(this, size.slots, title);
         this.previous = previous;
         this.renderOutline(outline);

@@ -1,4 +1,4 @@
-package com.hardlands.menu.screen;
+package com.hardlands.menu.screen.scenario;
 
 import com.hardlands.HardlandsPlugin;
 import com.hardlands.item.InventoryItem;
