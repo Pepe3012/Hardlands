@@ -1,59 +1,63 @@
 package com.hardlands;
 
-import com.hardlands.command.CommandInitializer;
-import com.hardlands.menu.MenuInventoryListener;
-import com.hardlands.player.PlayerListener;
-import com.hardlands.player.PlayerRepeatingTask;
-import com.hardlands.scenario.ScenarioManager;
-import com.hardlands.uhc.UHC;
+import com.hardlands.common.command.CommandInitializer;
+import com.hardlands.game.GameController;
+import com.hardlands.common.menu.MenuInventoryListener;
+import com.hardlands.common.player.PlayerListener;
+import com.hardlands.common.player.PlayerRepeatingTask;
+import com.hardlands.scenario.ScenarioController;
+import com.hardlands.scenario.ScenarioDefinition;
+import com.hardlands.world.WorldManager;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class HardlandsPlugin extends JavaPlugin {
 
-    private static final String BANNER = """
+    @Getter private GameController gameController;
+    @Getter private ScenarioController scenarioController;
+    @Getter private WorldManager worldManager;
+
+    @Override
+    public void onEnable() {
+        initializeManagers();
+        registerCommands();
+        registerListeners();
+
+        PlayerRepeatingTask.initialize(this);
+
+        getLogger().info(System.lineSeparator() + """
               _    _          _____  _____  _               _   _ _____   _____
              | |  | |   /\\   |  __ \\|  __ \\| |        /\\   | \\ | |  __ \\ / ____|
              | |__| |  /  \\  | |__) | |  | | |       /  \\  |  \\| | |  | | (___
              |  __  | / /\\ \\ |  _  /| |  | | |      / /\\ \\ | . ` | |  | |\\___ \\
              | |  | |/ ____ \\| | \\ \\| |__| | |____ / ____ \\| |\\  | |__| |____) |
              |_|  |_/_/    \\_\\_|  \\_\\_____/|______/_/    \\_\\_| \\_|_____/|_____/
-            """;
+            """);
 
-    @Getter @Setter private static HardlandsPlugin instance;
-
-    @Getter private final ScenarioManager scenarioManager = new ScenarioManager();
-    @Getter private UHC uhc;
-
-    @Override
-    public void onEnable() {
-        setInstance(this);
-
-        this.getLogger().info("Initializing UHC...");
-        this.uhc = new UHC(this);
-
-        this.getLogger().info("Registering listeners...");
-        this.registerListeners();
-
-        this.getLogger().info("Registering commands...");
-        new CommandInitializer(this).register();
-
-        this.getLogger().info("Initializing repeating tasks...");
-        PlayerRepeatingTask.initialize(this);
-
-        this.getLogger().info(System.lineSeparator() + BANNER);
-        this.getLogger().info("The plugin has been successfully enabled.");
+        getLogger().info("The plugin has been successfully enabled.");
     }
 
     @Override
     public void onDisable() {
-        this.getLogger().info("The plugin has been successfully disabled.");
+        getLogger().info("The plugin has been successfully disabled.");
+    }
+
+    private void initializeManagers() {
+        gameController = new GameController(this);
+
+        scenarioController = new ScenarioController(this);
+        scenarioController.registerScenarios(ScenarioDefinition.values());
+
+        worldManager = new WorldManager();
+    }
+
+    private void registerCommands() {
+        new CommandInitializer(this).register();
     }
 
     private void registerListeners() {
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         Bukkit.getPluginManager().registerEvents(new MenuInventoryListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
     }
 }
