@@ -1,4 +1,4 @@
-package org.heather.hardlands.common.util.formatter;
+package org.heather.hardlands.util.formatter;
 
 /**
  * Provides conversions between Minecraft ticks and common time units.

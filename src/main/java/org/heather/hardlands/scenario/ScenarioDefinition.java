@@ -33,14 +33,10 @@ public enum ScenarioDefinition {
             InventoryItem.display(Material.DIAMOND_ORE, "Extrae vetas completas de minerales al romper uno de sus bloques.")),
 
     HASTY_BOYS("hasty_boys", "Hasty Boys", HastyBoysScenario::new,
-            InventoryItem.display(Material.DIAMOND_PICKAXE, "Aplica automáticamente Efficiency y Unbreaking a las herramientas configuradas."));
+            InventoryItem.display(Material.DIAMOND_PICKAXE, "Aplica automáticamente Eficiencia e Irrompibilidad a las herramientas configuradas."));
 
-    public static final List<String> IDENTIFIERS = Arrays.stream(values())
-            .map(ScenarioDefinition::getIdentifier)
-            .toList();
-
-    private static final Map<String, ScenarioDefinition> BY_IDENTIFIER = Arrays.stream(values())
-            .collect(Collectors.toUnmodifiableMap(ScenarioDefinition::getIdentifier, Function.identity()));
+    public static final List<String> IDENTIFIERS = Arrays.stream(values()).map(ScenarioDefinition::getIdentifier).toList();
+    private static final Map<String, ScenarioDefinition> BY_IDENTIFIER = Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(ScenarioDefinition::getIdentifier, Function.identity()));
 
     private final String identifier;
     private final String displayName;

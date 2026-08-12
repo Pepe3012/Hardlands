@@ -8,11 +8,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.common.util.BlockTraversal;
-import org.heather.hardlands.common.util.BoundedCounter;
-import org.heather.hardlands.core.option.Option;
-import org.heather.hardlands.core.option.OptionDataType;
-import org.heather.hardlands.core.option.OptionValidators;
+import org.heather.hardlands.util.BlockTraversal;
+import org.heather.hardlands.util.data.BoundedCounter;
+import org.heather.hardlands.util.option.Option;
+import org.heather.hardlands.util.option.OptionDataType;
+import org.heather.hardlands.util.option.OptionValidators;
 import org.heather.hardlands.scenario.ScenarioModule;
 
 public final class TimberScenario extends ScenarioModule {

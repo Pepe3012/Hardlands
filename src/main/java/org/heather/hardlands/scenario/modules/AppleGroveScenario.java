@@ -8,9 +8,9 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.core.option.Option;
-import org.heather.hardlands.core.option.OptionDataType;
-import org.heather.hardlands.core.option.OptionValidators;
+import org.heather.hardlands.util.option.Option;
+import org.heather.hardlands.util.option.OptionDataType;
+import org.heather.hardlands.util.option.OptionValidators;
 import org.heather.hardlands.scenario.ScenarioModule;
 
 import java.util.concurrent.ThreadLocalRandom;

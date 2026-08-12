@@ -7,12 +7,12 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.common.util.ChatMessenger;
-import org.heather.hardlands.common.util.formatter.TickConverter;
-import org.heather.hardlands.core.option.Option;
-import org.heather.hardlands.core.option.OptionDataType;
+import org.heather.hardlands.util.ChatMessenger;
+import org.heather.hardlands.util.formatter.TickConverter;
+import org.heather.hardlands.util.option.Option;
+import org.heather.hardlands.util.option.OptionDataType;
 import org.heather.hardlands.game.GameController;
-import org.heather.hardlands.menu.MenuDefinition;
+import org.heather.hardlands.inventory.InventoryDefinition;
 import org.heather.hardlands.scenario.ScenarioDefinition;
 import org.heather.hardlands.scenario.ScenarioManager;
 import org.heather.hardlands.scenario.ScenarioModule;
@@ -32,7 +32,7 @@ public class HardlandsCommand extends BaseCommand {
     // Main Command
     @Default
     private void onHardlands(Player player) {
-        MenuDefinition.MAIN.openInventory(player);
+        InventoryDefinition.MAIN.openInventory(player);
     }
 
     // Scenario Commands

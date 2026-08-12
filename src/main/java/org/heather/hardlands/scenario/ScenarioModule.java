@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.heather.hardlands.core.option.OptionHolder;
+import org.heather.hardlands.util.option.OptionHolder;
 
 public abstract class ScenarioModule extends OptionHolder implements Listener {
 

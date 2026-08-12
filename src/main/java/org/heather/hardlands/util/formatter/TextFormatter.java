@@ -1,4 +1,4 @@
-package org.heather.hardlands.common.util.formatter;
+package org.heather.hardlands.util.formatter;
 
 import org.bukkit.entity.Player;
 

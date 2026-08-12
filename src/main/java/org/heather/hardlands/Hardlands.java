@@ -8,11 +8,9 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.heather.hardlands.common.command.CommandInitializer;
 import org.heather.hardlands.common.player.PlayerListener;
-import org.heather.hardlands.common.player.PlayerUpdateTask;
+import org.heather.hardlands.inventory.*;
+import org.heather.hardlands.task.PlayerUpdateTask;
 import org.heather.hardlands.game.GameController;
-import org.heather.hardlands.menu.InventoryListener;
-import org.heather.hardlands.menu.MenuDefinition;
-import org.heather.hardlands.menu.MenuRegistry;
 import org.heather.hardlands.scenario.ScenarioDefinition;
 import org.heather.hardlands.scenario.ScenarioManager;
 import org.heather.hardlands.world.WorldManager;
@@ -49,16 +47,19 @@ public final class Hardlands extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        getLogger().info("Hardlands has been disabled.");
+        super.getLogger().info("Hardlands has been disabled.");
     }
 
     private void initializeSystems() {
-        this.gameController = new GameController(this);
         this.scenarioManager = new ScenarioManager(this);
+        this.scenarioManager.registerScenarios(ScenarioDefinition.values());
+
+        this.gameController = new GameController(this);
+
         this.worldManager = new WorldManager(requireChunkyApi());
 
-        MenuRegistry.register(MenuDefinition.values());
-        MenuRegistry.freeze();
+        InventoryRegistry.register(InventoryDefinition.values());
+        InventoryRegistry.freeze();
     }
 
     private void registerListeners() {
@@ -71,10 +72,8 @@ public final class Hardlands extends JavaPlugin {
     private void initializeRepeatingTasks() {
         super.getLogger().info("Initializing repeating tasks...");
         PlayerUpdateTask.initialize(this, 20L);
-        scenarioManager.registerScenarios(ScenarioDefinition.values());
     }
 
-    // Utility Methods
     public NamespacedKey namespacedKey(String key) {
         return new NamespacedKey(this, key.toUpperCase());
     }

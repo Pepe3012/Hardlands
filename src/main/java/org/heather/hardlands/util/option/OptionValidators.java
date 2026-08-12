@@ -1,4 +1,4 @@
-package org.heather.hardlands.core.option;
+package org.heather.hardlands.util.option;
 
 import java.util.Collection;
 import java.util.Map;
