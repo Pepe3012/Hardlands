@@ -1,10 +1,10 @@
 package org.heather.hardlands.world;
 
+import lombok.Getter;
 import org.heather.hardlands.world.border.WorldBorderController;
 import org.heather.hardlands.world.border.WorldBorderController.BorderRegion;
-import org.heather.hardlands.world.pregen.PregenerationRequest;
 import org.heather.hardlands.world.pregen.PregenerationController;
-import lombok.Getter;
+import org.heather.hardlands.world.pregen.PregenerationRequest;
 import org.popcraft.chunky.api.ChunkyAPI;
 
 public final class WorldManager {

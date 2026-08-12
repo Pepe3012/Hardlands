@@ -1,13 +1,13 @@
 package org.heather.hardlands.scenario.modules;
 
-import org.heather.hardlands.core.option.Option;
-import org.heather.hardlands.core.option.OptionValidators;
-import org.heather.hardlands.scenario.ScenarioModule;
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
+import org.heather.hardlands.core.option.Option;
+import org.heather.hardlands.core.option.OptionValidators;
+import org.heather.hardlands.scenario.ScenarioModule;
 
 import java.util.Set;
 

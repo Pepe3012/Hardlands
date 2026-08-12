@@ -1,12 +1,12 @@
 package org.heather.hardlands.world.border;
 
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.WorldBorder;
 import org.heather.hardlands.core.option.Option;
 import org.heather.hardlands.core.option.OptionDataType;
 import org.heather.hardlands.core.option.OptionHolder;
 import org.heather.hardlands.core.option.OptionValidators;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.WorldBorder;
 
 public final class WorldBorderController extends OptionHolder {
 
@@ -14,9 +14,9 @@ public final class WorldBorderController extends OptionHolder {
     private final Option<Integer> centerXOption = super.createOption("center-x", OptionDataType.INTEGER);
     private final Option<Integer> centerZOption = super.createOption("center-z", OptionDataType.INTEGER);
 
-    private final Option<Integer> survivalSizeOption = super.createOption("survival-size", OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupSizeOption = super.createOption("meetup-size", OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> deathmatchSizeOption = super.createOption("deathmatch-size", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> survivalSizeOption = super.createOption("survival-inventorySize", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> meetupSizeOption = super.createOption("meetup-inventorySize", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> deathmatchSizeOption = super.createOption("deathmatch-inventorySize", OptionValidators.Integers.POSITIVE);
 
     private final Option<Integer> meetupShrinkDurationOption = super.createOption("meetup-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
     private final Option<Integer> deathmatchShrinkDurationOption = super.createOption("deathmatch-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);

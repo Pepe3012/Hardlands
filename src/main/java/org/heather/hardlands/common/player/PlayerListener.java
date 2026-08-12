@@ -1,6 +1,5 @@
 package org.heather.hardlands.common.player;
 
-import org.heather.hardlands.common.util.formatter.TextFormatter;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -12,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.heather.hardlands.common.util.formatter.TextFormatter;
 
 public final class PlayerListener implements Listener {
 

@@ -1,8 +1,5 @@
 package org.heather.hardlands.scenario.modules;
 
-import org.heather.hardlands.core.option.Option;
-import org.heather.hardlands.core.option.OptionDataType;
-import org.heather.hardlands.scenario.ScenarioModule;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ExperienceOrb;
@@ -13,6 +10,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
+import org.heather.hardlands.core.option.Option;
+import org.heather.hardlands.core.option.OptionDataType;
+import org.heather.hardlands.scenario.ScenarioModule;
 
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;

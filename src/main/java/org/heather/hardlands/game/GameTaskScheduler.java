@@ -1,7 +1,7 @@
 package org.heather.hardlands.game;
 
-import org.heather.hardlands.Hardlands;
 import org.bukkit.scheduler.BukkitTask;
+import org.heather.hardlands.Hardlands;
 
 public final class GameTaskScheduler {
 

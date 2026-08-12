@@ -1,28 +1,23 @@
 package org.heather.hardlands.common.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Single;
-import co.aikar.commands.annotation.Subcommand;
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.common.menu.screen.MainMenu;
-import org.heather.hardlands.core.option.Option;
-import org.heather.hardlands.common.util.ChatMessenger;
-import org.heather.hardlands.common.util.formatter.TickConverter;
-import org.heather.hardlands.game.GameController;
-import org.heather.hardlands.scenario.ScenarioManager;
-import org.heather.hardlands.scenario.ScenarioDefinition;
-import org.heather.hardlands.scenario.ScenarioModule;
-import org.heather.hardlands.core.option.OptionDataType;
-import org.heather.hardlands.world.border.WorldBorderController;
-import org.heather.hardlands.world.pregen.PregenerationController;
+import co.aikar.commands.annotation.*;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.common.util.ChatMessenger;
+import org.heather.hardlands.common.util.formatter.TickConverter;
+import org.heather.hardlands.core.option.Option;
+import org.heather.hardlands.core.option.OptionDataType;
+import org.heather.hardlands.game.GameController;
+import org.heather.hardlands.menu.MenuDefinition;
+import org.heather.hardlands.scenario.ScenarioDefinition;
+import org.heather.hardlands.scenario.ScenarioManager;
+import org.heather.hardlands.scenario.ScenarioModule;
+import org.heather.hardlands.world.border.WorldBorderController;
+import org.heather.hardlands.world.pregen.PregenerationController;
 import org.heather.hardlands.world.pregen.PregenerationState;
 
 import java.util.Locale;
@@ -34,34 +29,36 @@ public class HardlandsCommand extends BaseCommand {
 
     private final Hardlands plugin;
 
+    // Main Command
     @Default
     private void onHardlands(Player player) {
-        MainMenu.INSTANCE.open(player);
+        MenuDefinition.MAIN.openInventory(player);
     }
 
+    // Scenario Commands
     @Subcommand("scenarios list")
     private void onScenariosList(CommandSender sender) {
-        ScenarioManager controller = this.plugin.getScenarioManager();
+        ScenarioManager manager = plugin.getScenarioManager();
         ScenarioDefinition[] definitions = ScenarioDefinition.values();
 
         ChatMessenger.sendMessage(sender, "<gray>Scenarios:");
-
         for (int i = 0; i < definitions.length; i++) {
             ScenarioDefinition definition = definitions[i];
-            String state = controller.isScenarioActive(definition) ? "<green>active" : "<red>inactive";
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<gray>" + (i + 1) + ". <yellow>" + definition.getIdentifier() + " <gray>- " + state));
+            String state = manager.isScenarioActive(definition) ? "<green>active" : "<red>inactive";
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(
+                    "<gray>" + (i + 1) + ". <yellow>" + definition.getIdentifier() + " <gray>- " + state));
         }
     }
 
     @Subcommand("scenarios enable")
     @CommandCompletion("@registered_scenarios")
     private void onScenariosEnable(CommandSender sender, @Single String identifier) {
-        if (!this.canModifyScenarios(sender)) return;
+        if (!canModifyScenarios(sender)) return;
 
-        ScenarioDefinition definition = this.findScenario(sender, identifier);
+        ScenarioDefinition definition = findScenario(sender, identifier);
         if (definition == null) return;
 
-        ChatMessenger.sendMessage(sender, this.plugin.getScenarioManager().enableScenario(definition)
+        ChatMessenger.sendMessage(sender, plugin.getScenarioManager().enableScenario(definition)
                 ? "<green>Scenario '" + identifier + "' enabled."
                 : "<red>Scenario '" + identifier + "' is already active.");
     }
@@ -69,12 +66,12 @@ public class HardlandsCommand extends BaseCommand {
     @Subcommand("scenarios disable")
     @CommandCompletion("@active_scenarios")
     private void onScenariosDisable(CommandSender sender, @Single String identifier) {
-        if (!this.canModifyScenarios(sender)) return;
+        if (!canModifyScenarios(sender)) return;
 
-        ScenarioDefinition definition = this.findScenario(sender, identifier);
+        ScenarioDefinition definition = findScenario(sender, identifier);
         if (definition == null) return;
 
-        ChatMessenger.sendMessage(sender, this.plugin.getScenarioManager().disableScenario(definition)
+        ChatMessenger.sendMessage(sender, plugin.getScenarioManager().disableScenario(definition)
                 ? "<green>Scenario '" + definition.getIdentifier() + "' disabled."
                 : "<red>Scenario '" + definition.getIdentifier() + "' is not active.");
     }
@@ -82,12 +79,12 @@ public class HardlandsCommand extends BaseCommand {
     @Subcommand("scenarios option")
     @CommandCompletion("@registered_scenarios @scenario_options")
     private void onScenarioOption(CommandSender sender, @Single String identifier, @Single String key, @Single String value) {
-        if (!this.canModifyScenarios(sender)) return;
+        if (!canModifyScenarios(sender)) return;
 
-        ScenarioDefinition definition = this.findScenario(sender, identifier);
+        ScenarioDefinition definition = findScenario(sender, identifier);
         if (definition == null) return;
 
-        ScenarioModule module = this.plugin.getScenarioManager().getRegisteredScenario(definition);
+        ScenarioModule module = plugin.getScenarioManager().getRegisteredScenario(definition);
         Option<?> option = module.getOption(key);
 
         if (option == null) {
@@ -100,13 +97,14 @@ public class HardlandsCommand extends BaseCommand {
             return;
         }
 
-        ChatMessenger.sendMessage(sender, "<green>Option '" + key + "' set to <yellow>" + formatOptionValue(key, option.getValue()) + "<green>.");
+        ChatMessenger.sendMessage(sender, "<green>Option '" + key + "' set to <yellow>" +
+                formatOptionValue(key, option.getValue()) + "<green>.");
     }
 
+    // UHC Commands - Help
     @Subcommand("uhc")
     private void onUhcHelp(CommandSender sender) {
         ChatMessenger.sendMessage(sender, "<gray>UHC commands:");
-
         sendLine(sender, "/hardlands uhc options list", "View the configuration");
         sendLine(sender, "/hardlands uhc options set <key> <value>", "Change an option");
         sendLine(sender, "/hardlands uhc prepare", "Prepare and pregenerate the world");
@@ -118,9 +116,10 @@ public class HardlandsCommand extends BaseCommand {
         sendLine(sender, "/hardlands uhc reset", "Reset the game");
     }
 
+    // UHC Commands - Game Control
     @Subcommand("uhc prepare")
     private void onUhcPrepare(CommandSender sender) {
-        GameController game = this.plugin.getGameController();
+        GameController game = plugin.getGameController();
 
         if (game.isGameRunning()) {
             ChatMessenger.sendMessage(sender, "<red>The UHC is already running.");
@@ -128,7 +127,7 @@ public class HardlandsCommand extends BaseCommand {
         }
 
         try {
-            this.plugin.getWorldManager().startPregeneration();
+            plugin.getWorldManager().startPregeneration();
             ChatMessenger.sendMessage(sender, "<green>World pregeneration started with Chunky.");
         } catch (IllegalStateException | IllegalArgumentException exception) {
             sendFailure(sender, exception);
@@ -138,7 +137,7 @@ public class HardlandsCommand extends BaseCommand {
     @Subcommand("uhc prepare cancel")
     private void onUhcPrepareCancel(CommandSender sender) {
         try {
-            this.plugin.getWorldManager().cancelPregeneration();
+            plugin.getWorldManager().cancelPregeneration();
             ChatMessenger.sendMessage(sender, "<green>World pregeneration cancelled.");
         } catch (IllegalStateException exception) {
             sendFailure(sender, exception);
@@ -147,11 +146,12 @@ public class HardlandsCommand extends BaseCommand {
 
     @Subcommand("uhc start")
     private void onUhcStart(CommandSender sender) {
-        GameController game = this.plugin.getGameController();
+        GameController game = plugin.getGameController();
 
         try {
             game.startGame();
-            ChatMessenger.sendMessage(sender, "<green>UHC started in the <yellow>" + game.getCurrentPhase().getDisplayName() + "<green> phase.");
+            ChatMessenger.sendMessage(sender, "<green>UHC started in the <yellow>" +
+                    game.getCurrentPhase().getDisplayName() + "<green> phase.");
         } catch (IllegalStateException exception) {
             sendFailure(sender, exception);
         }
@@ -160,7 +160,7 @@ public class HardlandsCommand extends BaseCommand {
     @Subcommand("uhc stop")
     private void onUhcStop(CommandSender sender) {
         try {
-            this.plugin.getGameController().stopGame();
+            plugin.getGameController().stopGame();
             ChatMessenger.sendMessage(sender, "<green>UHC stopped.");
         } catch (IllegalStateException exception) {
             sendFailure(sender, exception);
@@ -170,7 +170,7 @@ public class HardlandsCommand extends BaseCommand {
     @Subcommand("uhc reset")
     private void onUhcReset(CommandSender sender) {
         try {
-            this.plugin.getGameController().resetGame();
+            plugin.getGameController().resetGame();
             ChatMessenger.sendMessage(sender, "<green>UHC reset to the lobby. World pregeneration must be run again.");
         } catch (IllegalStateException exception) {
             sendFailure(sender, exception);
@@ -179,11 +179,12 @@ public class HardlandsCommand extends BaseCommand {
 
     @Subcommand("uhc next")
     private void onUhcNext(CommandSender sender) {
-        GameController game = this.plugin.getGameController();
+        GameController game = plugin.getGameController();
 
         try {
             game.advanceGamePhase();
-            ChatMessenger.sendMessage(sender, "<green>Advanced to <yellow>" + game.getCurrentPhase().getDisplayName() + "<green>.");
+            ChatMessenger.sendMessage(sender, "<green>Advanced to <yellow>" +
+                    game.getCurrentPhase().getDisplayName() + "<green>.");
         } catch (IllegalStateException exception) {
             sendFailure(sender, exception);
         }
@@ -191,17 +192,16 @@ public class HardlandsCommand extends BaseCommand {
 
     @Subcommand("uhc status")
     private void onUhcStatus(CommandSender sender) {
-        GameController game = this.plugin.getGameController();
-        PregenerationController pregeneration = this.plugin.getWorldManager().getPregenerationController();
+        GameController game = plugin.getGameController();
+        PregenerationController pregeneration = plugin.getWorldManager().getPregenerationController();
 
         ChatMessenger.sendMessage(sender, "<gray>UHC status:");
-
         sendLine(sender, "Phase", game.getCurrentPhase().getDisplayName());
         sendLine(sender, "Running", game.isGameRunning() ? "<green>yes" : "<red>no");
         sendLine(sender, "PvP", game.isPvpEnabled() ? "<green>enabled" : "<red>disabled");
         sendLine(sender, "Pregeneration", pregeneration.getState().getDisplayName());
         sendLine(sender, "Configuration", game.isConfigurationValid() ? "<green>valid" : "<red>invalid");
-        sendLine(sender, "Active scenarios", String.valueOf(this.plugin.getScenarioManager().getActiveScenarios().size()));
+        sendLine(sender, "Active scenarios", String.valueOf(plugin.getScenarioManager().getActiveScenarios().size()));
 
         if (pregeneration.getActiveRequest() != null) {
             sendLine(sender, "Preparing world", pregeneration.getActiveRequest().worldName());
@@ -209,10 +209,11 @@ public class HardlandsCommand extends BaseCommand {
         }
     }
 
+    // UHC Commands - Options
     @Subcommand("uhc options list")
     private void onUhcOptionsList(CommandSender sender) {
-        GameController game = this.plugin.getGameController();
-        WorldBorderController border = this.plugin.getWorldManager().getBorderController();
+        GameController game = plugin.getGameController();
+        WorldBorderController border = plugin.getWorldManager().getBorderController();
 
         ChatMessenger.sendMessage(sender, "<gray>UHC options:");
         game.getRegisteredOptions().forEach((key, option) ->
@@ -226,7 +227,7 @@ public class HardlandsCommand extends BaseCommand {
     @Subcommand("uhc options set")
     @CommandCompletion("@uhc_options")
     private void onUhcOptionSet(CommandSender sender, @Single String key, @Single String value) {
-        GameController game = this.plugin.getGameController();
+        GameController game = plugin.getGameController();
 
         if (game.isGameRunning()) {
             ChatMessenger.sendMessage(sender, "<red>UHC options cannot be changed while the game is running.");
@@ -237,7 +238,7 @@ public class HardlandsCommand extends BaseCommand {
         boolean borderOption = false;
 
         if (option == null) {
-            option = this.plugin.getWorldManager().getBorderController().getOption(key);
+            option = plugin.getWorldManager().getBorderController().getOption(key);
             borderOption = option != null;
         }
 
@@ -246,7 +247,7 @@ public class HardlandsCommand extends BaseCommand {
             return;
         }
 
-        if (borderOption && this.plugin.getWorldManager().getPregenerationController().getState() != PregenerationState.IDLE) {
+        if (borderOption && plugin.getWorldManager().getPregenerationController().getState() != PregenerationState.IDLE) {
             ChatMessenger.sendMessage(sender, "<red>World border options are locked after pregeneration starts. Reset the UHC first.");
             return;
         }
@@ -259,11 +260,15 @@ public class HardlandsCommand extends BaseCommand {
             return;
         }
 
-        ChatMessenger.sendMessage(sender, "<green>Option '" + key + "' set to <yellow>" + formatOptionValue(key, option.getValue()) + "<green>.");
+        ChatMessenger.sendMessage(sender, "<green>Option '" + key + "' set to <yellow>" +
+                formatOptionValue(key, option.getValue()) + "<green>.");
     }
 
+    // Validation Methods
     private boolean canModifyScenarios(CommandSender sender) {
-        if (!this.plugin.getGameController().isGameRunning()) return true;
+        if (!plugin.getGameController().isGameRunning()) {
+            return true;
+        }
 
         ChatMessenger.sendMessage(sender, "<red>Scenarios cannot be changed while the UHC is running.");
         return false;
@@ -279,6 +284,7 @@ public class HardlandsCommand extends BaseCommand {
         return definition;
     }
 
+    // Option Parsing Methods
     private static boolean setSimpleValue(Option<?> option, String value) {
         Object previousValue = option.getValue();
 
@@ -293,11 +299,14 @@ public class HardlandsCommand extends BaseCommand {
                 default -> null;
             };
 
-            if (parsedValue == null) return false;
+            if (parsedValue == null) {
+                return false;
+            }
 
             option.setValue(parsedValue);
-
-            if (option.isValid()) return true;
+            if (option.isValid()) {
+                return true;
+            }
         } catch (IllegalArgumentException ignored) {
         }
 
@@ -319,7 +328,9 @@ public class HardlandsCommand extends BaseCommand {
                 return setSimpleValue(option, value);
             }
 
-            if (option.isValid()) return true;
+            if (option.isValid()) {
+                return true;
+            }
         } catch (IllegalArgumentException | ArithmeticException ignored) {
         }
 
@@ -342,16 +353,13 @@ public class HardlandsCommand extends BaseCommand {
 
         if (Character.isDigit(suffix)) {
             int ticks = Integer.parseInt(value);
-
             if (ticks < 0) {
                 throw new IllegalArgumentException("Duration cannot be negative");
             }
-
             return ticks;
         }
 
         int amount = Integer.parseInt(value.substring(0, value.length() - 1));
-
         if (amount < 0) {
             throw new IllegalArgumentException("Duration cannot be negative");
         }
@@ -361,16 +369,21 @@ public class HardlandsCommand extends BaseCommand {
             case 's' -> Math.multiplyExact(amount, TickConverter.TICKS_PER_SECOND);
             case 'm' -> Math.multiplyExact(amount, TickConverter.SECONDS_PER_MINUTE * TickConverter.TICKS_PER_SECOND);
             case 'h' -> Math.multiplyExact(amount, TickConverter.MINUTES_PER_HOUR * TickConverter.SECONDS_PER_MINUTE * TickConverter.TICKS_PER_SECOND);
-            default -> throw new IllegalArgumentException("Unknown duration suffix");
+            default -> throw new IllegalArgumentException("Unknown duration suffix: " + suffix);
         };
     }
 
     private static boolean parseBoolean(String value) {
-        if (value.equalsIgnoreCase("true")) return true;
-        if (value.equalsIgnoreCase("false")) return false;
+        if (value.equalsIgnoreCase("true")) {
+            return true;
+        }
+        if (value.equalsIgnoreCase("false")) {
+            return false;
+        }
         throw new IllegalArgumentException("Expected true or false");
     }
 
+    // Formatting Methods
     private static String formatOptionValue(String key, Object value) {
         return switch (value) {
             case null -> "N/A";
@@ -386,16 +399,22 @@ public class HardlandsCommand extends BaseCommand {
         long minutes = totalSeconds % 3600L / 60L;
         long seconds = totalSeconds % 60L;
 
-        if (hours > 0L) return "%dh %dm %ds".formatted(hours, minutes, seconds);
-        if (minutes > 0L) return "%dm %ds".formatted(minutes, seconds);
+        if (hours > 0L) {
+            return "%dh %dm %ds".formatted(hours, minutes, seconds);
+        }
+        if (minutes > 0L) {
+            return "%dm %ds".formatted(minutes, seconds);
+        }
 
         return "%ds".formatted(seconds);
     }
 
     private static void sendLine(CommandSender sender, String label, String value) {
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray> • <gray>" + label + ": <white>" + value));
+        sender.sendMessage(MiniMessage.miniMessage().deserialize(
+                "<dark_gray> • <gray>" + label + ": <white>" + value));
     }
 
+    // Utility Methods
     private static void sendFailure(CommandSender sender, RuntimeException exception) {
         ChatMessenger.sendMessage(sender, "<red>" + exception.getMessage() + ".");
     }

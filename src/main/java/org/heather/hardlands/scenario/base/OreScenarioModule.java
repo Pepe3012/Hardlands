@@ -1,8 +1,8 @@
 package org.heather.hardlands.scenario.base;
 
+import org.bukkit.Material;
 import org.heather.hardlands.core.option.Option;
 import org.heather.hardlands.scenario.ScenarioModule;
-import org.bukkit.Material;
 
 import java.util.Set;
 

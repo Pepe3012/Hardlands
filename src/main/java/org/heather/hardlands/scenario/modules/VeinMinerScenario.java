@@ -1,10 +1,5 @@
 package org.heather.hardlands.scenario.modules;
 
-import org.heather.hardlands.core.option.Option;
-import org.heather.hardlands.core.option.OptionValidators;
-import org.heather.hardlands.common.util.BlockTraversal;
-import org.heather.hardlands.common.util.BoundedCounter;
-import org.heather.hardlands.scenario.base.OreScenarioModule;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -12,10 +7,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.heather.hardlands.common.util.BlockTraversal;
+import org.heather.hardlands.common.util.BoundedCounter;
+import org.heather.hardlands.core.option.Option;
+import org.heather.hardlands.core.option.OptionValidators;
+import org.heather.hardlands.scenario.base.OreScenarioModule;
 
 public final class VeinMinerScenario extends OreScenarioModule {
 
-    private final Option<Integer> veinSizeLimitOption = super.createOption("vein-size-limit", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> veinSizeLimitOption = super.createOption("vein-inventorySize-limit", OptionValidators.Integers.POSITIVE);
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     private void onBlockBreak(BlockBreakEvent event) {

@@ -7,83 +7,113 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Stream;
 
 public final class ItemBuilder {
 
-    private static final int LORE_CHARACTER_LIMIT = 15;
-    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    private static final int LORE_CHARACTER_LIMIT = 25;
 
     private final ItemStack item;
 
     public ItemBuilder(Material material) {
-        this.item = new ItemStack(Objects.requireNonNull(material, "Material cannot be null"));
+        this.item = new ItemStack(material);
     }
 
     public ItemBuilder(ItemStack item) {
-        this.item = Objects.requireNonNull(item, "Item cannot be null").clone();
+        this.item = item.clone();
     }
 
     public ItemBuilder name(String name) {
-        this.item.setData(
-                DataComponentTypes.CUSTOM_NAME,
-                nonItalic(MINI_MESSAGE.deserialize(name))
-        );
+        return name(MiniMessage.miniMessage().deserialize(name));
+    }
+
+    public ItemBuilder name(Component name) {
+        item.setData(DataComponentTypes.CUSTOM_NAME, nonItalic(name));
         return this;
     }
 
     public ItemBuilder lore(String... lines) {
-        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(deserializeLore(lines)));
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(deserializeLore(lines)));
         return this;
     }
 
     public ItemBuilder addLore(String... lines) {
-        ItemLore current = this.item.getData(DataComponentTypes.LORE);
+        ItemLore current = item.getData(DataComponentTypes.LORE);
         List<Component> lore = new ArrayList<>((current == null ? 0 : current.lines().size()) + lines.length);
 
-        if (current != null) lore.addAll(current.lines());
+        if (current != null) {
+            lore.addAll(current.lines());
+        }
         lore.addAll(deserializeLore(lines));
 
-        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return this;
     }
 
     public ItemBuilder glint(boolean glint) {
-        this.item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glint);
+        item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glint);
         return this;
     }
 
     public ItemBuilder skullOwner(String owner) {
-        this.item.editMeta(
-                SkullMeta.class,
-                meta -> meta.setPlayerProfile(Bukkit.createProfile(owner))
-        );
+        item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
+        return this;
+    }
+
+    public ItemBuilder setId(String key, String value) {
+        return setId(key, PersistentDataType.STRING, value);
+    }
+
+    public ItemBuilder setId(String key, int value) {
+        return setId(key, PersistentDataType.INTEGER, value);
+    }
+
+    public ItemBuilder setId(String key, double value) {
+        return setId(key, PersistentDataType.DOUBLE, value);
+    }
+
+    public <T> ItemBuilder setId(String key, PersistentDataType<?, T> type, T value) {
+        item.editMeta(meta -> {
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            container.set(new NamespacedKey("hardlands", key), type, value);
+        });
+        return this;
+    }
+
+    public <T> ItemBuilder setId(NamespacedKey key, PersistentDataType<?, T> type, T value) {
+        item.editMeta(meta -> {
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            container.set(key, type, value);
+        });
         return this;
     }
 
     public ItemStack build() {
-        return this.item;
+        return item;
     }
 
     private static List<Component> deserializeLore(String[] lines) {
-        List<Component> lore = new ArrayList<>(lines.length);
-
-        for (String line : lines) {
-            lore.add(nonItalic(MINI_MESSAGE.deserialize(wrapLore(line))));
-        }
-
-        return lore;
+        return Stream.of(lines)
+                .flatMap(line -> wrapLore(line).stream())
+                .map(line -> nonItalic(MiniMessage.miniMessage().deserialize(line)))
+                .toList();
     }
 
-    private static String wrapLore(String text) {
-        if (text.isBlank()) return text;
+    private static List<String> wrapLore(String text) {
+        if (text.isBlank()) {
+            return List.of(text);
+        }
 
-        StringBuilder result = new StringBuilder(text.length());
+        List<String> lines = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
         int lineLength = 0;
         int index = 0;
 
@@ -91,17 +121,33 @@ public final class ItemBuilder {
             LoreWord word = readWord(text, index);
             index = word.nextIndex();
 
-            if (!word.content().isEmpty()) {
-                if (word.lineBreakBefore()) {
-                    result.append('\n');
-                    lineLength = 0;
+            if (word.content().isEmpty()) {
+                continue;
+            }
+
+            if (word.lineBreakBefore() || shouldWrap(lineLength, word.visibleLength())) {
+                if (!current.isEmpty()) {
+                    lines.add(current.toString());
+                    current.setLength(0);
                 }
 
-                lineLength = appendWord(result, word, lineLength);
+                lineLength = 0;
             }
+
+            if (lineLength > 0 && word.visibleLength() > 0) {
+                current.append(' ');
+                lineLength++;
+            }
+
+            current.append(word.content());
+            lineLength += word.visibleLength();
         }
 
-        return result.toString();
+        if (!current.isEmpty()) {
+            lines.add(current.toString());
+        }
+
+        return lines;
     }
 
     private static LoreWord readWord(String text, int startIndex) {
@@ -118,11 +164,11 @@ public final class ItemBuilder {
         boolean insideTag = false;
 
         while (index < text.length() && (insideTag || !Character.isWhitespace(text.charAt(index)))) {
-            char character = text.charAt(index);
+            char c = text.charAt(index);
 
-            if (!insideTag && character == '<' && !isEscaped(text, index)) {
+            if (!insideTag && c == '<' && !isEscaped(text, index)) {
                 insideTag = true;
-            } else if (insideTag && character == '>' && !isEscaped(text, index)) {
+            } else if (insideTag && c == '>' && !isEscaped(text, index)) {
                 insideTag = false;
             } else if (!insideTag) {
                 visibleLength++;
@@ -158,11 +204,9 @@ public final class ItemBuilder {
 
     private static boolean isEscaped(String text, int index) {
         int backslashes = 0;
-
         for (int i = index - 1; i >= 0 && text.charAt(i) == '\\'; i--) {
             backslashes++;
         }
-
         return backslashes % 2 != 0;
     }
 

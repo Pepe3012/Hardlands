@@ -2,11 +2,7 @@ package org.heather.hardlands.core.option;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 

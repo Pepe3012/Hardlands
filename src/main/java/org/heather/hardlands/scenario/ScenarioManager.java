@@ -3,12 +3,7 @@ package org.heather.hardlands.scenario;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.plugin.Plugin;
 
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RequiredArgsConstructor
 public final class ScenarioManager {

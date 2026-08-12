@@ -164,17 +164,17 @@ public final class OptionValidators {
         private Collections() {}
 
         public static Predicate<Collection<?>> minSize(int minimum) {
-            requireNonNegative(minimum, "Minimum size");
+            requireNonNegative(minimum, "Minimum inventorySize");
             return value -> value.size() >= minimum;
         }
 
         public static Predicate<Collection<?>> maxSize(int maximum) {
-            requireNonNegative(maximum, "Maximum size");
+            requireNonNegative(maximum, "Maximum inventorySize");
             return value -> value.size() <= maximum;
         }
 
         public static Predicate<Collection<?>> sizeBetween(int minimum, int maximum) {
-            requireNonNegative(minimum, "Minimum size");
+            requireNonNegative(minimum, "Minimum inventorySize");
             validateRange(minimum, maximum);
 
             return value -> value.size() >= minimum && value.size() <= maximum;
@@ -188,17 +188,17 @@ public final class OptionValidators {
         private Maps() {}
 
         public static Predicate<Map<?, ?>> minSize(int minimum) {
-            requireNonNegative(minimum, "Minimum size");
+            requireNonNegative(minimum, "Minimum inventorySize");
             return value -> value.size() >= minimum;
         }
 
         public static Predicate<Map<?, ?>> maxSize(int maximum) {
-            requireNonNegative(maximum, "Maximum size");
+            requireNonNegative(maximum, "Maximum inventorySize");
             return value -> value.size() <= maximum;
         }
 
         public static Predicate<Map<?, ?>> sizeBetween(int minimum, int maximum) {
-            requireNonNegative(minimum, "Minimum size");
+            requireNonNegative(minimum, "Minimum inventorySize");
             validateRange(minimum, maximum);
 
             return value -> value.size() >= minimum && value.size() <= maximum;

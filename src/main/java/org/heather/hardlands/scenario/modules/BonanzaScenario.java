@@ -1,12 +1,12 @@
 package org.heather.hardlands.scenario.modules;
 
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.heather.hardlands.core.option.Option;
 import org.heather.hardlands.core.option.OptionDataType;
 import org.heather.hardlands.core.option.OptionValidators;
 import org.heather.hardlands.scenario.base.OreScenarioModule;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockDropItemEvent;
 
 public final class BonanzaScenario extends OreScenarioModule {
 
