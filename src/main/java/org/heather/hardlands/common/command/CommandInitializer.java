@@ -14,6 +14,7 @@ public final class CommandInitializer {
 
     public static void initialize(Hardlands plugin) {
         PaperCommandManager manager = new PaperCommandManager(plugin);
+
         registerCompletions(plugin, manager);
         registerCommands(plugin, manager);
     }
@@ -37,7 +38,7 @@ public final class CommandInitializer {
                 .toList());
 
         completions.registerCompletion("scenario_options", context -> {
-            String identifier = context.getContextValue(String.class, 0);
+            String identifier = context.getContextValue(String.class, 1);
             ScenarioDefinition definition = ScenarioDefinition.findByIdentifier(identifier).orElse(null);
 
             if (definition == null || !plugin.getScenarioManager().isScenarioRegistered(definition)) {
