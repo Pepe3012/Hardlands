@@ -1,8 +1,13 @@
 package org.heather.hardlands.common.item;
 
+import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
+import net.kyori.adventure.text.flattener.FlattenerListener;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -13,13 +18,17 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.stream.Stream;
 
 public final class ItemBuilder {
 
     private static final int LORE_CHARACTER_LIMIT = 25;
+    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    private static final ComponentFlattener COMPONENT_FLATTENER = ComponentFlattener.basic();
 
     private final ItemStack item;
 
@@ -32,191 +41,234 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder name(String name) {
-        return name(MiniMessage.miniMessage().deserialize(name));
+        return this.name(MINI_MESSAGE.deserialize(name));
     }
 
     public ItemBuilder name(Component name) {
-        item.setData(DataComponentTypes.CUSTOM_NAME, nonItalic(name));
+        this.item.setData(DataComponentTypes.CUSTOM_NAME, nonItalic(name));
         return this;
     }
 
     public ItemBuilder lore(String... lines) {
-        item.setData(DataComponentTypes.LORE, ItemLore.lore(deserializeLore(lines)));
+        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(deserializeLore(lines)));
         return this;
     }
 
     public ItemBuilder addLore(String... lines) {
-        ItemLore current = item.getData(DataComponentTypes.LORE);
-        List<Component> lore = new ArrayList<>((current == null ? 0 : current.lines().size()) + lines.length);
+        ItemLore current = this.item.getData(DataComponentTypes.LORE);
+        List<Component> lore = new ArrayList<>(current == null ? List.of() : current.lines());
 
-        if (current != null) {
-            lore.addAll(current.lines());
-        }
         lore.addAll(deserializeLore(lines));
+        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 
-        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return this;
     }
 
     public ItemBuilder glint(boolean glint) {
-        item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glint);
+        this.item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glint);
         return this;
     }
 
     public ItemBuilder skullOwner(String owner) {
-        item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
+        this.item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
+        return this.hideTooltip(DataComponentTypes.PROFILE);
+    }
+
+    public ItemBuilder hideTooltip(DataComponentType... components) {
+        TooltipDisplay current = this.item.getData(DataComponentTypes.TOOLTIP_DISPLAY);
+        TooltipDisplay.Builder builder = TooltipDisplay.tooltipDisplay();
+
+        if (current != null) {
+            builder.hideTooltip(current.hideTooltip());
+            builder.hiddenComponents(current.hiddenComponents());
+        }
+
+        this.item.setData(DataComponentTypes.TOOLTIP_DISPLAY, builder.addHiddenComponents(components).build());
         return this;
     }
 
     public ItemBuilder setId(String key, String value) {
-        return setId(key, PersistentDataType.STRING, value);
+        return this.setId(key, PersistentDataType.STRING, value);
     }
 
     public ItemBuilder setId(String key, int value) {
-        return setId(key, PersistentDataType.INTEGER, value);
+        return this.setId(key, PersistentDataType.INTEGER, value);
     }
 
     public ItemBuilder setId(String key, double value) {
-        return setId(key, PersistentDataType.DOUBLE, value);
+        return this.setId(key, PersistentDataType.DOUBLE, value);
     }
 
     public <T> ItemBuilder setId(String key, PersistentDataType<?, T> type, T value) {
-        item.editMeta(meta -> {
+        this.item.editMeta(meta -> {
             PersistentDataContainer container = meta.getPersistentDataContainer();
             container.set(new NamespacedKey("hardlands", key), type, value);
         });
+
         return this;
     }
 
     public <T> ItemBuilder setId(NamespacedKey key, PersistentDataType<?, T> type, T value) {
-        item.editMeta(meta -> {
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            container.set(key, type, value);
-        });
+        this.item.editMeta(meta -> meta.getPersistentDataContainer().set(key, type, value));
         return this;
     }
 
     public ItemStack build() {
-        return item;
+        return this.item;
     }
 
     private static List<Component> deserializeLore(String[] lines) {
         return Stream.of(lines)
-                .flatMap(line -> wrapLore(line).stream())
-                .map(line -> nonItalic(MiniMessage.miniMessage().deserialize(line)))
+                .flatMap(line -> wrapLore(MINI_MESSAGE.deserialize(line)).stream())
+                .map(ItemBuilder::nonItalic)
                 .toList();
     }
 
-    private static List<String> wrapLore(String text) {
-        if (text.isBlank()) {
-            return List.of(text);
+    private static List<Component> wrapLore(Component component) {
+        List<StyledCharacter> characters = flatten(component);
+
+        if (characters.isEmpty()) {
+            return List.of(Component.empty());
         }
 
-        List<String> lines = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
-        int lineLength = 0;
-        int index = 0;
+        List<Component> lines = new ArrayList<>();
+        List<StyledCharacter> currentLine = new ArrayList<>();
+        List<StyledCharacter> currentWord = new ArrayList<>();
 
-        while (index < text.length()) {
-            LoreWord word = readWord(text, index);
-            index = word.nextIndex();
+        boolean spaceBeforeWord = false;
 
-            if (word.content().isEmpty()) {
+        for (StyledCharacter character : characters) {
+            int codePoint = character.codePoint();
+
+            if (isLineBreak(codePoint)) {
+                appendWord(lines, currentLine, currentWord, spaceBeforeWord);
+                flushLine(lines, currentLine);
+                spaceBeforeWord = false;
                 continue;
             }
 
-            if (word.lineBreakBefore() || shouldWrap(lineLength, word.visibleLength())) {
-                if (!current.isEmpty()) {
-                    lines.add(current.toString());
-                    current.setLength(0);
-                }
-
-                lineLength = 0;
+            if (Character.isWhitespace(codePoint)) {
+                appendWord(lines, currentLine, currentWord, spaceBeforeWord);
+                spaceBeforeWord = !currentLine.isEmpty();
+                continue;
             }
 
-            if (lineLength > 0 && word.visibleLength() > 0) {
-                current.append(' ');
-                lineLength++;
+            if (currentWord.isEmpty()) {
+                currentWord = new ArrayList<>();
             }
 
-            current.append(word.content());
-            lineLength += word.visibleLength();
+            currentWord.add(character);
         }
 
-        if (!current.isEmpty()) {
-            lines.add(current.toString());
+        appendWord(lines, currentLine, currentWord, spaceBeforeWord);
+
+        if (!currentLine.isEmpty()) {
+            flushLine(lines, currentLine);
         }
 
-        return lines;
+        return lines.isEmpty() ? List.of(Component.empty()) : lines;
     }
 
-    private static LoreWord readWord(String text, int startIndex) {
-        int index = startIndex;
-        boolean lineBreakBefore = false;
-
-        while (index < text.length() && Character.isWhitespace(text.charAt(index))) {
-            lineBreakBefore |= isLineBreak(text.charAt(index));
-            index++;
+    private static void appendWord(List<Component> lines, List<StyledCharacter> currentLine,
+                                   List<StyledCharacter> word, boolean spaceBeforeWord) {
+        if (word.isEmpty()) {
+            return;
         }
 
-        int wordStart = index;
-        int visibleLength = 0;
-        boolean insideTag = false;
+        int requiredLength = word.size() + (spaceBeforeWord && !currentLine.isEmpty() ? 1 : 0);
 
-        while (index < text.length() && (insideTag || !Character.isWhitespace(text.charAt(index)))) {
-            char c = text.charAt(index);
+        if (!currentLine.isEmpty() && currentLine.size() + requiredLength > LORE_CHARACTER_LIMIT) {
+            flushLine(lines, currentLine);
+        }
 
-            if (!insideTag && c == '<' && !isEscaped(text, index)) {
-                insideTag = true;
-            } else if (insideTag && c == '>' && !isEscaped(text, index)) {
-                insideTag = false;
-            } else if (!insideTag) {
-                visibleLength++;
+        if (!currentLine.isEmpty() && spaceBeforeWord) {
+            StyledCharacter first = word.getFirst();
+            currentLine.add(new StyledCharacter(' ', first.styles()));
+        }
+
+        currentLine.addAll(word);
+        word.clear();
+    }
+
+    private static void flushLine(List<Component> lines, List<StyledCharacter> characters) {
+        lines.add(buildComponent(characters));
+        characters.clear();
+    }
+
+    private static Component buildComponent(List<StyledCharacter> characters) {
+        if (characters.isEmpty()) {
+            return Component.empty();
+        }
+
+        Component result = Component.empty();
+        int start = 0;
+
+        while (start < characters.size()) {
+            StyledCharacter first = characters.get(start);
+            int end = start + 1;
+
+            while (end < characters.size() && first.styles().equals(characters.get(end).styles())) {
+                end++;
             }
 
-            index++;
+            StringBuilder text = new StringBuilder();
+
+            for (int index = start; index < end; index++) {
+                text.appendCodePoint(characters.get(index).codePoint());
+            }
+
+            result = result.append(applyStyles(text.toString(), first.styles()));
+            start = end;
         }
 
-        return new LoreWord(text.substring(wordStart, index), visibleLength, index, lineBreakBefore);
+        return result;
     }
 
-    private static int appendWord(StringBuilder result, LoreWord word, int lineLength) {
-        if (word.visibleLength() == 0) {
-            result.append(word.content());
-            return lineLength;
+    private static Component applyStyles(String text, List<Style> styles) {
+        Component component = Component.text(text);
+
+        for (int index = styles.size() - 1; index >= 0; index--) {
+            component = Component.empty()
+                    .style(styles.get(index))
+                    .append(component);
         }
 
-        if (shouldWrap(lineLength, word.visibleLength())) {
-            result.append('\n');
-            lineLength = 0;
-        } else if (lineLength > 0) {
-            result.append(' ');
-            lineLength++;
-        }
-
-        result.append(word.content());
-        return lineLength + word.visibleLength();
+        return component;
     }
 
-    private static boolean shouldWrap(int lineLength, int wordLength) {
-        return lineLength > 0 && lineLength + 1 + wordLength > LORE_CHARACTER_LIMIT;
+    private static List<StyledCharacter> flatten(Component component) {
+        List<StyledCharacter> characters = new ArrayList<>();
+        Deque<Style> styles = new ArrayDeque<>();
+
+        COMPONENT_FLATTENER.flatten(component, new FlattenerListener() {
+
+            @Override
+            public void pushStyle(Style style) {
+                styles.addLast(style);
+            }
+
+            @Override
+            public void component(String text) {
+                List<Style> activeStyles = List.copyOf(styles);
+                text.codePoints().forEach(codePoint -> characters.add(new StyledCharacter(codePoint, activeStyles)));
+            }
+
+            @Override
+            public void popStyle(Style style) {
+                styles.removeLast();
+            }
+        });
+
+        return characters;
     }
 
-    private static boolean isEscaped(String text, int index) {
-        int backslashes = 0;
-        for (int i = index - 1; i >= 0 && text.charAt(i) == '\\'; i--) {
-            backslashes++;
-        }
-        return backslashes % 2 != 0;
-    }
-
-    private static boolean isLineBreak(char character) {
-        return character == '\n' || character == '\r';
+    private static boolean isLineBreak(int codePoint) {
+        return codePoint == '\n' || codePoint == '\r';
     }
 
     private static Component nonItalic(Component component) {
         return component.decoration(TextDecoration.ITALIC, false);
     }
 
-    private record LoreWord(String content, int visibleLength, int nextIndex, boolean lineBreakBefore) {}
+    private record StyledCharacter(int codePoint, List<Style> styles) {}
 }
