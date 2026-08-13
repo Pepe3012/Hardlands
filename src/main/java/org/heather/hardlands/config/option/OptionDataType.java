@@ -1,4 +1,4 @@
-package org.heather.hardlands.util.option;
+package org.heather.hardlands.config.option;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

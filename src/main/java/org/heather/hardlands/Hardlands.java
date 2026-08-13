@@ -8,8 +8,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.heather.hardlands.common.command.CommandInitializer;
 import org.heather.hardlands.common.player.PlayerListener;
-import org.heather.hardlands.inventory.*;
-import org.heather.hardlands.task.PlayerUpdateTask;
+import org.heather.hardlands.config.inventory.*;
+import org.heather.hardlands.common.task.PlayerUpdateTask;
 import org.heather.hardlands.game.GameController;
 import org.heather.hardlands.scenario.ScenarioDefinition;
 import org.heather.hardlands.scenario.ScenarioManager;
@@ -59,7 +59,6 @@ public final class Hardlands extends JavaPlugin {
         this.worldManager = new WorldManager(requireChunkyApi());
 
         InventoryRegistry.register(InventoryDefinition.values());
-        InventoryRegistry.freeze();
     }
 
     private void registerListeners() {

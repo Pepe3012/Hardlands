@@ -34,9 +34,15 @@ public final class WorldManager {
     }
 
     public void startPregeneration() {
-        BorderRegion region = this.borderController.getSurvivalRegion();
-        this.pregenerationController.startPregeneration(new PregenerationRequest(region.worldName(), region.centerX(), region.centerZ(), region.radius()));
+        this.pregenerationController.startPregeneration(
+                new PregenerationRequest("world", 0, 0, 3000)
+        );
     }
+
+//    public void startPregeneration() {
+//        BorderRegion region = this.borderController.getSurvivalRegion();
+//        this.pregenerationController.startPregeneration(new PregenerationRequest(region.worldName(), region.centerX(), region.centerZ(), region.radius()));
+//    }
 
     public void cancelPregeneration() {
         this.pregenerationController.cancelPregeneration();

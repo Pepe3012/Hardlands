@@ -1,4 +1,4 @@
-package org.heather.hardlands.inventory.handler;
+package org.heather.hardlands.config.inventory.handler;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;

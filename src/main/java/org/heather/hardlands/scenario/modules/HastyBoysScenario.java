@@ -5,8 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.util.option.Option;
-import org.heather.hardlands.util.option.OptionValidators;
+import org.heather.hardlands.config.option.Option;
+import org.heather.hardlands.config.option.OptionValidators;
 import org.heather.hardlands.scenario.ScenarioModule;
 
 import java.util.Set;

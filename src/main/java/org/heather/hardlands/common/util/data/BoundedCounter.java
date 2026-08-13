@@ -1,4 +1,4 @@
-package org.heather.hardlands.util.data;
+package org.heather.hardlands.common.util.data;
 
 import lombok.Getter;
 

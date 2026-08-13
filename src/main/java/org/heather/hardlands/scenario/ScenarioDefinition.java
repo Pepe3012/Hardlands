@@ -4,8 +4,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.common.item.InventoryItem;
-import org.heather.hardlands.common.item.InventoryItem.InventoryDisplay;
+import org.heather.hardlands.common.item.inventory.InventoryDisplay;
+import org.heather.hardlands.common.item.inventory.InventoryItem;
+import org.heather.hardlands.common.item.inventory.InventoryItem;
 import org.heather.hardlands.scenario.modules.*;
 
 import java.util.*;

@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 public final class ItemBuilder {
 
-    private static final int LORE_CHARACTER_LIMIT = 25;
+    private static final int LORE_CHARACTER_LIMIT = 30;
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final ComponentFlattener COMPONENT_FLATTENER = ComponentFlattener.basic();
 

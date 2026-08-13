@@ -1,4 +1,4 @@
-package org.heather.hardlands.util;
+package org.heather.hardlands.common.util;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;

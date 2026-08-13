@@ -1,4 +1,4 @@
-package org.heather.hardlands.inventory;
+package org.heather.hardlands.config.inventory;
 
 import org.bukkit.inventory.Inventory;
 
@@ -10,15 +10,9 @@ public final class InventoryRegistry {
 
     private static final Map<InventoryDefinition, Inventory> INVENTORIES = new EnumMap<>(InventoryDefinition.class);
 
-    private static boolean frozen;
-
     private InventoryRegistry() {}
 
     public static void register(InventoryDefinition... definitions) {
-        if (frozen) {
-            throw new IllegalStateException("Inventory registry is frozen.");
-        }
-
         for (InventoryDefinition definition : definitions) {
             INVENTORIES.put(definition, definition.createInventory());
         }
@@ -47,9 +41,5 @@ public final class InventoryRegistry {
 
     public static boolean isManaged(Inventory inventory) {
         return INVENTORIES.values().stream().anyMatch(registered -> registered == inventory);
-    }
-
-    public static void freeze() {
-        frozen = true;
     }
 }

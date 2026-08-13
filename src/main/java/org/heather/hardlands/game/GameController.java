@@ -2,10 +2,10 @@ package org.heather.hardlands.game;
 
 import lombok.Getter;
 import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.util.formatter.TickConverter;
-import org.heather.hardlands.util.option.Option;
-import org.heather.hardlands.util.option.OptionHolder;
-import org.heather.hardlands.util.option.OptionValidators;
+import org.heather.hardlands.common.util.formatter.TickConverter;
+import org.heather.hardlands.config.option.Option;
+import org.heather.hardlands.config.option.OptionHolder;
+import org.heather.hardlands.config.option.OptionValidators;
 
 import java.util.List;
 

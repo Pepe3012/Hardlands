@@ -7,10 +7,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.util.BlockTraversal;
-import org.heather.hardlands.util.data.BoundedCounter;
-import org.heather.hardlands.util.option.Option;
-import org.heather.hardlands.util.option.OptionValidators;
+import org.heather.hardlands.common.util.BlockTraversal;
+import org.heather.hardlands.common.util.data.BoundedCounter;
+import org.heather.hardlands.config.option.Option;
+import org.heather.hardlands.config.option.OptionValidators;
 import org.heather.hardlands.scenario.base.OreScenarioModule;
 
 public final class VeinMinerScenario extends OreScenarioModule {

@@ -3,10 +3,10 @@ package org.heather.hardlands.world.border;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
-import org.heather.hardlands.util.option.Option;
-import org.heather.hardlands.util.option.OptionDataType;
-import org.heather.hardlands.util.option.OptionHolder;
-import org.heather.hardlands.util.option.OptionValidators;
+import org.heather.hardlands.config.option.Option;
+import org.heather.hardlands.config.option.OptionDataType;
+import org.heather.hardlands.config.option.OptionHolder;
+import org.heather.hardlands.config.option.OptionValidators;
 
 public final class WorldBorderController extends OptionHolder {
 

@@ -1,4 +1,4 @@
-package org.heather.hardlands.util;
+package org.heather.hardlands.common.util;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;

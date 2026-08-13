@@ -10,8 +10,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.util.option.Option;
-import org.heather.hardlands.util.option.OptionDataType;
+import org.heather.hardlands.config.option.Option;
+import org.heather.hardlands.config.option.OptionDataType;
 import org.heather.hardlands.scenario.ScenarioModule;
 
 import java.util.Map;
