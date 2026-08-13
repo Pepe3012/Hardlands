@@ -1,18 +1,14 @@
 name: Hardlands
 version: '${version}'
-
-main: org.heather.hardlands.Hardlands
+main: io.github.pepe3012.hardlands.Hardlands
 api-version: '26.2'
 load: POSTWORLD
-
 authors:
   - Pepe3012
-
 permissions:
   hardlands.admin:
     description: Access to Hardlands admin commands
     default: op
-
 dependencies:
   server:
     Chunky:
