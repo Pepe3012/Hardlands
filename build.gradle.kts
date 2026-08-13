@@ -1,31 +1,58 @@
 plugins {
     id("java-library")
+    kotlin("jvm")
+
     alias(libs.plugins.run.paper)
+    alias(libs.plugins.lombok)
+    alias(libs.plugins.shadow)
 }
 
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.aikar.co/content/groups/aikar/")
+    maven("https://repo.codemc.io/repository/maven-public/")
 }
 
 dependencies {
     compileOnly(libs.paper.api)
-    implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
+    compileOnly(libs.chunky.common)
+
+    implementation(libs.acf.paper)
+
+    constraints {
+        compileOnly(libs.commons.lang3) {
+            because("Fixes CVE-2025-48924")
+        }
+
+        compileOnly(libs.plexus.utils) {
+            because("Fixes CVE-2025-67030")
+        }
+    }
 }
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
 }
 
+lombok {
+    version = libs.versions.lombok.get()
+}
+
 tasks {
     jar {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+        archiveClassifier.set("unshaded")
+    }
+
+    shadowJar {
+        archiveClassifier.set("")
+
+        relocate("co.aikar.commands", "com.hardlands.libs.acf.commands")
+        relocate("co.aikar.locales", "com.hardlands.libs.acf.locales")
     }
 
     assemble {
-        dependsOn(jar)
+        dependsOn(shadowJar)
     }
 
     runServer {
@@ -35,6 +62,9 @@ tasks {
 
     processResources {
         val props = mapOf("version" to version)
+
+        inputs.properties(props)
+
         filesMatching("paper-plugin.yml") {
             expand(props)
         }
