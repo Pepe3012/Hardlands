@@ -2,7 +2,12 @@ package io.github.pepe3012.hardlands.scenario;
 
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public final class ScenarioManager {
 
@@ -50,7 +55,7 @@ public final class ScenarioManager {
 
     public boolean toggleScenario(ScenarioDefinition definition) {
         return this.isScenarioActive(definition)
-                ? !this.disableScenario(definition)
+                ? this.disableScenario(definition)
                 : this.enableScenario(definition);
     }
 
@@ -73,8 +78,8 @@ public final class ScenarioManager {
     }
 
     public Optional<ScenarioModule> findActiveScenario(ScenarioDefinition definition) {
-        return isScenarioActive(definition)
-                ? Optional.of(getRegisteredScenario(definition))
+        return this.isScenarioActive(definition)
+                ? Optional.of(this.getRegisteredScenario(definition))
                 : Optional.empty();
     }
 

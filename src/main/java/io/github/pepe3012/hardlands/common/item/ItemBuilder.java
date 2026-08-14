@@ -1,5 +1,7 @@
 package io.github.pepe3012.hardlands.common.item;
 
+import io.github.pepe3012.hardlands.Hardlands;
+import io.github.pepe3012.hardlands.common.util.data.PersistentData;
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -16,18 +18,20 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class ItemBuilder {
 
     private static final int LORE_CHARACTER_LIMIT = 30;
+    private static final String ID_KEY = "id";
+
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final ComponentFlattener COMPONENT_FLATTENER = ComponentFlattener.basic();
 
@@ -42,51 +46,51 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder name(String name) {
-        return this.name(MINI_MESSAGE.deserialize(name));
+        return name(MINI_MESSAGE.deserialize(name));
     }
 
     public ItemBuilder name(Component name) {
-        this.item.setData(DataComponentTypes.CUSTOM_NAME, nonItalic(name));
+        item.setData(DataComponentTypes.CUSTOM_NAME, nonItalic(name));
         return this;
     }
 
     public ItemBuilder lore(String... lines) {
-        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(deserializeLore(lines)));
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(deserializeLore(lines)));
         return this;
     }
 
     public ItemBuilder addLore(String... lines) {
-        ItemLore current = this.item.getData(DataComponentTypes.LORE);
+        ItemLore current = item.getData(DataComponentTypes.LORE);
         List<Component> lore = new ArrayList<>(current == null ? List.of() : current.lines());
 
         lore.addAll(deserializeLore(lines));
-        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 
         return this;
     }
 
     public ItemBuilder enchant(Enchantment enchantment, int level) {
-        this.item.addUnsafeEnchantment(enchantment, level);
+        item.addUnsafeEnchantment(enchantment, level);
         return this;
     }
 
     public ItemBuilder unbreakable() {
-        this.item.editMeta(meta -> meta.setUnbreakable(true));
+        item.editMeta(meta -> meta.setUnbreakable(true));
         return this;
     }
 
     public ItemBuilder glint(boolean glint) {
-        this.item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glint);
+        item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glint);
         return this;
     }
 
     public ItemBuilder skullOwner(String owner) {
-        this.item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
-        return this.hideTooltip(DataComponentTypes.PROFILE);
+        item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
+        return hideTooltip(DataComponentTypes.PROFILE);
     }
 
     public ItemBuilder hideTooltip(DataComponentType... components) {
-        TooltipDisplay current = this.item.getData(DataComponentTypes.TOOLTIP_DISPLAY);
+        TooltipDisplay current = item.getData(DataComponentTypes.TOOLTIP_DISPLAY);
         TooltipDisplay.Builder builder = TooltipDisplay.tooltipDisplay();
 
         if (current != null) {
@@ -94,38 +98,29 @@ public final class ItemBuilder {
             builder.hiddenComponents(current.hiddenComponents());
         }
 
-        this.item.setData(DataComponentTypes.TOOLTIP_DISPLAY, builder.addHiddenComponents(components).build());
+        item.setData(DataComponentTypes.TOOLTIP_DISPLAY, builder.addHiddenComponents(components).build());
         return this;
     }
 
-    public ItemBuilder setId(String key, String value) {
-        return this.setId(key, PersistentDataType.STRING, value);
-    }
-
-    public ItemBuilder setId(String key, int value) {
-        return this.setId(key, PersistentDataType.INTEGER, value);
-    }
-
-    public ItemBuilder setId(String key, double value) {
-        return this.setId(key, PersistentDataType.DOUBLE, value);
-    }
-
-    public <T> ItemBuilder setId(String key, PersistentDataType<?, T> type, T value) {
-        this.item.editMeta(meta -> {
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            container.set(new NamespacedKey("hardlands", key), type, value);
-        });
-
+    public <P, C> ItemBuilder setData(NamespacedKey key, PersistentDataType<P, C> type, C value) {
+        item.editMeta(meta -> PersistentData.set(meta, key, type, value));
         return this;
     }
 
-    public <T> ItemBuilder setId(NamespacedKey key, PersistentDataType<?, T> type, T value) {
-        this.item.editMeta(meta -> meta.getPersistentDataContainer().set(key, type, value));
-        return this;
+    public <P, C> Optional<C> getData(NamespacedKey key, PersistentDataType<P, C> type) {
+        return PersistentData.find(item.getItemMeta(), key, type);
+    }
+
+    public ItemBuilder setId(String id) {
+        return setData(Hardlands.namespacedKey(ID_KEY), PersistentDataType.STRING, id);
+    }
+
+    public Optional<String> findId() {
+        return getData(Hardlands.namespacedKey(ID_KEY), PersistentDataType.STRING);
     }
 
     public ItemStack build() {
-        return this.item;
+        return this.item.clone();
     }
 
     private static List<Component> deserializeLore(String[] lines) {
@@ -145,7 +140,6 @@ public final class ItemBuilder {
         List<Component> lines = new ArrayList<>();
         List<StyledCharacter> currentLine = new ArrayList<>();
         List<StyledCharacter> currentWord = new ArrayList<>();
-
         boolean spaceBeforeWord = false;
 
         for (StyledCharacter character : characters) {
@@ -162,10 +156,6 @@ public final class ItemBuilder {
                 appendWord(lines, currentLine, currentWord, spaceBeforeWord);
                 spaceBeforeWord = !currentLine.isEmpty();
                 continue;
-            }
-
-            if (currentWord.isEmpty()) {
-                currentWord = new ArrayList<>();
             }
 
             currentWord.add(character);
@@ -193,8 +183,7 @@ public final class ItemBuilder {
         }
 
         if (!currentLine.isEmpty() && spaceBeforeWord) {
-            StyledCharacter first = word.getFirst();
-            currentLine.add(new StyledCharacter(' ', first.styles()));
+            currentLine.add(new StyledCharacter(' ', word.getFirst().styles()));
         }
 
         currentLine.addAll(word);

@@ -1,46 +1,62 @@
 package io.github.pepe3012.hardlands.config.option;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import java.util.*;
-import java.util.function.Function;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@Getter
-@RequiredArgsConstructor
 public enum OptionDataType {
 
     BOOLEAN(Boolean.class),
-    INTEGER(Integer.class),
-    FLOAT(Float.class),
+    CUSTOM(Object.class),
     DOUBLE(Double.class),
-    LONG(Long.class),
-    STRING(String.class),
-
+    FLOAT(Float.class),
+    INTEGER(Integer.class),
     LIST(List.class),
-    SET(Set.class),
+    LONG(Long.class),
     MAP(Map.class),
-
-    CUSTOM(Object.class);
-
-    private static final Map<Class<?>, OptionDataType> BY_JAVA_TYPE = Arrays.stream(values()).filter(dataType -> dataType != CUSTOM).collect(Collectors.toUnmodifiableMap(OptionDataType::getJavaType, Function.identity()));
+    SET(Set.class),
+    STRING(String.class);
 
     private final Class<?> javaType;
+
+    OptionDataType(Class<?> javaType) {
+        this.javaType = javaType;
+    }
+
+    private static final Map<Class<?>, OptionDataType> BY_JAVA_TYPE = Stream.of(values()).filter(dataType -> dataType != CUSTOM).collect(Collectors.toUnmodifiableMap(OptionDataType::getJavaType, dataType -> dataType));
+
+    public Class<?> getJavaType() {
+        return this.javaType;
+    }
 
     public boolean acceptsValue(Object value) {
         return this.javaType.isInstance(value);
     }
 
     public static OptionDataType fromJavaType(Class<?> javaType) {
-        Objects.requireNonNull(javaType, "Java type cannot be null");
+        if (javaType == null) {
+            throw new IllegalArgumentException("Java type cannot be null");
+        }
 
         OptionDataType dataType = BY_JAVA_TYPE.get(javaType);
-        if (dataType != null) return dataType;
 
-        if (List.class.isAssignableFrom(javaType)) return LIST;
-        if (Set.class.isAssignableFrom(javaType)) return SET;
-        if (Map.class.isAssignableFrom(javaType)) return MAP;
+        if (dataType != null) {
+            return dataType;
+        }
+
+        if (List.class.isAssignableFrom(javaType)) {
+            return LIST;
+        }
+
+        if (Map.class.isAssignableFrom(javaType)) {
+            return MAP;
+        }
+
+        if (Set.class.isAssignableFrom(javaType)) {
+            return SET;
+        }
 
         return CUSTOM;
     }

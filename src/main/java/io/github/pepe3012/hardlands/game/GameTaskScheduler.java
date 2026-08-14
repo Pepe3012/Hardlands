@@ -1,34 +1,44 @@
 package io.github.pepe3012.hardlands.game;
 
-import org.bukkit.scheduler.BukkitTask;
 import io.github.pepe3012.hardlands.Hardlands;
+import org.bukkit.scheduler.BukkitTask;
 
 public final class GameTaskScheduler {
 
     private final Hardlands plugin;
+    private BukkitTask scheduledTask;
 
-    private BukkitTask task;
-
-    public GameTaskScheduler(final Hardlands plugin) {
+    public GameTaskScheduler(Hardlands plugin) {
         this.plugin = plugin;
     }
 
     public void scheduleTask(Runnable action, long delay) {
+        if (action == null) {
+            throw new IllegalArgumentException("Action cannot be null");
+        }
+
+        if (delay < 0L) {
+            throw new IllegalArgumentException("Delay cannot be negative");
+        }
+
         this.cancelScheduledTask();
-        this.task = this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
-            this.task = null;
+
+        this.scheduledTask = this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+            this.scheduledTask = null;
             action.run();
         }, delay);
     }
 
     public void cancelScheduledTask() {
-        if (this.task == null) return;
+        if (this.scheduledTask == null) {
+            return;
+        }
 
-        this.task.cancel();
-        this.task = null;
+        this.scheduledTask.cancel();
+        this.scheduledTask = null;
     }
 
     public boolean isTaskScheduled() {
-        return this.task != null;
+        return this.scheduledTask != null && !this.scheduledTask.isCancelled();
     }
 }

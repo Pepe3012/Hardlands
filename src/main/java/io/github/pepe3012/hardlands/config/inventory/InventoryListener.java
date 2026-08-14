@@ -1,15 +1,15 @@
 package io.github.pepe3012.hardlands.config.inventory;
 
+import io.github.pepe3012.hardlands.common.item.inventory.InventoryItem;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
-import io.github.pepe3012.hardlands.common.item.inventory.InventoryItem;
 
 public final class InventoryListener implements Listener {
 
@@ -17,21 +17,24 @@ public final class InventoryListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory inventory = event.getView().getTopInventory();
 
-        if (!InventoryRegistry.isManaged(inventory)
-                || !(event.getWhoClicked() instanceof Player player)) {
+        if (!InventoryRegistry.isManaged(inventory) || !(event.getWhoClicked() instanceof Player player)) {
             return;
         }
 
         boolean clickedTop = event.getClickedInventory() == inventory;
         boolean affectsTop = clickedTop
-                || event.getClick().isShiftClick()
-                || event.getClick() == ClickType.DOUBLE_CLICK;
+                || event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                || event.getAction() == InventoryAction.COLLECT_TO_CURSOR;
 
-        if (!affectsTop) return;
+        if (!affectsTop) {
+            return;
+        }
 
         event.setCancelled(true);
 
-        if (!clickedTop) return;
+        if (!clickedTop) {
+            return;
+        }
 
         InventoryItem.find(event.getCurrentItem()).ifPresent(item -> {
             if (item.execute(inventory, player, event.getClick())) {
@@ -44,15 +47,23 @@ public final class InventoryListener implements Listener {
     public void onInventoryDrag(InventoryDragEvent event) {
         Inventory inventory = event.getView().getTopInventory();
 
-        if (InventoryRegistry.isManaged(inventory)
-                && event.getRawSlots().stream().anyMatch(slot -> slot < inventory.getSize())) {
+        if (!InventoryRegistry.isManaged(inventory)) {
+            return;
+        }
+
+        boolean affectsTop = event.getRawSlots().stream()
+                .anyMatch(slot -> slot >= 0 && slot < inventory.getSize());
+
+        if (affectsTop) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (!(event.getPlayer() instanceof Player player)) return;
+        if (!(event.getPlayer() instanceof Player player)) {
+            return;
+        }
 
         Inventory inventory = event.getView().getTopInventory();
 

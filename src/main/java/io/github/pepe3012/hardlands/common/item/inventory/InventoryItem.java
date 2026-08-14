@@ -1,15 +1,12 @@
 package io.github.pepe3012.hardlands.common.item.inventory;
 
+import io.github.pepe3012.hardlands.common.item.ItemBuilder;
+import io.github.pepe3012.hardlands.config.inventory.InventoryDefinition;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
-import io.github.pepe3012.hardlands.Hardlands;
-import io.github.pepe3012.hardlands.common.item.ItemBuilder;
-import io.github.pepe3012.hardlands.config.inventory.InventoryDefinition;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,62 +14,73 @@ import java.util.function.Supplier;
 
 public enum InventoryItem {
 
-    PREVIOUS(item(
-            head("MHF_ArrowLeft", "Anterior", "Regresa al menú o página anterior."),
-            click(ClickType.LEFT, (inventory, player) -> InventoryDefinition.find(inventory).ifPresent(definition -> definition.openParent(player)))
-    )),
+    PREVIOUS(head("MHF_ArrowLeft", "Anterior", "Regresa al menú o página anterior."),
+            click(ClickType.LEFT, (inventory, player) -> InventoryDefinition.find(inventory).ifPresent(definition -> definition.openParent(player)))),
+    PREPARATION(PreparationInventoryItem::build,
+            click(ClickType.RIGHT, (_, _) -> PreparationInventoryItem.toggle())),
+    NEXT(head("MHF_ArrowRight", "Siguiente", "Avanza a la siguiente página.")),
 
-    PREPARATION(item(
-            PreparationInventoryItem::build,
-            click(ClickType.RIGHT, (_, _) -> PreparationInventoryItem.toggle())
-    )),
-
-    NEXT(item(head("MHF_ArrowRight", "Siguiente", "Avanza a la siguiente página."))),
-
-    SCENARIOS(menu(() -> InventoryDefinition.SCENARIOS, Material.CHERRY_SAPLING, "Activa, desactiva y configura los escenarios de la partida.")),
-    PLAYERS(menu(() -> InventoryDefinition.PLAYERS, Material.PLAYER_HEAD, "Administra los jugadores de la partida.")),
-    DURATION(menu(() -> InventoryDefinition.DURATION, Material.COMPARATOR, "Configura las opciones generales de la partida.")),
-    VANILLA_CHANGES(menu(() -> InventoryDefinition.VANILLA_CHANGES, Material.GRASS_BLOCK, "Consulta y configura los cambios realizados al juego base.")),
-    WORLD(menu(() -> InventoryDefinition.WORLD, () -> new ItemBuilder(Material.PLAYER_HEAD).skullOwner("KEYKOTV"), "Configura la generación y los límites del mundo.")),
-    TEMPLATES(menu(() -> InventoryDefinition.TEMPLATES, Material.WRITABLE_BOOK, "Administra las plantillas de configuración."));
+    SCENARIOS(() -> InventoryDefinition.SCENARIOS, Material.CHERRY_SAPLING, "Activa, desactiva y configura los escenarios de la partida."),
+    PLAYERS(() -> InventoryDefinition.PLAYERS, Material.PLAYER_HEAD, "Administra los jugadores de la partida."),
+    DURATION(() -> InventoryDefinition.DURATION, Material.COMPARATOR, "Configura las opciones generales de la partida."),
+    VANILLA_CHANGES(() -> InventoryDefinition.VANILLA_CHANGES, Material.GRASS_BLOCK, "Consulta y configura los cambios realizados al juego base."),
+    WORLD(() -> InventoryDefinition.WORLD, () -> new ItemBuilder(Material.PLAYER_HEAD).skullOwner("KEYKOTV"), "Configura la generación y los límites del mundo."),
+    TEMPLATES(() -> InventoryDefinition.TEMPLATES, Material.WRITABLE_BOOK, "Administra las plantillas de configuración.");
 
     private final Supplier<ItemStack> factory;
-    private final List<InventoryItemClick> clicks;
+    private final List<Click> clicks;
 
-    InventoryItem(InventoryItemConfiguration configuration) {
-        this.factory = configuration.factory();
-        this.clicks = configuration.clicks();
+    InventoryItem(Supplier<ItemStack> factory, Click... clicks) {
+        this.factory = factory;
+        this.clicks = List.of(clicks);
+    }
+
+    InventoryItem(Supplier<InventoryDefinition> definition, Material material, String description) {
+        this(definition, () -> new ItemBuilder(material), description);
+    }
+
+    InventoryItem(Supplier<InventoryDefinition> definition, Supplier<ItemBuilder> builder, String description) {
+        this(
+                () -> builder.get()
+                        .name(definition.get().getTitle())
+                        .lore("<gray>" + description)
+                        .build(),
+                click(ClickType.LEFT, (_, player) -> definition.get().openInventory(player))
+        );
     }
 
     public ItemStack build() {
-        ItemStack item = this.factory.get();
-
-        item.editMeta(meta -> meta.getPersistentDataContainer()
-                .set(itemKey(), PersistentDataType.STRING, this.name()));
-
-        return item;
+        return new ItemBuilder(factory.get())
+                .setId(name())
+                .build();
     }
 
-    public boolean execute(Inventory inventory, Player player, ClickType clickType) {
-        return this.clicks.stream()
-                .filter(click -> click.matches(clickType))
-                .findFirst()
-                .map(click -> {
-                    click.execute(inventory, player);
-                    return true;
-                })
-                .orElse(false);
+    public boolean execute(Inventory inventory, Player player, ClickType type) {
+        for (Click click : clicks) {
+            if (click.type() != type) {
+                continue;
+            }
+
+            click.action().execute(inventory, player);
+            return true;
+        }
+
+        return false;
     }
 
     public static Optional<InventoryItem> find(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) return Optional.empty();
+        if (item == null || !item.hasItemMeta()) {
+            return Optional.empty();
+        }
 
-        String identifier = item.getItemMeta()
-                .getPersistentDataContainer()
-                .get(itemKey(), PersistentDataType.STRING);
+        return new ItemBuilder(item).findId().flatMap(InventoryItem::find);
+    }
 
-        if (identifier == null) return Optional.empty();
+    public static InventoryDisplay display(Material material, String description) {
+        return new InventoryDisplay(material, description);
+    }
 
+    private static Optional<InventoryItem> find(String identifier) {
         try {
             return Optional.of(valueOf(identifier));
         } catch (IllegalArgumentException _) {
@@ -80,48 +88,18 @@ public enum InventoryItem {
         }
     }
 
-    public static InventoryDisplay display(Material material, String description) {
-        return new InventoryDisplay(material, description);
-    }
-
-    private static InventoryItemConfiguration item(
-            Supplier<ItemStack> factory,
-            InventoryItemClick... clicks
-    ) {
-        return new InventoryItemConfiguration(factory, List.of(clicks));
-    }
-
-    private static InventoryItemConfiguration menu(
-            Supplier<InventoryDefinition> definition,
-            Material material,
-            String description
-    ) {
-        return menu(definition, () -> new ItemBuilder(material), description);
-    }
-
-    private static InventoryItemConfiguration menu(
-            Supplier<InventoryDefinition> definition,
-            Supplier<ItemBuilder> builder,
-            String description
-    ) {
-        return item(
-                () -> InventoryItemFactory.menu(definition.get(), builder.get(), description),
-                click(ClickType.LEFT, (_, player) -> definition.get().openInventory(player))
-        );
-    }
-
     private static Supplier<ItemStack> head(String owner, String name, String description) {
-        return () -> InventoryItemFactory.head(owner, name, description);
+        return () -> new ItemBuilder(Material.PLAYER_HEAD).skullOwner(owner).name(name).lore("<gray>" + description).build();
     }
 
-    private static InventoryItemClick click(
-            ClickType clickType,
-            InventoryItemClick.Action action
-    ) {
-        return new InventoryItemClick(clickType, action);
+    private static Click click(ClickType type, Action action) {
+        return new Click(type, action);
     }
 
-    private static NamespacedKey itemKey() {
-        return Hardlands.getInstance().namespacedKey("INVENTORY_ITEM");
+    private record Click(ClickType type, Action action) {}
+
+    @FunctionalInterface
+    private interface Action {
+        void execute(Inventory inventory, Player player);
     }
 }

@@ -1,6 +1,5 @@
 package io.github.pepe3012.hardlands.world.pregen;
 
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.popcraft.chunky.api.ChunkyAPI;
 import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
@@ -10,14 +9,26 @@ public final class PregenerationController {
 
     private final ChunkyAPI chunky;
 
-    @Getter private volatile PregenerationState state = PregenerationState.IDLE;
-    @Getter private volatile PregenerationRequest activeRequest;
-    @Getter private volatile float progress;
+    private PregenerationState state = PregenerationState.IDLE;
+    private PregenerationRequest activeRequest;
+    private float progress;
 
-    public PregenerationController(final ChunkyAPI chunky) {
+    public PregenerationController(ChunkyAPI chunky) {
         this.chunky = chunky;
         this.chunky.onGenerationProgress(this::handleProgress);
         this.chunky.onGenerationComplete(this::handleCompletion);
+    }
+
+    public synchronized PregenerationState getState() {
+        return this.state;
+    }
+
+    public synchronized PregenerationRequest getActiveRequest() {
+        return this.activeRequest;
+    }
+
+    public synchronized float getProgress() {
+        return this.progress;
     }
 
     public synchronized void startPregeneration(PregenerationRequest request) {
@@ -69,16 +80,18 @@ public final class PregenerationController {
         this.resetState();
     }
 
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
         return this.state == PregenerationState.RUNNING;
     }
 
-    public boolean isCompleted() {
+    public synchronized boolean isCompleted() {
         return this.state == PregenerationState.COMPLETED;
     }
 
     private synchronized void handleProgress(GenerationProgressEvent event) {
-        if (!this.isActiveWorld(event.world())) return;
+        if (!this.isActiveWorld(event.world())) {
+            return;
+        }
 
         if (Float.isFinite(event.progress())) {
             this.progress = Math.clamp(event.progress(), 0.0F, 100.0F);
@@ -90,8 +103,7 @@ public final class PregenerationController {
     }
 
     private synchronized void handleCompletion(GenerationCompleteEvent event) {
-        String worldName = event.world();
-        if (this.isActiveWorld(worldName)) {
+        if (this.isActiveWorld(event.world())) {
             this.complete();
         }
     }

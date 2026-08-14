@@ -1,11 +1,7 @@
 package io.github.pepe3012.hardlands.config.option;
 
-import lombok.Getter;
-
-import java.util.Objects;
 import java.util.function.Predicate;
 
-@Getter
 public final class Option<T> {
 
     private final String key;
@@ -28,7 +24,7 @@ public final class Option<T> {
     }
 
     public Option(String key, Class<T> valueType, Predicate<? super T> validator) {
-        this(key, valueType, OptionDataType.fromJavaType(valueType), validator);
+        this(key, valueType, resolveDataType(valueType), validator);
     }
 
     private Option(String key, Class<T> valueType, OptionDataType dataType, Predicate<? super T> validator) {
@@ -36,10 +32,42 @@ public final class Option<T> {
             throw new IllegalArgumentException("Option key cannot be blank");
         }
 
+        if (valueType == null) {
+            throw new IllegalArgumentException("Value type cannot be null");
+        }
+
+        if (dataType == null) {
+            throw new IllegalArgumentException("Data type cannot be null");
+        }
+
+        if (validator == null) {
+            throw new IllegalArgumentException("Validator cannot be null");
+        }
+
         this.key = key;
-        this.valueType = Objects.requireNonNull(valueType, "Value type cannot be null");
-        this.dataType = Objects.requireNonNull(dataType, "Data type cannot be null");
-        this.validator = Objects.requireNonNull(validator, "Validator cannot be null");
+        this.valueType = valueType;
+        this.dataType = dataType;
+        this.validator = validator;
+    }
+
+    public String getKey() {
+        return this.key;
+    }
+
+    public Class<T> getValueType() {
+        return this.valueType;
+    }
+
+    public OptionDataType getDataType() {
+        return this.dataType;
+    }
+
+    public Predicate<? super T> getValidator() {
+        return this.validator;
+    }
+
+    public T getValue() {
+        return this.value;
     }
 
     public void setValue(Object value) {
@@ -68,8 +96,18 @@ public final class Option<T> {
         this.value = null;
     }
 
+    private static OptionDataType resolveDataType(Class<?> valueType) {
+        if (valueType == null) {
+            throw new IllegalArgumentException("Value type cannot be null");
+        }
+
+        return OptionDataType.fromJavaType(valueType);
+    }
+
     private static <T> Class<T> resolveValueType(OptionDataType dataType) {
-        Objects.requireNonNull(dataType, "Data type cannot be null");
+        if (dataType == null) {
+            throw new IllegalArgumentException("Data type cannot be null");
+        }
 
         if (dataType == OptionDataType.CUSTOM) {
             throw new IllegalArgumentException("Custom options require an explicit Java type");

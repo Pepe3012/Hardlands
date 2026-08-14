@@ -1,23 +1,30 @@
 package io.github.pepe3012.hardlands.common.util.data;
 
-import lombok.Getter;
-
-/**
- * Mutable counter with a fixed maximum value.
- */
-@Getter
 public final class BoundedCounter {
 
     private final int limit;
     private int count;
 
     public BoundedCounter(int limit) {
-        if (limit < 0) throw new IllegalArgumentException("Limit cannot be negative");
+        if (limit < 0) {
+            throw new IllegalArgumentException("Limit cannot be negative");
+        }
+
         this.limit = limit;
     }
 
+    public int getLimit() {
+        return this.limit;
+    }
+
+    public int getCount() {
+        return this.count;
+    }
+
     public boolean tryAdvance() {
-        if (this.count >= this.limit) return false;
+        if (this.count >= this.limit) {
+            return false;
+        }
 
         this.count++;
         return true;

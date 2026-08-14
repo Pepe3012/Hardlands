@@ -1,6 +1,8 @@
 package io.github.pepe3012.hardlands.config.inventory;
 
-import lombok.Getter;
+import io.github.pepe3012.hardlands.common.item.ItemBuilder;
+import io.github.pepe3012.hardlands.common.item.inventory.InventoryItem;
+import io.github.pepe3012.hardlands.config.inventory.handler.InventoryHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -8,9 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import io.github.pepe3012.hardlands.common.item.inventory.InventoryItem;
-import io.github.pepe3012.hardlands.common.item.ItemBuilder;
-import io.github.pepe3012.hardlands.config.inventory.handler.InventoryHandler;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Map;
@@ -20,11 +20,11 @@ import java.util.function.Supplier;
 public enum InventoryDefinition {
 
     MAIN("Hardlands", Material.RED_STAINED_GLASS_PANE, new Layout("""
-        -------
-        -SPDWV-
-        ---T---
-        -------
-        """, Map.of(
+            -------
+            -SPDWV-
+            ---T---
+            -------
+            """, Map.of(
             'S', () -> InventoryItem.SCENARIOS,
             'P', () -> InventoryItem.PLAYERS,
             'D', () -> InventoryItem.DURATION,
@@ -40,13 +40,11 @@ public enum InventoryDefinition {
     TEMPLATES("Plantillas", Material.PURPLE_STAINED_GLASS_PANE, MAIN),
     VANILLA_CHANGES("Cambios de Vanilla", Material.LIME_STAINED_GLASS_PANE, MAIN);
 
-    private static final int COLUMNS = 9;
-
-    @Getter private final String title;
+    private final String title;
     private final Material outlineMaterial;
     private final Layout layout;
     private final InventoryHandler handler;
-    @Getter private final InventoryDefinition parent;
+    private final InventoryDefinition parent;
 
     InventoryDefinition(String title, Material outlineMaterial, InventoryDefinition parent) {
         this(title, outlineMaterial, Layout.BLANK, InventoryHandler.EMPTY, parent);
@@ -64,8 +62,21 @@ public enum InventoryDefinition {
         this.parent = parent;
     }
 
+    private static final int COLUMNS = 9;
+
+    public String getTitle() {
+        return this.title;
+    }
+
+    public InventoryDefinition getParent() {
+        return this.parent;
+    }
+
     Inventory createInventory() {
-        Inventory inventory = Bukkit.createInventory(new InventoryDefinitionHolder(this), this.layout.getInventorySize(), Component.text(this.title));
+        DefinitionHolder holder = new DefinitionHolder(this);
+        Inventory inventory = Bukkit.createInventory(holder, this.layout.getInventorySize(), Component.text(this.title));
+
+        holder.setInventory(inventory);
 
         this.renderFrame(inventory);
         this.layout.render(inventory);
@@ -77,9 +88,8 @@ public enum InventoryDefinition {
     public void openInventory(Player player) {
         Inventory inventory = InventoryRegistry.get(this);
 
-        if (player.openInventory(inventory) != null) {
-            this.handler.onOpen(inventory, player);
-        }
+        player.openInventory(inventory);
+        this.handler.onOpen(inventory, player);
     }
 
     public void openParent(Player player) {
@@ -89,9 +99,10 @@ public enum InventoryDefinition {
     }
 
     public static Optional<InventoryDefinition> find(Inventory inventory) {
-        return inventory.getHolder() instanceof InventoryDefinitionHolder holder
-                ? Optional.of(holder.getDefinition())
-                : Optional.empty();
+        if (inventory.getHolder() instanceof DefinitionHolder holder) {
+            return Optional.of(holder.getDefinition());
+        }
+        return Optional.empty();
     }
 
     void handleClose(Inventory inventory, Player player) {
@@ -103,13 +114,13 @@ public enum InventoryDefinition {
         ItemStack outline = new ItemBuilder(this.outlineMaterial).name("").build();
 
         for (int column = 1; column <= COLUMNS; column++) {
-            inventory.setItem(slot(1, column), outline.clone());
-            inventory.setItem(slot(rows, column), outline.clone());
+            inventory.setItem(slot(1, column), outline);
+            inventory.setItem(slot(rows, column), outline);
         }
 
         for (int row = 2; row < rows; row++) {
-            inventory.setItem(slot(row, 1), outline.clone());
-            inventory.setItem(slot(row, COLUMNS), outline.clone());
+            inventory.setItem(slot(row, 1), outline);
+            inventory.setItem(slot(row, COLUMNS), outline);
         }
 
         inventory.setItem(slot(rows, 4), InventoryItem.PREVIOUS.build());
@@ -121,37 +132,48 @@ public enum InventoryDefinition {
         return (row - 1) * COLUMNS + column - 1;
     }
 
-    private static class InventoryDefinitionHolder implements InventoryHolder {
+    private static final class DefinitionHolder implements InventoryHolder {
+
         private final InventoryDefinition definition;
 
-        private InventoryDefinitionHolder(InventoryDefinition definition) {
+        private Inventory inventory;
+
+        private DefinitionHolder(InventoryDefinition definition) {
             this.definition = definition;
         }
 
-        @Override
-        public Inventory getInventory() {
-            return null;
+        private InventoryDefinition getDefinition() {
+            return this.definition;
         }
 
-        public InventoryDefinition getDefinition() {
-            return this.definition;
+        private void setInventory(Inventory inventory) {
+            this.inventory = inventory;
+        }
+
+        @Override
+        public @NonNull Inventory getInventory() {
+            return this.inventory;
         }
     }
 
     private record Layout(List<String> rows, Map<Character, Supplier<InventoryItem>> items) {
 
-        private static final Layout BLANK = new Layout("""
-            -------
-            -------
-            -------
-            -------
-            """, Map.of());
-
         private static final char EMPTY = '-';
-        private static final int COLUMNS = 7;
+        private static final int CONTENT_COLUMNS = 7;
+        private static final Layout BLANK = new Layout("""
+                -------
+                -------
+                -------
+                -------
+                """, Map.of());
 
         private Layout(String layout, Map<Character, Supplier<InventoryItem>> items) {
             this(layout.strip().lines().toList(), items);
+            for (String row : this.rows) {
+                if (row.length() != CONTENT_COLUMNS) {
+                    throw new IllegalArgumentException("Layout rows must contain exactly " + CONTENT_COLUMNS + " columns");
+                }
+            }
         }
 
         private int getInventorySize() {
@@ -162,9 +184,12 @@ public enum InventoryDefinition {
             for (int row = 0; row < this.rows.size(); row++) {
                 String line = this.rows.get(row);
 
-                for (int column = 0; column < COLUMNS; column++) {
+                for (int column = 0; column < CONTENT_COLUMNS; column++) {
                     char symbol = line.charAt(column);
-                    if (symbol == EMPTY) continue;
+
+                    if (symbol == EMPTY) {
+                        continue;
+                    }
 
                     Supplier<InventoryItem> item = this.items.get(symbol);
 

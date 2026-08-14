@@ -76,7 +76,6 @@ final class PreparationInventoryItem {
     private static String progressBar(float progress) {
         int filled = Math.round(progress / MAX_PROGRESS * PROGRESS_BAR_LENGTH);
         int empty = PROGRESS_BAR_LENGTH - filled;
-
         return PROGRESS_FILLED.repeat(filled) + PROGRESS_EMPTY.repeat(empty);
     }
 

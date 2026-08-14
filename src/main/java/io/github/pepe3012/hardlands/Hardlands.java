@@ -5,6 +5,7 @@ import io.github.pepe3012.hardlands.config.inventory.InventoryListener;
 import io.github.pepe3012.hardlands.config.inventory.InventoryRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import io.github.pepe3012.hardlands.common.command.CommandInitializer;
@@ -30,8 +31,14 @@ public final class Hardlands extends JavaPlugin {
         setInstance(this);
 
         this.initializeSystems();
+
         this.initializeRepeatingTasks();
-        this.registerListeners();
+
+        this.registerListeners(
+                new InventoryListener(),
+                new PlayerListener()
+        );
+
         CommandInitializer.initialize(this);
 
         super.getLogger().info(System.lineSeparator() + """
@@ -61,19 +68,18 @@ public final class Hardlands extends JavaPlugin {
         InventoryRegistry.register(InventoryDefinition.values());
     }
 
-    private void registerListeners() {
-        PluginManager pluginManager = Bukkit.getPluginManager();
-
-        pluginManager.registerEvents(new InventoryListener(), this);
-        pluginManager.registerEvents(new PlayerListener(), this);
+    private void registerListeners(Listener... listeners) {
+        for (Listener listener : listeners) {
+            Bukkit.getPluginManager().registerEvents(listener, this);
+        }
     }
 
     private void initializeRepeatingTasks() {
         PlayerUpdateTask.initialize(this, 20L);
     }
 
-    public NamespacedKey namespacedKey(String key) {
-        return new NamespacedKey(this, key.toUpperCase());
+    public static NamespacedKey namespacedKey(String key) {
+        return new NamespacedKey(instance, key.toUpperCase());
     }
 
     private static ChunkyAPI requireChunkyApi() {

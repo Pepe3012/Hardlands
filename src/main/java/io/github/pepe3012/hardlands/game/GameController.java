@@ -1,8 +1,6 @@
 package io.github.pepe3012.hardlands.game;
 
-import lombok.Getter;
 import io.github.pepe3012.hardlands.Hardlands;
-import io.github.pepe3012.hardlands.common.util.formatter.TickConverter;
 import io.github.pepe3012.hardlands.config.option.Option;
 import io.github.pepe3012.hardlands.config.option.OptionHolder;
 import io.github.pepe3012.hardlands.config.option.OptionValidators;
@@ -18,18 +16,21 @@ public final class GameController extends OptionHolder {
     private final Hardlands plugin;
     private final GameTaskScheduler taskScheduler;
 
-    @Getter private GamePhase currentPhase = GamePhase.LOBBY;
+    private GamePhase currentPhase = GamePhase.LOBBY;
 
-    public GameController(final Hardlands plugin) {
+    public GameController(Hardlands plugin) {
         this.plugin = plugin;
         this.taskScheduler = new GameTaskScheduler(plugin);
+    }
+
+    public GamePhase getCurrentPhase() {
+        return this.currentPhase;
     }
 
     public void startGame() {
         if (this.currentPhase != GamePhase.LOBBY) {
             throw new IllegalStateException("The game cannot start from the " + this.currentPhase.getDisplayName() + " phase");
         }
-
 
         if (!this.plugin.getWorldManager().isPregenerationCompleted()) {
             throw new IllegalStateException("World pregeneration has not been completed");
@@ -93,19 +94,23 @@ public final class GameController extends OptionHolder {
     }
 
     public boolean isConfigurationValid() {
-        return super.areOptionsValid()
-                && this.plugin.getWorldManager().isBorderConfigurationValid()
+        if (!super.areOptionsValid()) {
+            return false;
+        }
+
+        return this.plugin.getWorldManager().isBorderConfigurationValid()
                 && this.pactDurationOption.getValue() <= this.survivalDurationOption.getValue();
     }
 
     public List<String> getConfigurationOptionKeys() {
-        return super.getRegisteredOptions().keySet().stream().toList();
+        return List.copyOf(super.getRegisteredOptions().keySet());
     }
 
     private void startMeetup() {
         this.currentPhase = GamePhase.MEETUP;
 
         MeetupDuration duration = this.meetupDurationOption.getValue();
+
         if (!duration.isInfinite()) {
             this.schedulePhaseAdvance(duration.ticks());
         }
@@ -143,12 +148,14 @@ public final class GameController extends OptionHolder {
 
         public static final MeetupDuration INFINITE = new MeetupDuration(-1);
 
-        public static MeetupDuration ofMinutes(int minutes) {
-            return new MeetupDuration(TickConverter.minutesToTicks(minutes));
+        public MeetupDuration {
+            if (ticks < -1) {
+                throw new IllegalArgumentException("Meetup duration cannot be less than -1");
+            }
         }
 
         public boolean isInfinite() {
-            return this.equals(INFINITE);
+            return this.ticks == INFINITE.ticks;
         }
     }
 }

@@ -1,6 +1,5 @@
 package io.github.pepe3012.hardlands.world;
 
-import lombok.Getter;
 import io.github.pepe3012.hardlands.world.border.WorldBorderController;
 import io.github.pepe3012.hardlands.world.pregen.PregenerationController;
 import io.github.pepe3012.hardlands.world.pregen.PregenerationRequest;
@@ -8,12 +7,20 @@ import org.popcraft.chunky.api.ChunkyAPI;
 
 public final class WorldManager {
 
-    @Getter private final PregenerationController pregenerationController;
-    @Getter private final WorldBorderController borderController;
+    private final PregenerationController pregenerationController;
+    private final WorldBorderController borderController;
 
-    public WorldManager(final ChunkyAPI chunkyApi) {
-        this.pregenerationController = new PregenerationController(chunkyApi);
+    public WorldManager(ChunkyAPI chunky) {
+        this.pregenerationController = new PregenerationController(chunky);
         this.borderController = new WorldBorderController();
+    }
+
+    public PregenerationController getPregenerationController() {
+        return this.pregenerationController;
+    }
+
+    public WorldBorderController getBorderController() {
+        return this.borderController;
     }
 
     public void initializeSurvivalBorder() {
@@ -37,11 +44,6 @@ public final class WorldManager {
                 new PregenerationRequest("world", 0, 0, 3000)
         );
     }
-
-//    public void startPregeneration() {
-//        BorderRegion region = this.borderController.getSurvivalRegion();
-//        this.pregenerationController.startPregeneration(new PregenerationRequest(region.worldName(), region.centerX(), region.centerZ(), region.radius()));
-//    }
 
     public void cancelPregeneration() {
         this.pregenerationController.cancelPregeneration();
