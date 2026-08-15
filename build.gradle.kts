@@ -3,7 +3,6 @@ plugins {
     kotlin("jvm")
 
     alias(libs.plugins.run.paper)
-    alias(libs.plugins.lombok)
     alias(libs.plugins.shadow)
 }
 
@@ -17,26 +16,12 @@ repositories {
 dependencies {
     compileOnly(libs.paper.api)
     compileOnly(libs.chunky.common)
-
     implementation(libs.acf.paper)
-
-    constraints {
-        compileOnly(libs.commons.lang3) {
-            because("Fixes CVE-2025-48924")
-        }
-
-        compileOnly(libs.plexus.utils) {
-            because("Fixes CVE-2025-67030")
-        }
-    }
+    compileOnly("com.google.code.gson:gson:2.14.0")
 }
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
-}
-
-lombok {
-    version = libs.versions.lombok.get()
 }
 
 tasks {
@@ -46,9 +31,8 @@ tasks {
 
     shadowJar {
         archiveClassifier.set("")
-
-        relocate("co.aikar.commands", "com.hardlands.libs.acf.commands")
-        relocate("co.aikar.locales", "com.hardlands.libs.acf.locales")
+        relocate("co.aikar.commands", "io.github.pepe3012.hardlands.libs.acf.commands")
+        relocate("co.aikar.locales", "io.github.pepe3012.hardlands.libs.acf.locales")
     }
 
     assemble {
@@ -62,9 +46,7 @@ tasks {
 
     processResources {
         val props = mapOf("version" to version)
-
         inputs.properties(props)
-
         filesMatching("paper-plugin.yml") {
             expand(props)
         }
