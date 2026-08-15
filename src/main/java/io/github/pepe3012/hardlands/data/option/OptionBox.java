@@ -12,55 +12,70 @@ import java.util.function.Predicate;
 
 public final class OptionBox {
 
-    private final Map<String, Option<?>> options = new LinkedHashMap<>();
-    private final String key;
+    private static final String PROPERTY_IDENTIFIER = "identifier";
+    private static final String PROPERTY_OPTIONS = "options";
 
-    public OptionBox(String key) {
-        this.key = key;
+    private final Map<String, Option<?>> options = new LinkedHashMap<>();
+    private final String identifier;
+
+    public OptionBox(String identifier) {
+        this.identifier = identifier;
     }
 
-    public <T> Option<T> createOption(String key, OptionDataType dataType) {
+    public <T> Option<T> place(String key, OptionDataType dataType) {
         return this.registerOption(new Option<>(key, dataType));
     }
 
-    public <T> Option<T> createOption(String key, OptionDataType dataType, Predicate<? super T> validator) {
+    public <T> Option<T> place(String key, OptionDataType dataType, Predicate<? super T> validator) {
         return this.registerOption(new Option<>(key, dataType, validator));
     }
 
-    public <T> Option<T> createOption(String key, Class<T> valueType) {
+    public <T> Option<T> place(String key, Class<T> valueType) {
         return this.registerOption(new Option<>(key, valueType));
     }
 
-    public <T> Option<T> createOption(String key, Class<T> valueType, Predicate<? super T> validator) {
+    public <T> Option<T> place(String key, Class<T> valueType, Predicate<? super T> validator) {
         return this.registerOption(new Option<>(key, valueType, validator));
     }
 
-    public Option<Double> createOption(String key, DoublePredicate validator) {
-        return this.registerOption(new Option<>(key, OptionDataType.DOUBLE, validator::test));
+    public Option<Double> place(String key, DoublePredicate validator) {
+        return this.place(key, OptionDataType.DOUBLE, validator::test);
     }
 
-    public Option<Integer> createOption(String key, IntPredicate validator) {
-        return this.registerOption(new Option<>(key, OptionDataType.INTEGER, validator::test));
+    public Option<Integer> place(String key, IntPredicate validator) {
+        return this.place(key, OptionDataType.INTEGER, validator::test);
     }
 
-    public Option<Long> createOption(String key, LongPredicate validator) {
-        return this.registerOption(new Option<>(key, OptionDataType.LONG, validator::test));
+    public Option<Long> place(String key, LongPredicate validator) {
+        return this.place(key, OptionDataType.LONG, validator::test);
     }
 
-    public <T> Option<List<T>> createListOption(String key) {
-        return this.registerOption(new Option<>(key, OptionDataType.LIST));
+    public <T> Option<List<T>> placeList(String key) {
+        return this.place(key, OptionDataType.LIST);
     }
 
-    public <T> Option<Set<T>> createSetOption(String key) {
-        return this.registerOption(new Option<>(key, OptionDataType.SET));
+    public <T> Option<List<T>> placeList(String key, Predicate<? super List<T>> validator) {
+        return this.place(key, OptionDataType.LIST, validator);
     }
 
-    public <K, V> Option<Map<K, V>> createMapOption(String key) {
-        return this.registerOption(new Option<>(key, OptionDataType.MAP));
+    public <T> Option<Set<T>> placeSet(String key) {
+        return this.place(key, OptionDataType.SET);
     }
 
-    public String getKey() {
-        return this.key;
+    public <T> Option<Set<T>> placeSet(String key, Predicate<? super Set<T>> validator) {
+        return this.place(key, OptionDataType.SET, validator);
+    }
+
+    public <K, V> Option<Map<K, V>> placeMap(String key) {
+        return this.place(key, OptionDataType.MAP);
+    }
+
+    public <K, V> Option<Map<K, V>> placeMap(String key, Predicate<? super Map<K, V>> validator) {
+        return this.place(key, OptionDataType.MAP, validator);
+    }
+
+    public String getIdentifier() {
+        return this.identifier;
     }
 
     public @Nullable Option<?> getOption(String key) {
@@ -75,7 +90,7 @@ public final class OptionBox {
         return this.options.containsKey(key);
     }
 
-    public boolean isValid() {
+    public boolean validate() {
         return this.options.values().stream().allMatch(Option::isValid);
     }
 
@@ -91,17 +106,9 @@ public final class OptionBox {
 
     public String serialize() {
         JsonObject root = new JsonObject();
-        JsonObject values = new JsonObject();
 
-        root.addProperty("key", this.key);
-
-        this.options.forEach((key, option) -> {
-            if (option.hasValue()) {
-                values.add(key, Hardlands.GSON.toJsonTree(option.getValue()));
-            }
-        });
-
-        root.add("options", values);
+        root.addProperty(PROPERTY_IDENTIFIER, this.identifier);
+        root.add(PROPERTY_OPTIONS, this.serializeOptions());
 
         return Hardlands.GSON.toJson(root);
     }
@@ -109,39 +116,31 @@ public final class OptionBox {
     public void deserialize(String json) {
         JsonObject root = Hardlands.GSON.fromJson(json, JsonObject.class);
 
-        if (root == null || !root.has("options")) {
-            throw new IllegalArgumentException("Invalid option box JSON");
+        if (!this.identifier.equals(root.get(PROPERTY_IDENTIFIER).getAsString())) {
+            throw new IllegalArgumentException("Option box identifier does not match: " + this.identifier);
         }
 
-        if (root.has("key") && !this.key.equals(root.get("key").getAsString())) {
-            throw new IllegalArgumentException(
-                    "Expected option box '" + this.key + "' but received '" + root.get("key").getAsString() + "'"
-            );
-        }
+        this.deserializeOptions(root.getAsJsonObject(PROPERTY_OPTIONS));
+    }
 
-        JsonObject values = root.getAsJsonObject("options");
+    private JsonObject serializeOptions() {
+        JsonObject values = new JsonObject();
 
-        values.entrySet().forEach(entry -> {
-            Option<?> option = this.options.get(entry.getKey());
+        this.options.values().stream()
+                .filter(Option::hasValue)
+                .forEach(option -> values.add(option.getKey(), Hardlands.GSON.toJsonTree(option.getValue())));
 
-            if (option == null) {
-                return;
-            }
+        return values;
+    }
 
-            Object value = Hardlands.GSON.fromJson(
-                    entry.getValue(),
-                    option.getValueType()
-            );
-
-            option.setValue(value);
-        });
+    private void deserializeOptions(JsonObject values) {
+        values.entrySet().forEach(entry -> Optional.ofNullable(this.options.get(entry.getKey()))
+                .ifPresent(option -> option.setValue(Hardlands.GSON.fromJson(entry.getValue(), option.getValueType()))));
     }
 
     private <T> Option<T> registerOption(Option<T> option) {
         if (this.options.putIfAbsent(option.getKey(), option) != null) {
-            throw new IllegalArgumentException(
-                    "Option already registered: " + option.getKey()
-            );
+            throw new IllegalArgumentException("Option already registered: " + option.getKey());
         }
 
         return option;

@@ -1,6 +1,7 @@
 package io.github.pepe3012.hardlands.world;
 
 import io.github.pepe3012.hardlands.data.option.Option;
+import io.github.pepe3012.hardlands.data.option.OptionBox;
 import io.github.pepe3012.hardlands.data.option.OptionDataType;
 import io.github.pepe3012.hardlands.data.option.OptionValidators;
 import org.bukkit.Bukkit;
@@ -10,16 +11,17 @@ import org.popcraft.chunky.api.ChunkyAPI;
 import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
 import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
 
-public final class WorldManager extends OptionHolder {
+public final class WorldManager {
 
-    private final Option<String> worldName = super.createOption("world", OptionDataType.STRING);
-    private final Option<Double> centerX = super.createOption("center-x", OptionDataType.DOUBLE);
-    private final Option<Double> centerZ = super.createOption("center-z", OptionDataType.DOUBLE);
-    private final Option<Integer> survivalBorderSize = super.createOption("survival-border-size", OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupBorderSize = super.createOption("meetup-border-size", OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> deathmatchBorderSize = super.createOption("deathmatch-border-size", OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupShrinkDuration = super.createOption("meetup-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
-    private final Option<Integer> deathmatchShrinkDuration = super.createOption("deathmatch-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
+    private final OptionBox box = new OptionBox("world");
+    private final Option<String> worldName = this.box.place("worldManager-name", OptionDataType.STRING);
+    private final Option<Double> centerX = this.box.place("center-x", OptionDataType.DOUBLE);
+    private final Option<Double> centerZ = this.box.place("center-z", OptionDataType.DOUBLE);
+    private final Option<Integer> survivalBorderSize = this.box.place("survival-border-size", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> meetupBorderSize = this.box.place("meetup-border-size", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> deathmatchBorderSize = this.box.place("deathmatch-border-size", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> meetupShrinkDuration = this.box.place("meetup-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
+    private final Option<Integer> deathmatchShrinkDuration = this.box.place("deathmatch-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
 
     private final ChunkyAPI chunky;
 
@@ -34,7 +36,7 @@ public final class WorldManager extends OptionHolder {
     }
 
     public boolean validate() {
-        if (!super.areOptionsValid()) {
+        if (!this.box.validate()) {
             return false;
         }
 
@@ -65,24 +67,18 @@ public final class WorldManager extends OptionHolder {
             throw new IllegalStateException("Pregeneration is not running");
         }
 
-        if (!this.chunky.cancelTask(this.worldName.getValue())) {
+        String worldName = this.worldName.getValue();
+
+        if (!this.chunky.cancelTask(worldName)) {
             throw new IllegalStateException("Failed to pause pregeneration for " + worldName);
         }
 
         this.pregenerationState = PregenerationState.PAUSED;
     }
 
-    private synchronized void onGenerationProgress(GenerationProgressEvent event) {
-        this.pregenerationProgress = event.progress();
-    }
-
-    private synchronized void onGenerationComplete(GenerationCompleteEvent event) {
-        this.pregenerationProgress = 100.0F;
-        this.pregenerationState = PregenerationState.COMPLETED;
-    }
-
     public void shrinkBorderForSurvival() {
         WorldBorder border = this.getWorld().getWorldBorder();
+
         border.setCenter(this.centerX.getValue(), this.centerZ.getValue());
         border.setSize(this.survivalBorderSize.getValue());
     }
@@ -115,6 +111,23 @@ public final class WorldManager extends OptionHolder {
 
     public synchronized boolean isPregenerationCompleted() {
         return this.pregenerationState == PregenerationState.COMPLETED;
+    }
+
+    public String serializeOptions() {
+        return this.box.serialize();
+    }
+
+    public void deserializeOptions(String json) {
+        this.box.deserialize(json);
+    }
+
+    private synchronized void onGenerationProgress(GenerationProgressEvent event) {
+        this.pregenerationProgress = event.progress();
+    }
+
+    private synchronized void onGenerationComplete(GenerationCompleteEvent event) {
+        this.pregenerationProgress = 100.0F;
+        this.pregenerationState = PregenerationState.COMPLETED;
     }
 
     private PregenerationRequest createPregenerationRequest() {

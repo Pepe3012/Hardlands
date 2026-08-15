@@ -5,10 +5,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.pepe3012.hardlands.common.command.HardlandsCommand;
 import io.github.pepe3012.hardlands.common.player.PlayerListener;
+import io.github.pepe3012.hardlands.data.HardlandsData;
 import io.github.pepe3012.hardlands.inventory.InventoryDefinition;
 import io.github.pepe3012.hardlands.inventory.InventoryListener;
 import io.github.pepe3012.hardlands.inventory.InventoryRegistry;
-import io.github.pepe3012.hardlands.game.GameManager;
 import io.github.pepe3012.hardlands.scenario.ScenarioDefinition;
 import io.github.pepe3012.hardlands.scenario.ScenarioManager;
 import io.github.pepe3012.hardlands.world.WorldManager;
@@ -24,7 +24,6 @@ public final class Hardlands extends JavaPlugin {
 
     private static Hardlands instance;
 
-    private GameManager gameManager;
     private ScenarioManager scenarioManager;
     private WorldManager worldManager;
 
@@ -42,19 +41,26 @@ public final class Hardlands extends JavaPlugin {
 
         new PaperCommandManager(this).registerCommand(new HardlandsCommand());
 
+        HardlandsData.deserialize(this);
+
         super.getLogger().info(System.lineSeparator() + """
-          _    _          _____  _____  _               _   _ _____   _____
-         | |  | |   /\\   |  __ \\|  __ \\| |        /\\   | \\ | |  __ \\ / ____|
-         | |__| |  /  \\  | |__) | |  | | |       /  \\  |  \\| | |  | | (___
-         |  __  | / /\\ \\ |  _  /| |  | | |      / /\\ \\ | . ` | |  | |\\___ \\
-         | |  | |/ ____ \\| | \\ \\| |__| | |____ / ____ \\| |\\  | |__| |____) |
-         |_|  |_/_/    \\_\\_|  \\_\\_____/|______/_/    \\_\\_| \\_|_____/|_____/
-        """);
+      _    _          _____  _____  _               _   _ _____   _____
+     | |  | |   /\\   |  __ \\|  __ \\| |        /\\   | \\ | |  __ \\ / ____|
+     | |__| |  /  \\  | |__) | |  | | |       /  \\  |  \\| | |  | | (___
+     |  __  | / /\\ \\ |  _  /| |  | | |      / /\\ \\ | . ` | |  | |\\___ \\
+     | |  | |/ ____ \\| | \\ \\| |__| | |____ / ____ \\| |\\  | |__| |____) |
+     |_|  |_/_/    \\_\\_|  \\_\\_____/|______/_/    \\_\\_| \\_|_____/|_____/
+    """);
+
         super.getLogger().info("Hardlands has been enabled.");
     }
 
     @Override
     public void onDisable() {
+        super.getLogger().info("Disabling Hardlands Plugin...");
+
+        HardlandsData.serialize(this);
+
         super.getLogger().info("Hardlands has been disabled.");
     }
 
@@ -62,7 +68,7 @@ public final class Hardlands extends JavaPlugin {
         this.scenarioManager = new ScenarioManager(this);
         this.scenarioManager.registerScenarios(ScenarioDefinition.values());
 
-        this.gameManager = new GameManager(this);
+        //this.gameManager = new GameManager(this);
 
         this.worldManager = new WorldManager(requireChunkyApi());
 
@@ -87,14 +93,6 @@ public final class Hardlands extends JavaPlugin {
         }
 
         return chunkyApi;
-    }
-
-    public GameManager getGameController() {
-        return this.gameManager;
-    }
-
-    public ScenarioManager getScenarioManager() {
-        return this.scenarioManager;
     }
 
     public WorldManager getWorldManager() {
