@@ -2,12 +2,7 @@ package io.github.pepe3012.hardlands.scenario;
 
 import org.bukkit.plugin.Plugin;
 
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public final class ScenarioManager {
 
@@ -15,7 +10,7 @@ public final class ScenarioManager {
     private final Set<ScenarioDefinition> activeScenarios = EnumSet.noneOf(ScenarioDefinition.class);
     private final Plugin plugin;
 
-    public ScenarioManager(Plugin plugin) {
+    public ScenarioManager(final Plugin plugin) {
         this.plugin = plugin;
     }
 

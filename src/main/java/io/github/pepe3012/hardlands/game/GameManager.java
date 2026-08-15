@@ -7,20 +7,20 @@ import io.github.pepe3012.hardlands.config.option.OptionValidators;
 
 import java.util.List;
 
-public final class GameController extends OptionHolder {
+public final class GameManager extends OptionHolder {
 
-    private final Option<Integer> pactDurationOption = super.createOption("pact-duration", OptionValidators.Integers.NON_NEGATIVE);
+    private final Option<Integer> gracePeriodOption = super.createOption("grace-period", OptionValidators.Integers.NON_NEGATIVE);
     private final Option<Integer> survivalDurationOption = super.createOption("survival-duration", OptionValidators.Integers.POSITIVE);
     private final Option<MeetupDuration> meetupDurationOption = super.createOption("meetup-duration", MeetupDuration.class);
 
     private final Hardlands plugin;
-    private final GameTaskScheduler taskScheduler;
+    private final GameTaskScheduler scheduler;
 
-    private GamePhase currentPhase = GamePhase.LOBBY;
+    private GamePhase currentPhase = GamePhase.IDLE;
 
-    public GameController(Hardlands plugin) {
+    public GameManager(Hardlands plugin) {
         this.plugin = plugin;
-        this.taskScheduler = new GameTaskScheduler(plugin);
+        this.scheduler = new GameTaskScheduler(plugin);
     }
 
     public GamePhase getCurrentPhase() {
@@ -28,7 +28,7 @@ public final class GameController extends OptionHolder {
     }
 
     public void startGame() {
-        if (this.currentPhase != GamePhase.LOBBY) {
+        if (this.currentPhase != GamePhase.IDLE) {
             throw new IllegalStateException("The game cannot start from the " + this.currentPhase.getDisplayName() + " phase");
         }
 
@@ -38,8 +38,8 @@ public final class GameController extends OptionHolder {
 
         this.requireValidConfiguration();
 
-        this.plugin.getWorldManager().initializeSurvivalBorder();
-        this.startPhase(GamePhase.SURVIVAL_GRACE_PERIOD, this.pactDurationOption.getValue());
+        this.plugin.getWorldManager().handleBorderForSurvival();
+        this.startPhase(GamePhase.GRACE_PERIOD, this.gracePeriodOption.getValue());
     }
 
     public void stopGame() {
@@ -55,9 +55,9 @@ public final class GameController extends OptionHolder {
             throw new IllegalStateException("The game cannot be reset while running");
         }
 
-        this.taskScheduler.cancelScheduledTask();
+        this.scheduler.cancelScheduledTask();
         this.plugin.getWorldManager().resetPregeneration();
-        this.currentPhase = GamePhase.LOBBY;
+        this.currentPhase = GamePhase.IDLE;
     }
 
     public void advanceGamePhase() {
@@ -65,18 +65,18 @@ public final class GameController extends OptionHolder {
             throw new IllegalStateException("The " + this.currentPhase.getDisplayName() + " phase cannot be advanced");
         }
 
-        this.taskScheduler.cancelScheduledTask();
+        this.scheduler.cancelScheduledTask();
 
         switch (this.currentPhase) {
-            case SURVIVAL_GRACE_PERIOD -> this.startPhase(GamePhase.SURVIVAL_PVP, (long) this.survivalDurationOption.getValue() - this.pactDurationOption.getValue());
+            case GRACE_PERIOD -> this.startPhase(GamePhase.PVE, (long) this.survivalDurationOption.getValue() - this.gracePeriodOption.getValue());
 
-            case SURVIVAL_PVP -> this.startPhase(GamePhase.BORDER_SHRINK, this.plugin.getWorldManager().shrinkBorderForMeetup());
+            case PVE -> this.startPhase(GamePhase.BORDER_SHRINK, this.plugin.getWorldManager().handleBorderForMeetup());
 
             case BORDER_SHRINK -> this.startMeetup();
 
             case MEETUP -> {
                 this.currentPhase = GamePhase.DEATHMATCH;
-                this.plugin.getWorldManager().shrinkBorderForDeathmatch();
+                this.plugin.getWorldManager().handleBorderForDeathmatch();
             }
 
             case DEATHMATCH -> this.finishGame();
@@ -99,7 +99,7 @@ public final class GameController extends OptionHolder {
         }
 
         return this.plugin.getWorldManager().isBorderConfigurationValid()
-                && this.pactDurationOption.getValue() <= this.survivalDurationOption.getValue();
+                && this.gracePeriodOption.getValue() <= this.survivalDurationOption.getValue();
     }
 
     public List<String> getConfigurationOptionKeys() {
@@ -122,12 +122,12 @@ public final class GameController extends OptionHolder {
     }
 
     private void finishGame() {
-        this.taskScheduler.cancelScheduledTask();
+        this.scheduler.cancelScheduledTask();
         this.currentPhase = GamePhase.FINISHED;
     }
 
     private void schedulePhaseAdvance(long delay) {
-        this.taskScheduler.scheduleTask(this::advanceGamePhase, delay);
+        this.scheduler.scheduleTask(this::advanceGamePhase, delay);
     }
 
     private void requireValidConfiguration() {
@@ -139,7 +139,7 @@ public final class GameController extends OptionHolder {
             throw new IllegalStateException("The world border configuration is invalid");
         }
 
-        if (this.pactDurationOption.getValue() > this.survivalDurationOption.getValue()) {
+        if (this.gracePeriodOption.getValue() > this.survivalDurationOption.getValue()) {
             throw new IllegalStateException("Pact duration cannot exceed survival duration");
         }
     }

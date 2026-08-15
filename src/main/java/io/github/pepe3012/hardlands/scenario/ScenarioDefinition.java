@@ -2,59 +2,42 @@ package io.github.pepe3012.hardlands.scenario;
 
 import io.github.pepe3012.hardlands.common.item.inventory.InventoryDisplay;
 import io.github.pepe3012.hardlands.common.item.inventory.InventoryItem;
-import io.github.pepe3012.hardlands.scenario.modules.AppleGroveScenario;
-import io.github.pepe3012.hardlands.scenario.modules.BonanzaScenario;
-import io.github.pepe3012.hardlands.scenario.modules.CutCleanScenario;
-import io.github.pepe3012.hardlands.scenario.modules.HastyBoysScenario;
-import io.github.pepe3012.hardlands.scenario.modules.TimberScenario;
-import io.github.pepe3012.hardlands.scenario.modules.VeinMinerScenario;
+import io.github.pepe3012.hardlands.scenario.modules.*;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public enum ScenarioDefinition {
 
-    CUT_CLEAN("cut_clean", "Cut Clean", CutCleanScenario::new,
-            InventoryItem.display(Material.FURNACE, "Funde automáticamente los minerales y cocina los alimentos obtenidos.")),
-    TIMBER("timber", "Timber", TimberScenario::new,
-            InventoryItem.display(Material.IRON_AXE, "Tala árboles completos al romper uno de sus troncos con un hacha.")),
-    APPLE_GROVE("apple_grove", "Apple Grove", AppleGroveScenario::new,
-            InventoryItem.display(Material.GOLDEN_APPLE, "Aumenta la obtención de manzanas y permite convertirlas en doradas o encantadas al romper hojas.")),
-    VEIN_MINER("vein_miner", "Vein Miner", VeinMinerScenario::new,
-            InventoryItem.display(Material.COAL_ORE, "Extrae vetas completas de minerales al romper uno de sus bloques.")),
-    HASTY_BOYS("hasty_boys", "Hasty Boys", HastyBoysScenario::new,
-            InventoryItem.display(Material.DIAMOND_PICKAXE, "Aplica automáticamente Eficiencia e Irrompibilidad a las herramientas configuradas.")),
-    BONANZA("bonanza", "Bonanza", BonanzaScenario::new,
-            InventoryItem.display(Material.GOLD_ORE, "Multiplica la cantidad de recursos obtenidos al extraer minerales."));
+    APPLE_GROVE("Apple Grove", AppleGroveScenario::new,
+            InventoryItem.display(Material.GOLDEN_APPLE, "Aumenta la obtención de manzanas y permite conseguir variantes doradas o encantadas.")),
 
-    public static final List<String> IDENTIFIERS = Stream.of(values()).map(ScenarioDefinition::getIdentifier).toList();
-    private static final Map<String, ScenarioDefinition> BY_IDENTIFIER = Stream.of(values()).collect(Collectors.toUnmodifiableMap(ScenarioDefinition::getIdentifier, definition -> definition));
+    BONANZA("Bonanza", BonanzaScenario::new,
+            InventoryItem.display(Material.GOLD_ORE, "Multiplica los recursos obtenidos al extraer minerales.")),
 
-    private final String identifier;
+    // BERSERK("berserk", "Berserk", BerserkScenario::new, InventoryItem.display(Material.IRON_SWORD, "Otorga Regeneración IV, Fuerza I y Velocidad II durante 20 segundos al eliminar a un jugador.")),
+    // FINAL_HEAL("final_heal", "Final Heal", FinalHealScenario::new, InventoryItem.display(Material.GLISTERING_MELON_SLICE, "Restaura completamente la salud de todos los jugadores en el momento configurado.")),
+    // FIREPROOF("fireproof", "Fireproof", FireproofScenario::new, InventoryItem.display(Material.MAGMA_CREAM, "Protege los objetos soltados del fuego y la lava.")),
+    // HEART_HUNTER("heart_hunter", "Heart Hunter", HeartHunterScenario::new, InventoryItem.display(Material.REDSTONE, "Aumenta la vida máxima al descubrir mobs, completar logros y eliminar jugadores.")),
+    // LIMITLESS("limitless", "Limitless", LimitlessScenario::new, InventoryItem.display(Material.ENCHANTED_BOOK, "Elimina el límite de encantamientos.")),
+    // MAGIC_MAN("magic_man", "Magic Man", MagicManScenario::new, InventoryItem.display(Material.ENCHANTING_TABLE, "Aplica los encantamientos configurados a sus herramientas respectivas sin reemplazar niveles superiores.")),
+    // PERFECT_GAME("perfect_game", "Perfect Game", PerfectGameScenario::new, InventoryItem.display(Material.CLOCK, "Recompensa periódicamente a los jugadores que no reciben daño.")),
+    // PLAYER_RADAR("player_radar", "Player Radar", PlayerRadarScenario::new, InventoryItem.display(Material.COMPASS, "Activa la barra de ubicación.")),
+    // STARTER_ITEMS("starter_items", "Starter Items", StarterItemsScenario::new, InventoryItem.display(Material.BUNDLE, "Otorga los objetos configurados al unirse al mundo por primera vez.")),
+    // TOMB_BOMB("tomb_bomb", "Tomb Bomb", TombBombScenario::new, InventoryItem.display(Material.TNT, "Guarda el inventario de los jugadores eliminados en un cofre que explota después de unos segundos."));
+
+    ;
+
     private final String displayName;
     private final Supplier<ScenarioModule> moduleFactory;
     private final InventoryDisplay display;
 
-    ScenarioDefinition(String identifier, String displayName, Supplier<ScenarioModule> moduleFactory, InventoryDisplay display) {
-        this.identifier = identifier;
+    ScenarioDefinition(String displayName, Supplier<ScenarioModule> moduleFactory, InventoryDisplay display) {
         this.displayName = displayName;
         this.moduleFactory = moduleFactory;
         this.display = display;
-    }
-
-    public String getIdentifier() {
-        return this.identifier;
-    }
-
-    public String getDisplayName() {
-        return this.displayName;
     }
 
     public ScenarioModule createModule() {
@@ -65,11 +48,11 @@ public enum ScenarioDefinition {
         return this.display.build("<yellow>" + this.displayName);
     }
 
-    public static Optional<ScenarioDefinition> findByIdentifier(String identifier) {
-        if (identifier == null) {
-            return Optional.empty();
-        }
+    public String getDisplayName() {
+        return this.displayName;
+    }
 
-        return Optional.ofNullable(BY_IDENTIFIER.get(identifier.toLowerCase(Locale.ROOT)));
+    public String getIdentifier() {
+        return this.name().toLowerCase(Locale.ROOT);
     }
 }

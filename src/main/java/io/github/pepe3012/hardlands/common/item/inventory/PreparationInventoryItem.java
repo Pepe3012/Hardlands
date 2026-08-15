@@ -1,11 +1,10 @@
 package io.github.pepe3012.hardlands.common.item.inventory;
 
-import org.bukkit.inventory.ItemStack;
 import io.github.pepe3012.hardlands.Hardlands;
 import io.github.pepe3012.hardlands.common.item.ItemBuilder;
+import io.github.pepe3012.hardlands.world.PregenerationState;
 import io.github.pepe3012.hardlands.world.WorldManager;
-import io.github.pepe3012.hardlands.world.pregen.PregenerationController;
-import io.github.pepe3012.hardlands.world.pregen.PregenerationState;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Locale;
 
@@ -48,7 +47,7 @@ final class PreparationInventoryItem {
 
         switch (state) {
             case IDLE -> worldManager().startPregeneration();
-            case RUNNING -> worldManager().cancelPregeneration();
+            case RUNNING -> worldManager().pausePregeneration();
             case COMPLETED -> {
                 // No action available once pregeneration is complete.
             }

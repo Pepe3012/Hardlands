@@ -1,27 +1,26 @@
 package io.github.pepe3012.hardlands;
 
+import co.aikar.commands.PaperCommandManager;
+import io.github.pepe3012.hardlands.common.command.HardlandsCommand;
+import io.github.pepe3012.hardlands.common.player.PlayerListener;
 import io.github.pepe3012.hardlands.config.inventory.InventoryDefinition;
 import io.github.pepe3012.hardlands.config.inventory.InventoryListener;
 import io.github.pepe3012.hardlands.config.inventory.InventoryRegistry;
-import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import io.github.pepe3012.hardlands.common.command.CommandInitializer;
-import io.github.pepe3012.hardlands.common.player.PlayerListener;
-import io.github.pepe3012.hardlands.common.task.PlayerUpdateTask;
-import io.github.pepe3012.hardlands.game.GameController;
+import io.github.pepe3012.hardlands.game.GameManager;
 import io.github.pepe3012.hardlands.scenario.ScenarioDefinition;
 import io.github.pepe3012.hardlands.scenario.ScenarioManager;
 import io.github.pepe3012.hardlands.world.WorldManager;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.popcraft.chunky.api.ChunkyAPI;
 
 public final class Hardlands extends JavaPlugin {
 
     private static Hardlands instance;
 
-    private GameController gameController;
+    private GameManager gameManager;
     private ScenarioManager scenarioManager;
     private WorldManager worldManager;
 
@@ -32,14 +31,12 @@ public final class Hardlands extends JavaPlugin {
 
         this.initializeSystems();
 
-        this.initializeRepeatingTasks();
-
         this.registerListeners(
                 new InventoryListener(),
                 new PlayerListener()
         );
 
-        CommandInitializer.initialize(this);
+        new PaperCommandManager(this).registerCommand(new HardlandsCommand());
 
         super.getLogger().info(System.lineSeparator() + """
           _    _          _____  _____  _               _   _ _____   _____
@@ -61,7 +58,7 @@ public final class Hardlands extends JavaPlugin {
         this.scenarioManager = new ScenarioManager(this);
         this.scenarioManager.registerScenarios(ScenarioDefinition.values());
 
-        this.gameController = new GameController(this);
+        this.gameManager = new GameManager(this);
 
         this.worldManager = new WorldManager(requireChunkyApi());
 
@@ -72,10 +69,6 @@ public final class Hardlands extends JavaPlugin {
         for (Listener listener : listeners) {
             Bukkit.getPluginManager().registerEvents(listener, this);
         }
-    }
-
-    private void initializeRepeatingTasks() {
-        PlayerUpdateTask.initialize(this, 20L);
     }
 
     public static NamespacedKey namespacedKey(String key) {
@@ -92,8 +85,8 @@ public final class Hardlands extends JavaPlugin {
         return chunkyApi;
     }
 
-    public GameController getGameController() {
-        return this.gameController;
+    public GameManager getGameController() {
+        return this.gameManager;
     }
 
     public ScenarioManager getScenarioManager() {

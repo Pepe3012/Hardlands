@@ -1,4 +1,4 @@
-package io.github.pepe3012.hardlands.world.pregen;
+package io.github.pepe3012.hardlands.world;
 
 import org.bukkit.Material;
 
@@ -6,6 +6,7 @@ public enum PregenerationState {
 
     IDLE("idle", "<gray>Sin iniciar", Material.BEDROCK),
     RUNNING("running", "<yellow>En progreso", Material.DIRT),
+    PAUSED("paused", "<gold>Pausado", Material.STONE),
     COMPLETED("completed", "<green>Completado", Material.GRASS_BLOCK);
 
     private final String key;
@@ -19,18 +20,14 @@ public enum PregenerationState {
     }
 
     public String getKey() {
-        return key;
+        return this.key;
     }
 
     public String getDisplayName() {
-        return displayName;
+        return this.displayName;
     }
 
     public Material getMaterial() {
-        return material;
-    }
-
-    public boolean isCompleted() {
-        return this == COMPLETED;
+        return this.material;
     }
 }

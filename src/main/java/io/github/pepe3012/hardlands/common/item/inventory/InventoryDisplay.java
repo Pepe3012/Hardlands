@@ -1,8 +1,8 @@
 package io.github.pepe3012.hardlands.common.item.inventory;
 
+import io.github.pepe3012.hardlands.common.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import io.github.pepe3012.hardlands.common.item.ItemBuilder;
 
 public record InventoryDisplay(Material material, String description) {
 

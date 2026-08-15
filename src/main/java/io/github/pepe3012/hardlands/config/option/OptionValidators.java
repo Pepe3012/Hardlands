@@ -41,12 +41,12 @@ public final class OptionValidators {
         private Collections() {}
 
         public static Predicate<Collection<?>> minSize(int minimum) {
-            requireNonNegative(minimum, "Minimum size");
+            requireNonNegative(minimum, "Minimum worldSize");
             return value -> value.size() >= minimum;
         }
 
         public static Predicate<Collection<?>> maxSize(int maximum) {
-            requireNonNegative(maximum, "Maximum size");
+            requireNonNegative(maximum, "Maximum worldSize");
             return value -> value.size() <= maximum;
         }
 
@@ -165,12 +165,12 @@ public final class OptionValidators {
         private Maps() {}
 
         public static Predicate<Map<?, ?>> minSize(int minimum) {
-            requireNonNegative(minimum, "Minimum size");
+            requireNonNegative(minimum, "Minimum worldSize");
             return value -> value.size() >= minimum;
         }
 
         public static Predicate<Map<?, ?>> maxSize(int maximum) {
-            requireNonNegative(maximum, "Maximum size");
+            requireNonNegative(maximum, "Maximum worldSize");
             return value -> value.size() <= maximum;
         }
 

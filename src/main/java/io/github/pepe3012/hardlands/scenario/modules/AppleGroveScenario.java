@@ -1,5 +1,9 @@
 package io.github.pepe3012.hardlands.scenario.modules;
 
+import io.github.pepe3012.hardlands.config.option.Option;
+import io.github.pepe3012.hardlands.config.option.OptionDataType;
+import io.github.pepe3012.hardlands.config.option.OptionValidators;
+import io.github.pepe3012.hardlands.scenario.ScenarioModule;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -8,19 +12,15 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.inventory.ItemStack;
-import io.github.pepe3012.hardlands.config.option.Option;
-import io.github.pepe3012.hardlands.config.option.OptionDataType;
-import io.github.pepe3012.hardlands.config.option.OptionValidators;
-import io.github.pepe3012.hardlands.scenario.ScenarioModule;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class AppleGroveScenario extends ScenarioModule {
 
-    private final Option<Boolean> allTreeTypesOption = super.createOption("all-tree-types", OptionDataType.BOOLEAN);
-    private final Option<Float> appleDropRateOption = super.createOption("apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
-    private final Option<Float> goldenAppleDropRateOption = super.createOption("golden-apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
-    private final Option<Float> enchantedGoldenAppleDropRateOption = super.createOption("enchanted-golden-apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
+    private final Option<Boolean> allTreeTypes = super.createOption("all-tree-types", OptionDataType.BOOLEAN);
+    private final Option<Float> appleDropRate = super.createOption("apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
+    private final Option<Float> goldenAppleDropRate = super.createOption("golden-apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
+    private final Option<Float> enchantedGoldenAppleDropRate = super.createOption("enchanted-golden-apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
 
     @EventHandler(ignoreCancelled = true)
     private void onLeavesDecay(LeavesDecayEvent event) {
@@ -44,9 +44,9 @@ public final class AppleGroveScenario extends ScenarioModule {
     }
 
     private Material rollAppleDrop() {
-        float enchantedRate = this.enchantedGoldenAppleDropRateOption.getValue();
-        float goldenRate = enchantedRate + this.goldenAppleDropRateOption.getValue();
-        float appleRate = goldenRate + this.appleDropRateOption.getValue();
+        float enchantedRate = this.enchantedGoldenAppleDropRate.getValue();
+        float goldenRate = enchantedRate + this.goldenAppleDropRate.getValue();
+        float appleRate = goldenRate + this.appleDropRate.getValue();
 
         float roll = ThreadLocalRandom.current().nextFloat();
         if (roll < enchantedRate) return Material.ENCHANTED_GOLDEN_APPLE;
@@ -57,6 +57,6 @@ public final class AppleGroveScenario extends ScenarioModule {
     }
 
     private boolean isEligibleLeaf(Material material) {
-        return Tag.LEAVES.isTagged(material) && (this.allTreeTypesOption.getValue() || material == Material.OAK_LEAVES);
+        return Tag.LEAVES.isTagged(material) && (this.allTreeTypes.getValue() || material == Material.OAK_LEAVES);
     }
 }
