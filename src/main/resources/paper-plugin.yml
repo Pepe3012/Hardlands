@@ -15,3 +15,5 @@ dependencies:
       load: BEFORE
       required: true
       join-classpath: true
+libraries:
+  - com.google.code.gson:gson:2.14.0

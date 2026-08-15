@@ -1,4 +1,4 @@
-package io.github.pepe3012.hardlands.config.inventory.handler;
+package io.github.pepe3012.hardlands.inventory.handler;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;

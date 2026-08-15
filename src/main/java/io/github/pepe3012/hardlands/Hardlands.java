@@ -1,11 +1,13 @@
 package io.github.pepe3012.hardlands;
 
 import co.aikar.commands.PaperCommandManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.github.pepe3012.hardlands.common.command.HardlandsCommand;
 import io.github.pepe3012.hardlands.common.player.PlayerListener;
-import io.github.pepe3012.hardlands.config.inventory.InventoryDefinition;
-import io.github.pepe3012.hardlands.config.inventory.InventoryListener;
-import io.github.pepe3012.hardlands.config.inventory.InventoryRegistry;
+import io.github.pepe3012.hardlands.inventory.InventoryDefinition;
+import io.github.pepe3012.hardlands.inventory.InventoryListener;
+import io.github.pepe3012.hardlands.inventory.InventoryRegistry;
 import io.github.pepe3012.hardlands.game.GameManager;
 import io.github.pepe3012.hardlands.scenario.ScenarioDefinition;
 import io.github.pepe3012.hardlands.scenario.ScenarioManager;
@@ -17,6 +19,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.popcraft.chunky.api.ChunkyAPI;
 
 public final class Hardlands extends JavaPlugin {
+
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private static Hardlands instance;
 

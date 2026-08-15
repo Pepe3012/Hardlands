@@ -1,6 +1,6 @@
-package io.github.pepe3012.hardlands.config.inventory;
+package io.github.pepe3012.hardlands.inventory;
 
-import io.github.pepe3012.hardlands.common.item.inventory.InventoryItem;
+import io.github.pepe3012.hardlands.common.item.InventoryItem;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

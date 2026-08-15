@@ -1,8 +1,8 @@
 package io.github.pepe3012.hardlands.scenario.modules;
 
-import io.github.pepe3012.hardlands.config.option.Option;
-import io.github.pepe3012.hardlands.config.option.OptionDataType;
-import io.github.pepe3012.hardlands.config.option.OptionValidators;
+import io.github.pepe3012.hardlands.data.option.Option;
+import io.github.pepe3012.hardlands.data.option.OptionDataType;
+import io.github.pepe3012.hardlands.data.option.OptionValidators;
 import io.github.pepe3012.hardlands.scenario.ScenarioModule;
 import org.bukkit.Material;
 import org.bukkit.Tag;

@@ -1,8 +1,8 @@
-package io.github.pepe3012.hardlands.config.inventory;
+package io.github.pepe3012.hardlands.inventory;
 
 import io.github.pepe3012.hardlands.common.item.ItemBuilder;
-import io.github.pepe3012.hardlands.common.item.inventory.InventoryItem;
-import io.github.pepe3012.hardlands.config.inventory.handler.InventoryHandler;
+import io.github.pepe3012.hardlands.common.item.InventoryItem;
+import io.github.pepe3012.hardlands.inventory.handler.InventoryHandler;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

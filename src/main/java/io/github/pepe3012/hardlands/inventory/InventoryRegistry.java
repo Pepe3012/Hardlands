@@ -1,4 +1,4 @@
-package io.github.pepe3012.hardlands.config.inventory;
+package io.github.pepe3012.hardlands.inventory;
 
 import org.bukkit.inventory.Inventory;
 

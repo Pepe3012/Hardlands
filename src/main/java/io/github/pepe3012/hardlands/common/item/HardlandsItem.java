@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
 
-public enum HardlandsItems {
+public enum HardlandsItem {
 
     ENDER_BAG(new ItemBuilder(Material.CARROT_ON_A_STICK).name("<white>Ender Bag").lore("<gray>Abre tu <white>cofre de Ender<gray> al hacer <white>clic derecho<gray>.")),
     VOID_BAG(new ItemBuilder(Material.CARROT_ON_A_STICK).name("<white>Void Bag").lore("<gray>Abre el <white>inventario compartido<gray> de tu equipo al hacer <white>clic derecho<gray>.")),
@@ -15,11 +15,11 @@ public enum HardlandsItems {
 
     private final ItemBuilder builder;
 
-    HardlandsItems(ItemBuilder builder) {
+    HardlandsItem(ItemBuilder builder) {
         this.builder = builder;
     }
 
-    public static Optional<HardlandsItems> find(String identifier) {
+    public static Optional<HardlandsItem> find(String identifier) {
         return Optional.of(valueOf(identifier.toUpperCase()));
     }
 

@@ -1,7 +1,6 @@
-package io.github.pepe3012.hardlands.common.item.inventory;
+package io.github.pepe3012.hardlands.common.item;
 
-import io.github.pepe3012.hardlands.common.item.ItemBuilder;
-import io.github.pepe3012.hardlands.config.inventory.InventoryDefinition;
+import io.github.pepe3012.hardlands.inventory.InventoryDefinition;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -14,10 +13,12 @@ import java.util.function.Supplier;
 
 public enum InventoryItem {
 
-    PREVIOUS(head("MHF_ArrowLeft", "Anterior", "Regresa al menú o página anterior."),
-            click(ClickType.LEFT, (inventory, player) -> InventoryDefinition.find(inventory).ifPresent(definition -> definition.openParent(player)))),
-    PREPARATION(PreparationInventoryItem::build,
-            click(ClickType.RIGHT, (_, _) -> PreparationInventoryItem.toggle())),
+    PREVIOUS(
+            head("MHF_ArrowLeft", "Anterior", "Regresa al menú o página anterior."),
+            click(ClickType.LEFT, (inventory, player) ->
+                    InventoryDefinition.find(inventory)
+                            .ifPresent(definition -> definition.openParent(player)))
+    ),
     NEXT(head("MHF_ArrowRight", "Siguiente", "Avanza a la siguiente página.")),
 
     SCENARIOS(() -> InventoryDefinition.SCENARIOS, Material.CHERRY_SAPLING, "Activa, desactiva y configura los escenarios de la partida."),
@@ -73,11 +74,13 @@ public enum InventoryItem {
             return Optional.empty();
         }
 
-        return new ItemBuilder(item).findId().flatMap(InventoryItem::find);
+        return new ItemBuilder(item)
+                .findId()
+                .flatMap(InventoryItem::find);
     }
 
-    public static InventoryDisplay display(Material material, String description) {
-        return new InventoryDisplay(material, description);
+    public static Display display(Material material, String description) {
+        return new Display(material, description);
     }
 
     private static Optional<InventoryItem> find(String identifier) {
@@ -89,11 +92,25 @@ public enum InventoryItem {
     }
 
     private static Supplier<ItemStack> head(String owner, String name, String description) {
-        return () -> new ItemBuilder(Material.PLAYER_HEAD).skullOwner(owner).name(name).lore("<gray>" + description).build();
+        return () -> new ItemBuilder(Material.PLAYER_HEAD)
+                .skullOwner(owner)
+                .name(name)
+                .lore("<gray>" + description)
+                .build();
     }
 
     private static Click click(ClickType type, Action action) {
         return new Click(type, action);
+    }
+
+    public record Display(Material material, String description) {
+
+        public ItemStack build(String name) {
+            return new ItemBuilder(material)
+                    .name(name)
+                    .lore("<gray>" + description)
+                    .build();
+        }
     }
 
     private record Click(ClickType type, Action action) {}

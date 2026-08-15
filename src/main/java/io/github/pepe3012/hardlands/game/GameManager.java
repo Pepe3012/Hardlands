@@ -1,9 +1,8 @@
 package io.github.pepe3012.hardlands.game;
 
 import io.github.pepe3012.hardlands.Hardlands;
-import io.github.pepe3012.hardlands.config.option.Option;
-import io.github.pepe3012.hardlands.config.option.OptionHolder;
-import io.github.pepe3012.hardlands.config.option.OptionValidators;
+import io.github.pepe3012.hardlands.data.option.Option;
+import io.github.pepe3012.hardlands.data.option.OptionValidators;
 
 import java.util.List;
 
@@ -14,13 +13,11 @@ public final class GameManager extends OptionHolder {
     private final Option<MeetupDuration> meetupDurationOption = super.createOption("meetup-duration", MeetupDuration.class);
 
     private final Hardlands plugin;
-    private final GameTaskScheduler scheduler;
 
     private GamePhase currentPhase = GamePhase.IDLE;
 
     public GameManager(Hardlands plugin) {
         this.plugin = plugin;
-        this.scheduler = new GameTaskScheduler(plugin);
     }
 
     public GamePhase getCurrentPhase() {
@@ -28,8 +25,8 @@ public final class GameManager extends OptionHolder {
     }
 
     public void startGame() {
-        if (this.currentPhase != GamePhase.IDLE) {
-            throw new IllegalStateException("The game cannot start from the " + this.currentPhase.getDisplayName() + " phase");
+        if (this.currentPhase != GamePhase.PRE_GAME) {
+            throw new IllegalStateException("The game must be started only at phase: %s, but tried to at: %s".formatted(GamePhase.PRE_GAME.name(), this.currentPhase.name()));
         }
 
         if (!this.plugin.getWorldManager().isPregenerationCompleted()) {
@@ -38,8 +35,8 @@ public final class GameManager extends OptionHolder {
 
         this.requireValidConfiguration();
 
-        this.plugin.getWorldManager().handleBorderForSurvival();
-        this.startPhase(GamePhase.GRACE_PERIOD, this.gracePeriodOption.getValue());
+        //this.plugin.getWorldManager().shrinkBorderForSurvival(); must be done at pregeneration
+        this.startPhase(GamePhase.SURVIVAL, this.gracePeriodOption.getValue());
     }
 
     public void stopGame() {
@@ -103,7 +100,7 @@ public final class GameManager extends OptionHolder {
     }
 
     public List<String> getConfigurationOptionKeys() {
-        return List.copyOf(super.getRegisteredOptions().keySet());
+        return List.copyOf(super.getOptions().keySet());
     }
 
     private void startMeetup() {
@@ -150,6 +147,7 @@ public final class GameManager extends OptionHolder {
 
         public MeetupDuration {
             if (ticks < -1) {
+                Duration.
                 throw new IllegalArgumentException("Meetup duration cannot be less than -1");
             }
         }

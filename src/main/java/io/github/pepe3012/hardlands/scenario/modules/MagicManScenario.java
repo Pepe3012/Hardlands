@@ -1,6 +1,6 @@
 package io.github.pepe3012.hardlands.scenario.modules;
 
-import io.github.pepe3012.hardlands.config.option.Option;
+import io.github.pepe3012.hardlands.data.option.Option;
 import io.github.pepe3012.hardlands.scenario.ScenarioModule;
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import org.bukkit.enchantments.Enchantment;

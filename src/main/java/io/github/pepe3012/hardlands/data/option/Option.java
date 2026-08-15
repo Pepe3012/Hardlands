@@ -1,4 +1,4 @@
-package io.github.pepe3012.hardlands.config.option;
+package io.github.pepe3012.hardlands.data.option;
 
 import java.util.function.Predicate;
 

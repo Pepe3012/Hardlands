@@ -1,9 +1,8 @@
 package io.github.pepe3012.hardlands.world;
 
-import io.github.pepe3012.hardlands.config.option.Option;
-import io.github.pepe3012.hardlands.config.option.OptionDataType;
-import io.github.pepe3012.hardlands.config.option.OptionHolder;
-import io.github.pepe3012.hardlands.config.option.OptionValidators;
+import io.github.pepe3012.hardlands.data.option.Option;
+import io.github.pepe3012.hardlands.data.option.OptionDataType;
+import io.github.pepe3012.hardlands.data.option.OptionValidators;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
@@ -13,7 +12,7 @@ import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
 
 public final class WorldManager extends OptionHolder {
 
-    private final Option<World> world = super.createOption("world", OptionDataType.CUSTOM);
+    private final Option<String> worldName = super.createOption("world", OptionDataType.STRING);
     private final Option<Double> centerX = super.createOption("center-x", OptionDataType.DOUBLE);
     private final Option<Double> centerZ = super.createOption("center-z", OptionDataType.DOUBLE);
     private final Option<Integer> survivalBorderSize = super.createOption("survival-border-size", OptionValidators.Integers.POSITIVE);
@@ -66,9 +65,7 @@ public final class WorldManager extends OptionHolder {
             throw new IllegalStateException("Pregeneration is not running");
         }
 
-        String worldName = this.activePregeneration.worldName();
-
-        if (!this.chunky.cancelTask(worldName)) {
+        if (!this.chunky.cancelTask(this.worldName.getValue())) {
             throw new IllegalStateException("Failed to pause pregeneration for " + worldName);
         }
 
@@ -85,20 +82,20 @@ public final class WorldManager extends OptionHolder {
     }
 
     public void shrinkBorderForSurvival() {
-        WorldBorder border = this.world.getValue().getWorldBorder();
+        WorldBorder border = this.getWorld().getWorldBorder();
         border.setCenter(this.centerX.getValue(), this.centerZ.getValue());
         border.setSize(this.survivalBorderSize.getValue());
     }
 
     public void shrinkBorderForMeetup() {
-        this.world.getValue().getWorldBorder().changeSize(
+        this.getWorld().getWorldBorder().changeSize(
                 this.meetupBorderSize.getValue(),
                 this.meetupShrinkDuration.getValue()
         );
     }
 
     public void shrinkBorderForDeathmatch() {
-        this.world.getValue().getWorldBorder().changeSize(
+        this.getWorld().getWorldBorder().changeSize(
                 this.deathmatchBorderSize.getValue(),
                 this.deathmatchShrinkDuration.getValue()
         );
@@ -122,10 +119,20 @@ public final class WorldManager extends OptionHolder {
 
     private PregenerationRequest createPregenerationRequest() {
         return new PregenerationRequest(
-                this.world.getValue().getName(),
+                this.worldName.getValue(),
                 this.centerX.getValue(),
                 this.centerZ.getValue(),
                 this.survivalBorderSize.getValue()
         );
+    }
+
+    private World getWorld() {
+        World world = Bukkit.getWorld(this.worldName.getValue());
+
+        if (world == null) {
+            throw new IllegalStateException("World not found: " + this.worldName.getValue());
+        }
+
+        return world;
     }
 }
