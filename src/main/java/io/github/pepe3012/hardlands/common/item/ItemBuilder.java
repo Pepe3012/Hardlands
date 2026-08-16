@@ -1,7 +1,7 @@
 package io.github.pepe3012.hardlands.common.item;
 
 import io.github.pepe3012.hardlands.Hardlands;
-import io.github.pepe3012.hardlands.common.util.data.PersistentData;
+import io.github.pepe3012.hardlands.core.data.PersistentData;
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
