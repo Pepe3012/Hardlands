@@ -20,38 +20,28 @@ public enum ScenarioDefinition {
     MAGIC_MAN("Magic Man", MagicManScenario::new,
             InventoryItem.display(Material.ENCHANTING_TABLE, "Aplica los encantamientos configurados a sus herramientas respectivas.")),
 
-    // BERSERK("berserk", "Berserk", BerserkScenario::new, InventoryItem.display(Material.IRON_SWORD, "Otorga Regeneración IV, Fuerza I y Velocidad II durante 20 segundos al eliminar a un jugador.")),
-    // FINAL_HEAL("final_heal", "Final Heal", FinalHealScenario::new, InventoryItem.display(Material.GLISTERING_MELON_SLICE, "Restaura completamente la salud de todos los jugadores en el momento configurado.")),
-    // FIREPROOF("fireproof", "Fireproof", FireproofScenario::new, InventoryItem.display(Material.MAGMA_CREAM, "Protege los objetos soltados del fuego y la lava.")),
-    // HEART_HUNTER("heart_hunter", "Heart Hunter", HeartHunterScenario::new, InventoryItem.display(Material.REDSTONE, "Aumenta la vida máxima al descubrir mobs, completar logros y eliminar jugadores.")),
-    // LIMITLESS("limitless", "Limitless", LimitlessScenario::new, InventoryItem.display(Material.ENCHANTED_BOOK, "Elimina el límite de encantamientos.")),
-    // PERFECT_GAME("perfect_game", "Perfect Game", PerfectGameScenario::new, InventoryItem.display(Material.CLOCK, "Recompensa periódicamente a los jugadores que no reciben daño.")),
-    // PLAYER_RADAR("player_radar", "Player Radar", PlayerRadarScenario::new, InventoryItem.display(Material.COMPASS, "Activa la barra de ubicación.")),
-    // STARTER_ITEMS("starter_items", "Starter Items", StarterItemsScenario::new, InventoryItem.display(Material.BUNDLE, "Otorga los objetos configurados al unirse al mundo por primera vez.")),
-    // TOMB_BOMB("tomb_bomb", "Tomb Bomb", TombBombScenario::new, InventoryItem.display(Material.TNT, "Guarda el inventario de los jugadores eliminados en un cofre que explota después de unos segundos."));
-
     ;
 
-    private final String displayName;
-    private final Supplier<ScenarioModule> moduleFactory;
-    private final InventoryDisplay display;
+    private final String name;
+    private final Supplier<ScenarioModule> factory;
+    private final InventoryItem.Display item;
 
-    ScenarioDefinition(String displayName, Supplier<ScenarioModule> moduleFactory, InventoryDisplay display) {
-        this.displayName = displayName;
-        this.moduleFactory = moduleFactory;
-        this.display = display;
+    ScenarioDefinition(String name, Supplier<ScenarioModule> factory, InventoryItem.Display item) {
+        this.name = name;
+        this.factory = factory;
+        this.item = item;
     }
 
     public ScenarioModule createModule() {
-        return this.moduleFactory.get();
+        return this.factory.get();
     }
 
     public ItemStack createDisplayItem() {
-        return this.display.build("<yellow>" + this.displayName);
+        return this.item.build("<yellow>" + this.name);
     }
 
-    public String getDisplayName() {
-        return this.displayName;
+    public String getName() {
+        return this.name;
     }
 
     public String getIdentifier() {

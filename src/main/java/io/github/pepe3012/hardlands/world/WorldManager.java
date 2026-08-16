@@ -1,7 +1,8 @@
 package io.github.pepe3012.hardlands.world;
 
+import io.github.pepe3012.hardlands.data.json.JsonConvertible;
 import io.github.pepe3012.hardlands.data.option.Option;
-import io.github.pepe3012.hardlands.data.option.OptionBox;
+import io.github.pepe3012.hardlands.data.option.OptionContainer;
 import io.github.pepe3012.hardlands.data.option.OptionDataType;
 import io.github.pepe3012.hardlands.data.option.OptionValidators;
 import org.bukkit.Bukkit;
@@ -11,40 +12,38 @@ import org.popcraft.chunky.api.ChunkyAPI;
 import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
 import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
 
-public final class WorldManager {
+public final class WorldManager implements JsonConvertible {
 
-    private final OptionBox box = new OptionBox("world");
-    private final Option<String> worldName = this.box.place("worldManager-name", OptionDataType.STRING);
-    private final Option<Double> centerX = this.box.place("center-x", OptionDataType.DOUBLE);
-    private final Option<Double> centerZ = this.box.place("center-z", OptionDataType.DOUBLE);
-    private final Option<Integer> survivalBorderSize = this.box.place("survival-border-size", OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupBorderSize = this.box.place("meetup-border-size", OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> deathmatchBorderSize = this.box.place("deathmatch-border-size", OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupShrinkDuration = this.box.place("meetup-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
-    private final Option<Integer> deathmatchShrinkDuration = this.box.place("deathmatch-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
+    private final OptionContainer options = new OptionContainer("world");
+    private final Option<String> worldName = this.options.register("world-name", OptionDataType.STRING);
+    private final Option<Double> centerX = this.options.register("center-x", OptionDataType.DOUBLE);
+    private final Option<Double> centerZ = this.options.register("center-z", OptionDataType.DOUBLE);
+    private final Option<Integer> survivalBorderSize = this.options.register("survival-border-size", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> meetupBorderSize = this.options.register("meetup-border-size", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> deathmatchBorderSize = this.options.register("deathmatch-border-size", OptionValidators.Integers.POSITIVE);
+    private final Option<Integer> meetupShrinkDuration = this.options.register("meetup-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
+    private final Option<Integer> deathmatchShrinkDuration = this.options.register("deathmatch-shrink-duration", OptionValidators.Integers.NON_NEGATIVE);
 
     private final ChunkyAPI chunky;
 
     private PregenerationState pregenerationState = PregenerationState.IDLE;
-    private PregenerationRequest activePregeneration;
+    private PregenerationRequest pregenerationRequest;
     private float pregenerationProgress;
 
     public WorldManager(ChunkyAPI chunky) {
         this.chunky = chunky;
-        this.chunky.onGenerationProgress(this::onGenerationProgress);
-        this.chunky.onGenerationComplete(this::onGenerationComplete);
+        this.chunky.onGenerationProgress(this::handleGenerationProgress);
+        this.chunky.onGenerationComplete(this::handleGenerationComplete);
     }
 
-    public boolean validate() {
-        if (!this.box.validate()) {
-            return false;
-        }
+    public boolean isValid() {
+        if (!this.options.validate()) return false;
 
-        int survivalSize = this.survivalBorderSize.getValue();
-        int meetupSize = this.meetupBorderSize.getValue();
-        int deathmatchSize = this.deathmatchBorderSize.getValue();
+        int survival = this.survivalBorderSize.getValue();
+        int meetup = this.meetupBorderSize.getValue();
+        int deathmatch = this.deathmatchBorderSize.getValue();
 
-        return survivalSize >= meetupSize && meetupSize >= deathmatchSize;
+        return survival >= meetup && meetup >= deathmatch;
     }
 
     public synchronized void startPregeneration() {
@@ -52,12 +51,12 @@ public final class WorldManager {
             throw new IllegalStateException("Pregeneration is already running");
         }
 
-        PregenerationRequest request = this.activePregeneration != null
-                ? this.activePregeneration
+        PregenerationRequest request = this.pregenerationRequest != null
+                ? this.pregenerationRequest
                 : this.createPregenerationRequest();
 
-        request.reviewAndAccept(this.chunky).ifPresent(acceptedRequest -> {
-            this.activePregeneration = acceptedRequest;
+        request.reviewAndAccept(this.chunky).ifPresent(accepted -> {
+            this.pregenerationRequest = accepted;
             this.pregenerationState = PregenerationState.RUNNING;
         });
     }
@@ -76,7 +75,7 @@ public final class WorldManager {
         this.pregenerationState = PregenerationState.PAUSED;
     }
 
-    public void shrinkBorderForSurvival() {
+    public void initializeSurvivalBorder() {
         WorldBorder border = this.getWorld().getWorldBorder();
 
         border.setCenter(this.centerX.getValue(), this.centerZ.getValue());
@@ -84,17 +83,11 @@ public final class WorldManager {
     }
 
     public void shrinkBorderForMeetup() {
-        this.getWorld().getWorldBorder().changeSize(
-                this.meetupBorderSize.getValue(),
-                this.meetupShrinkDuration.getValue()
-        );
+        this.resizeBorder(this.meetupBorderSize.getValue(), this.meetupShrinkDuration.getValue());
     }
 
     public void shrinkBorderForDeathmatch() {
-        this.getWorld().getWorldBorder().changeSize(
-                this.deathmatchBorderSize.getValue(),
-                this.deathmatchShrinkDuration.getValue()
-        );
+        this.resizeBorder(this.deathmatchBorderSize.getValue(), this.deathmatchShrinkDuration.getValue());
     }
 
     public PregenerationState getPregenerationState() {
@@ -113,19 +106,15 @@ public final class WorldManager {
         return this.pregenerationState == PregenerationState.COMPLETED;
     }
 
-    public String serializeOptions() {
-        return this.box.serialize();
+    private void resizeBorder(double size, long duration) {
+        this.getWorld().getWorldBorder().changeSize(size, duration);
     }
 
-    public void deserializeOptions(String json) {
-        this.box.deserialize(json);
-    }
-
-    private synchronized void onGenerationProgress(GenerationProgressEvent event) {
+    private synchronized void handleGenerationProgress(GenerationProgressEvent event) {
         this.pregenerationProgress = event.progress();
     }
 
-    private synchronized void onGenerationComplete(GenerationCompleteEvent event) {
+    private synchronized void handleGenerationComplete(GenerationCompleteEvent event) {
         this.pregenerationProgress = 100.0F;
         this.pregenerationState = PregenerationState.COMPLETED;
     }
@@ -147,5 +136,15 @@ public final class WorldManager {
         }
 
         return world;
+    }
+
+    @Override
+    public String toJson() {
+        return this.options.toJson();
+    }
+
+    @Override
+    public void fromJson(String json) {
+        this.options.fromJson(json);
     }
 }

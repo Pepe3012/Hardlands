@@ -24,25 +24,11 @@ public final class Option<T> {
     }
 
     public Option(String key, Class<T> valueType, Predicate<? super T> validator) {
-        this(key, valueType, resolveDataType(valueType), validator);
+        this(key, valueType, OptionDataType.fromJavaType(valueType), validator);
     }
 
-    private Option(String key, Class<T> valueType, OptionDataType dataType, Predicate<? super T> validator) {
-        if (key == null || key.isBlank()) {
-            throw new IllegalArgumentException("Option key cannot be blank");
-        }
-
-        if (valueType == null) {
-            throw new IllegalArgumentException("Value type cannot be null");
-        }
-
-        if (dataType == null) {
-            throw new IllegalArgumentException("Data type cannot be null");
-        }
-
-        if (validator == null) {
-            throw new IllegalArgumentException("Validator cannot be null");
-        }
+    public Option(String key, Class<T> valueType, OptionDataType dataType, Predicate<? super T> validator) {
+        if (key.isBlank()) throw new IllegalArgumentException("Option key cannot be blank");
 
         this.key = key;
         this.valueType = valueType;
@@ -72,13 +58,13 @@ public final class Option<T> {
 
     public void setValue(Object value) {
         if (!this.valueType.isInstance(value)) {
-            throw new IllegalArgumentException("Option '" + this.key + "' requires a value of type " + this.valueType.getSimpleName());
+            throw new IllegalArgumentException("Option '%s' requires a value of type %s".formatted(this.key, this.valueType.getSimpleName()));
         }
 
         T typedValue = this.valueType.cast(value);
 
         if (!this.validator.test(typedValue)) {
-            throw new IllegalArgumentException("Invalid value for option '" + this.key + "'");
+            throw new IllegalArgumentException("Invalid value for option '%s'".formatted(this.key));
         }
 
         this.value = typedValue;
@@ -89,26 +75,15 @@ public final class Option<T> {
     }
 
     public boolean isValid() {
-        return this.hasValue() && this.validator.test(this.value);
+        return this.value != null && this.validator.test(this.value);
     }
 
     public void clearValue() {
         this.value = null;
     }
 
-    private static OptionDataType resolveDataType(Class<?> valueType) {
-        if (valueType == null) {
-            throw new IllegalArgumentException("Value type cannot be null");
-        }
-
-        return OptionDataType.fromJavaType(valueType);
-    }
-
+    //wtfd
     private static <T> Class<T> resolveValueType(OptionDataType dataType) {
-        if (dataType == null) {
-            throw new IllegalArgumentException("Data type cannot be null");
-        }
-
         if (dataType == OptionDataType.CUSTOM) {
             throw new IllegalArgumentException("Custom options require an explicit Java type");
         }

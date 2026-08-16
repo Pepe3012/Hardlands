@@ -1,36 +1,37 @@
 package io.github.pepe3012.hardlands.data;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 import io.github.pepe3012.hardlands.Hardlands;
-
-import java.util.Map;
+import io.github.pepe3012.hardlands.data.json.JsonDataStore;
 
 public record HardlandsData(
-        JsonObject world,
-        Map<String, JsonObject> scenarios
+        @SerializedName("world") JsonObject world,
+        @SerializedName("scenarios") JsonObject scenarios
 ) {
 
-    private static final String FILE_NAME = "data.json";
-
-    public static void serialize(Hardlands plugin) {
-        new JsonDataStore<>(plugin.getDataPath().resolve(FILE_NAME), HardlandsData.class).write(from(plugin));
+    private void apply(Hardlands plugin) {
+        plugin.getWorldManager().deserializeOptions(this.world.toString());
+        plugin.getScenarioManager().fromJson(this.scenarios.toString());
     }
 
-    public static void deserialize(Hardlands plugin) {
-        new JsonDataStore<>(plugin.getDataPath().resolve(FILE_NAME), HardlandsData.class)
-                .read()
-                .ifPresent(data -> data.apply(plugin));
+    public static void save(Hardlands plugin) {
+        store(plugin).write(capture(plugin));
     }
 
-    private static HardlandsData from(Hardlands plugin) {
+    public static void load(Hardlands plugin) {
+        store(plugin).read().ifPresent(data -> data.apply(plugin));
+    }
+
+    private static HardlandsData capture(Hardlands plugin) {
         return new HardlandsData(
-                Hardlands.GSON.fromJson(plugin.getWorldManager().serializeOptions(), JsonObject.class),
-                plugin.getScenarioManager().serializeOptions()
+                JsonParser.parseString(plugin.getWorldManager().serializeOptions()).getAsJsonObject(),
+                JsonParser.parseString(plugin.getScenarioManager().toJson()).getAsJsonObject()
         );
     }
 
-    private void apply(Hardlands plugin) {
-        plugin.getWorldManager().deserializeOptions(Hardlands.GSON.toJson(this.world));
-        plugin.getScenarioManager().deserializeOptions(this.scenarios);
+    private static JsonDataStore<HardlandsData> store(Hardlands plugin) {
+        return new JsonDataStore<>(Hardlands.GSON, plugin.getDataPath().resolve("data.json"), HardlandsData.class);
     }
 }

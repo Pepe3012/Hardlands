@@ -1,46 +1,51 @@
 package io.github.pepe3012.hardlands.scenario;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import io.github.pepe3012.hardlands.Hardlands;
+import io.github.pepe3012.hardlands.data.json.JsonConvertible;
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
-public final class ScenarioManager {
+public final class ScenarioManager implements JsonConvertible {
 
-    private final Map<ScenarioDefinition, ScenarioModule> registeredScenarios = new EnumMap<>(ScenarioDefinition.class);
+    private final Map<ScenarioDefinition, ScenarioModule> scenarios = new EnumMap<>(ScenarioDefinition.class);
     private final Set<ScenarioDefinition> activeScenarios = EnumSet.noneOf(ScenarioDefinition.class);
     private final Plugin plugin;
 
-    public ScenarioManager(final Plugin plugin) {
+    public ScenarioManager(Plugin plugin) {
+        this.register(ScenarioDefinition.values());
         this.plugin = plugin;
     }
 
-    public void registerScenarios(ScenarioDefinition... definitions) {
+    public void register(ScenarioDefinition... definitions) {
         for (ScenarioDefinition definition : definitions) {
-            if (this.registeredScenarios.putIfAbsent(definition, definition.createModule()) != null) {
-                throw new IllegalArgumentException("Scenario is already registered: " + definition);
+            if (this.scenarios.putIfAbsent(definition, definition.createModule()) != null) {
+                throw new IllegalArgumentException("Scenario already registered: " + definition);
             }
         }
     }
 
-    public boolean enableScenario(ScenarioDefinition definition) {
-        if (this.activeScenarios.contains(definition)) {
-            return false;
-        }
+    public boolean enable(ScenarioDefinition definition) {
+        if (this.activeScenarios.contains(definition)) return false;
 
-        ScenarioModule module = this.getRegisteredScenario(definition);
-        module.enable(this.plugin);
+        this.get(definition).enable(this.plugin);
         this.activeScenarios.add(definition);
 
         return true;
     }
 
-    public boolean disableScenario(ScenarioDefinition definition) {
-        if (!this.activeScenarios.contains(definition)) {
-            return false;
-        }
+    public boolean disable(ScenarioDefinition definition) {
+        if (!this.activeScenarios.contains(definition)) return false;
 
         try {
-            this.getRegisteredScenario(definition).disable();
+            this.get(definition).disable();
         } finally {
             this.activeScenarios.remove(definition);
         }
@@ -48,51 +53,66 @@ public final class ScenarioManager {
         return true;
     }
 
-    public boolean toggleScenario(ScenarioDefinition definition) {
-        return this.isScenarioActive(definition)
-                ? this.disableScenario(definition)
-                : this.enableScenario(definition);
+    public boolean toggle(ScenarioDefinition definition) {
+        return this.isActive(definition)
+                ? this.disable(definition)
+                : this.enable(definition);
     }
 
-    public boolean isScenarioRegistered(ScenarioDefinition definition) {
-        return this.registeredScenarios.containsKey(definition);
+    public boolean isRegistered(ScenarioDefinition definition) {
+        return this.scenarios.containsKey(definition);
     }
 
-    public boolean isScenarioActive(ScenarioDefinition definition) {
+    public boolean isActive(ScenarioDefinition definition) {
         return this.activeScenarios.contains(definition);
     }
 
-    public ScenarioModule getRegisteredScenario(ScenarioDefinition definition) {
-        ScenarioModule module = this.registeredScenarios.get(definition);
+    public ScenarioModule get(ScenarioDefinition definition) {
+        ScenarioModule scenario = this.scenarios.get(definition);
 
-        if (module == null) {
+        if (scenario == null) {
             throw new IllegalArgumentException("Scenario is not registered: " + definition);
         }
 
-        return module;
+        return scenario;
     }
 
-    public Optional<ScenarioModule> findActiveScenario(ScenarioDefinition definition) {
-        return this.isScenarioActive(definition)
-                ? Optional.of(this.getRegisteredScenario(definition))
-                : Optional.empty();
+    public Optional<ScenarioModule> findActive(ScenarioDefinition definition) {
+        if (!this.activeScenarios.contains(definition)) return Optional.empty();
+
+        return Optional.of(this.get(definition));
     }
 
-    public List<ScenarioModule> getRegisteredScenarios() {
-        return List.copyOf(this.registeredScenarios.values());
+    public List<ScenarioModule> getScenarios() {
+        return List.copyOf(this.scenarios.values());
     }
 
     public List<ScenarioModule> getActiveScenarios() {
         return this.activeScenarios.stream()
-                .map(this::getRegisteredScenario)
+                .map(this::get)
                 .toList();
     }
 
-    public List<ScenarioDefinition> getRegisteredScenarioDefinitions() {
-        return List.copyOf(this.registeredScenarios.keySet());
+    public List<ScenarioDefinition> getDefinitions() {
+        return List.copyOf(this.scenarios.keySet());
     }
 
-    public List<ScenarioDefinition> getActiveScenarioDefinitions() {
+    public List<ScenarioDefinition> getActiveDefinitions() {
         return List.copyOf(this.activeScenarios);
+    }
+
+    @Override
+    public String toJson() {
+        JsonObject json = new JsonObject();
+        this.scenarios.values().forEach(scenario ->
+                json.add(scenario.getIdentifier(), JsonParser.parseString(scenario.toJson())));
+        return Hardlands.GSON.toJson(json);
+    }
+
+    @Override
+    public void fromJson(String json) {
+        JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+        this.scenarios.values().forEach(scenario ->
+                scenario.fromJson(root.get(scenario.getIdentifier()).toString()));
     }
 }

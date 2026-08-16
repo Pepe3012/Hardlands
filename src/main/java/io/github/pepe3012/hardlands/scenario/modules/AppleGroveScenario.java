@@ -17,10 +17,14 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class AppleGroveScenario extends ScenarioModule {
 
-    private final Option<Boolean> allTreeTypes = super.createOption("all-tree-types", OptionDataType.BOOLEAN);
-    private final Option<Float> appleDropRate = super.createOption("apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
-    private final Option<Float> goldenAppleDropRate = super.createOption("golden-apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
-    private final Option<Float> enchantedGoldenAppleDropRate = super.createOption("enchanted-golden-apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
+    private final Option<Boolean> allTreeTypes = super.registerOption("all-tree-types", OptionDataType.BOOLEAN);
+    private final Option<Float> appleDropRate = super.registerOption("apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
+    private final Option<Float> goldenAppleDropRate = super.registerOption("golden-apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
+    private final Option<Float> enchantedGoldenAppleDropRate = super.registerOption("enchanted-golden-apple-drop-rate", OptionDataType.FLOAT, OptionValidators.Floats.PERCENTAGE);
+
+    public AppleGroveScenario() {
+        super("apple-grove");
+    }
 
     @EventHandler(ignoreCancelled = true)
     private void onLeavesDecay(LeavesDecayEvent event) {
