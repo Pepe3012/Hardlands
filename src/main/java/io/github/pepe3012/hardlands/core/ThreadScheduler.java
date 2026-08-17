@@ -1,4 +1,4 @@
-package io.github.pepe3012.hardlands.common.task;
+package io.github.pepe3012.hardlands.core;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;

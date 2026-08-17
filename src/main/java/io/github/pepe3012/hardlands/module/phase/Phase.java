@@ -1,6 +1,6 @@
-package io.github.pepe3012.hardlands.module.game;
+package io.github.pepe3012.hardlands.module.phase;
 
-public enum GamePhase {
+public enum Phase {
 
     IDLE("Idle"),
     PRE_GAME("Pre-Game"),
@@ -11,7 +11,7 @@ public enum GamePhase {
 
     private final String displayName;
 
-    GamePhase(String displayName) {
+    Phase(String displayName) {
         this.displayName = displayName;
     }
 
@@ -20,10 +20,9 @@ public enum GamePhase {
     }
 
     public boolean isRunning() {
-        return this == SURVIVAL || this == MEETUP || this == DEATHMATCH;
-    }
-
-    public boolean canAdvance() {
-        return this != POST_GAME;
+        return switch (this) {
+            case SURVIVAL, MEETUP, DEATHMATCH -> true;
+            default -> false;
+        };
     }
 }

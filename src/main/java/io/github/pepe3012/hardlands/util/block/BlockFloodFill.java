@@ -1,4 +1,4 @@
-package io.github.pepe3012.hardlands.util;
+package io.github.pepe3012.hardlands.util.block;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;

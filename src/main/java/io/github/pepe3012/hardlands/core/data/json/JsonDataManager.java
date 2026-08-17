@@ -7,13 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public final class JsonStore<T> {
+public final class JsonDataManager<T> {
 
     private final Gson gson;
     private final Path path;
     private final Class<T> dataType;
 
-    public JsonStore(Gson gson, Path path, Class<T> dataType) {
+    public JsonDataManager(Gson gson, Path path, Class<T> dataType) {
         this.gson = gson;
         this.path = path;
         this.dataType = dataType;

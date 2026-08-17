@@ -1,5 +1,6 @@
 package io.github.pepe3012.hardlands.module.scenario.scenarios;
 
+import io.github.pepe3012.hardlands.Hardlands;
 import io.github.pepe3012.hardlands.core.config.Option;
 import io.github.pepe3012.hardlands.core.config.OptionValidators;
 import io.github.pepe3012.hardlands.module.scenario.Scenario;
@@ -11,9 +12,9 @@ import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Optional;
 
-public final class AppleGroveScenario extends Scenario {
+public class AppleGroveScenario extends Scenario {
 
     private final Option<Boolean> allTreeTypes = super.registerOption("all-tree-types", Boolean.class);
     private final Option<Float> appleDropRate = super.registerOption("apple-drop-rate", Float.class, OptionValidators.Floats.UNIT_INTERVAL);
@@ -22,41 +23,39 @@ public final class AppleGroveScenario extends Scenario {
 
     @EventHandler(ignoreCancelled = true)
     private void onLeavesDecay(LeavesDecayEvent event) {
-        this.tryDropApple(event);
+        tryDropApple(event);
     }
 
     @EventHandler(ignoreCancelled = true)
     private void onBlockDropItem(BlockDropItemEvent event) {
-        this.tryDropApple(event);
+        tryDropApple(event);
     }
 
     private void tryDropApple(BlockEvent event) {
         var block = event.getBlock();
 
-        if (!this.isEligibleLeaf(block.getType())) return;
+        if (!isEligibleLeaf(block.getType())) return;
 
-        var drop = this.rollAppleDrop();
-        if (drop == null) return;
-
-        block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(drop));
+        findAppleDrop().ifPresent(drop ->
+                block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(drop)));
     }
 
-    private Material rollAppleDrop() {
-        var enchantedRate = this.enchantedGoldenAppleDropRate.getValue();
-        var goldenRate = enchantedRate + this.goldenAppleDropRate.getValue();
-        var appleRate = goldenRate + this.appleDropRate.getValue();
+    private Optional<Material> findAppleDrop() {
+        var roll = Hardlands.RANDOMIZER.nextFloat();
 
-        var roll = ThreadLocalRandom.current().nextFloat();
+        var enchantedRate = enchantedGoldenAppleDropRate.getValue();
+        var goldenRate = enchantedRate + goldenAppleDropRate.getValue();
+        var appleRate = goldenRate + appleDropRate.getValue();
 
-        if (roll < enchantedRate) return Material.ENCHANTED_GOLDEN_APPLE;
-        if (roll < goldenRate) return Material.GOLDEN_APPLE;
-        if (roll < appleRate) return Material.APPLE;
+        if (roll < enchantedRate) return Optional.of(Material.ENCHANTED_GOLDEN_APPLE);
+        if (roll < goldenRate) return Optional.of(Material.GOLDEN_APPLE);
+        if (roll < appleRate) return Optional.of(Material.APPLE);
 
-        return null;
+        return Optional.empty();
     }
 
     private boolean isEligibleLeaf(Material material) {
         return Tag.LEAVES.isTagged(material)
-                && (this.allTreeTypes.getValue() || material == Material.OAK_LEAVES);
+                && (allTreeTypes.getValue() || material == Material.OAK_LEAVES);
     }
 }

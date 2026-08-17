@@ -9,18 +9,18 @@ import org.popcraft.chunky.api.ChunkyAPI;
 import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
 import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
 
-import java.util.Optional;
-
 public final class WorldManager extends Configuration {
 
-    private final Option<String> worldName = super.registerOption("world-name", String.class, OptionValidators.Strings.NON_BLANK);
-    private final Option<Double> centerX = super.registerOption("center-x", Double.class);
-    private final Option<Double> centerZ = super.registerOption("center-z", Double.class);
-    private final Option<Integer> survivalBorderSize = super.registerOption("survival-border-size", Integer.class, OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupBorderSize = super.registerOption("meetup-border-size", Integer.class, OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> deathmatchBorderSize = super.registerOption("deathmatch-border-size", Integer.class, OptionValidators.Integers.POSITIVE);
-    private final Option<Integer> meetupShrinkDuration = super.registerOption("meetup-shrink-duration", Integer.class, OptionValidators.Integers.NON_NEGATIVE);
-    private final Option<Integer> deathmatchShrinkDuration = super.registerOption("deathmatch-shrink-duration", Integer.class, OptionValidators.Integers.NON_NEGATIVE);
+    public final Option<String> worldName = super.registerOption("world-name", String.class, OptionValidators.Strings.NON_BLANK);
+    public final Option<Double> centerX = super.registerOption("center-x", Double.class);
+    public final Option<Double> centerZ = super.registerOption("center-z", Double.class);
+    public final Option<Integer> survivalBorderSize = super.registerOption("survival-border-size", Integer.class, OptionValidators.Integers.POSITIVE);
+    public final Option<Integer> meetupBorderSize = super.registerOption("meetup-border-size", Integer.class, OptionValidators.Integers.POSITIVE);
+    public final Option<Integer> deathmatchBorderSize = super.registerOption("deathmatch-border-size", Integer.class, OptionValidators.Integers.POSITIVE);
+    public final Option<Integer> meetupShrinkDuration = super.registerOption("meetup-shrink-duration", Integer.class, OptionValidators.Integers.NON_NEGATIVE);
+    public final Option<Integer> deathmatchShrinkDuration = super.registerOption("deathmatch-shrink-duration", Integer.class, OptionValidators.Integers.NON_NEGATIVE);
+    public final Option<Boolean> teleport = super.registerOption("teleport", Boolean.class);
+    public final Option<Boolean> damage = super.registerOption("damage", Boolean.class);
 
     private final ChunkyAPI chunky;
 

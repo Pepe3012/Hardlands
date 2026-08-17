@@ -24,36 +24,55 @@ public abstract class Configuration implements JsonConvertible {
     }
 
     public final String getIdentifier() {
-        if (this.identifier == null) {
-            throw new IllegalStateException("Configuration identifier has not been set");
-        }
+        if (this.identifier == null) throw new IllegalStateException("Configuration identifier has not been set");
         return this.identifier;
-    }
-
-    protected final void setIdentifier(String identifier) {
-        if (identifier == null || identifier.isBlank()) {
-            throw new IllegalArgumentException("Identifier cannot be null or blank");
-        }
-
-        if (this.identifier != null) {
-            throw new IllegalStateException("Configuration identifier is already set");
-        }
-
-        this.identifier = identifier;
-    }
-
-    public final boolean isValid() {
-        return this.options.values().stream().allMatch(Option::isValid);
     }
 
     public final Map<String, Option<?>> getOptions() {
         return Map.copyOf(this.options);
     }
 
-    protected final <T> Option<T> registerOption(Option<T> option) {
-        if (this.options.putIfAbsent(option.getKey(), option) != null) {
-            throw new IllegalArgumentException("Option already registered: " + option.getKey());
+    public final boolean isValid() {
+        return this.options.values().stream().allMatch(Option::isValid) && this.isConfigurationValid();
+    }
+
+    @Override
+    public final JsonElement toJson() {
+        var json = new JsonObject();
+
+        for (var option : this.options.values()) {
+            if (option.isValid()) continue;
+
+            json.add(option.getKey(), Hardlands.GSON.toJsonTree(option.getValue()));
         }
+
+        return json;
+    }
+
+    @Override
+    public final void fromJson(JsonElement json) {
+        for (var entry : json.getAsJsonObject().entrySet()) {
+            var option = this.options.get(entry.getKey());
+
+            if (option == null) continue;
+
+            option.setValue(Hardlands.GSON.fromJson(entry.getValue(), option.getDataType()));
+        }
+    }
+
+    protected boolean isConfigurationValid() {
+        return true;
+    }
+
+    protected final void setIdentifier(String identifier) {
+        if (identifier == null || identifier.isBlank()) throw new IllegalArgumentException("Identifier cannot be null or blank");
+        if (this.identifier != null) throw new IllegalStateException("Configuration identifier is already set");
+
+        this.identifier = identifier;
+    }
+
+    protected final <T> Option<T> registerOption(Option<T> option) {
+        if (this.options.putIfAbsent(option.getKey(), option) != null) throw new IllegalArgumentException("Option already registered: " + option.getKey());
         return option;
     }
 
@@ -95,29 +114,5 @@ public abstract class Configuration implements JsonConvertible {
 
     private <T> Option<T> registerOption(String key, Type type, Predicate<T> validator) {
         return this.registerOption(new Option<>(key, type, validator));
-    }
-
-    @Override
-    public final JsonElement toJson() {
-        var json = new JsonObject();
-
-        for (var option : this.options.values()) {
-            if (!option.isValid()) continue;
-
-            json.add(option.getKey(), Hardlands.GSON.toJsonTree(option.getValue()));
-        }
-
-        return json;
-    }
-
-    @Override
-    public final void fromJson(JsonElement json) {
-        for (var entry : json.getAsJsonObject().entrySet()) {
-            var option = this.options.get(entry.getKey());
-
-            if (option == null) continue;
-
-            option.setValue(Hardlands.GSON.fromJson(json, option.getDataType()));
-        }
     }
 }

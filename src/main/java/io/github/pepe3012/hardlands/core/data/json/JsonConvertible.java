@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 
 public interface JsonConvertible {
 
-    JsonElement toJson();
-
     void fromJson(JsonElement json);
+
+    JsonElement toJson();
 }

@@ -9,17 +9,17 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 
-public final class MagicManScenario extends Scenario {
+public class MagicManScenario extends Scenario {
 
-    private final Option<Map<Enchantment, Integer>> enchantments = super.registerMap("enchantments", Enchantment.class, Integer.class);
+    private final Option<Map<Enchantment, Integer>> enchantments = registerMap("enchantments", Enchantment.class, Integer.class);
 
     @EventHandler
-    private void onInventorySlotChange(PlayerInventorySlotChangeEvent event) {
+    private void onPlayerInventorySlotChange(PlayerInventorySlotChangeEvent event) {
         var item = event.getNewItemStack();
 
-        if (!this.applyEnchantments(item)) return;
-
-        event.getPlayer().getInventory().setItem(event.getSlot(), item);
+        if (applyEnchantments(item)) {
+            event.getPlayer().getInventory().setItem(event.getSlot(), item);
+        }
     }
 
     private boolean applyEnchantments(ItemStack item) {
@@ -33,9 +33,7 @@ public final class MagicManScenario extends Scenario {
     }
 
     private static boolean applyEnchantment(ItemStack item, Enchantment enchantment, int level) {
-        if (level <= 0
-                || !enchantment.canEnchantItem(item)
-                || item.getEnchantmentLevel(enchantment) >= level) {
+        if (level <= 0 || !enchantment.canEnchantItem(item) || item.getEnchantmentLevel(enchantment) >= level) {
             return false;
         }
 
