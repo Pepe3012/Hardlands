@@ -9,3 +9,5 @@ plugins {
 }
 
 rootProject.name = "Hardlands"
+
+include("annotation-processor")

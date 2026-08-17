@@ -1,36 +1,44 @@
 package org.heather.hardlands.module.phase;
 
 import org.heather.hardlands.core.ThreadScheduler;
-import org.heather.hardlands.core.config.Configuration;
 import org.heather.hardlands.core.config.Option;
-import org.heather.hardlands.core.config.OptionValidators;
+import org.heather.hardlands.annotation.ConfigOption;
+import org.heather.hardlands.annotation.ConfigurationSpec;
 
-public final class PhaseTimer extends Configuration {
+@ConfigurationSpec(
+        identifier = "timer",
+        options = {
+                @ConfigOption(name = "pvpStartMinute", type = Integer.class),
+                @ConfigOption(name = "borderStartMinute", type = Integer.class),
+                @ConfigOption(name = "meetupStartMinute", type = Integer.class),
+                @ConfigOption(name = "deathmatchStartMinute", type = Integer.class)
+        }
+)
+public final class PhaseTimer extends PhaseTimerConfiguration {
 
-    public final Option<Integer> pvpStartMinute = super.registerOption("pvp-start-minute", Integer.class, OptionValidators.Integers.NON_NEGATIVE);
-    public final Option<Integer> borderStartMinute = super.registerOption("border-start-minute", Integer.class, OptionValidators.Integers.NON_NEGATIVE);
-    public final Option<Integer> meetupStartMinute = super.registerOption("meetup-start-minute", Integer.class, OptionValidators.Integers.NON_NEGATIVE);
-    public final Option<Integer> deathmatchStartMinute = super.registerOption("deathmatch-start-minute", Integer.class, OptionValidators.Integers.NON_NEGATIVE);
+    private static final long TICKS_PER_MINUTE = 20L * 60L;
 
     private final ThreadScheduler scheduler;
 
     public PhaseTimer(ThreadScheduler scheduler) {
-        super("timer");
         this.scheduler = scheduler;
     }
 
     public void scheduleForOption(Runnable runnable, Option<Integer> option) {
-        var ticks = option.getValue() * 50L; //T0do sea por mantener el uso EXCLUSIVO de ticks...
+        long ticks = option.getValue() * TICKS_PER_MINUTE;
         this.scheduler.scheduleSync(runnable, ticks);
     }
 
     @Override
     protected boolean isConfigurationValid() {
-        var pvp = this.pvpStartMinute.getValue();
-        var border = this.borderStartMinute.getValue();
-        var meetup = this.meetupStartMinute.getValue();
-        var deathmatch = this.deathmatchStartMinute.getValue();
+        int pvp = this.pvpStartMinute.getValue();
+        int border = this.borderStartMinute.getValue();
+        int meetup = this.meetupStartMinute.getValue();
+        int deathmatch = this.deathmatchStartMinute.getValue();
 
-        return pvp < border && border < meetup && meetup < deathmatch;
+        return pvp >= 0
+                && pvp < border
+                && border < meetup
+                && meetup < deathmatch;
     }
 }

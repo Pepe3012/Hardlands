@@ -17,7 +17,11 @@ dependencies {
     compileOnly(libs.paper.api)
     compileOnly(libs.chunky.common)
     implementation(libs.acf.paper)
+
     compileOnly("com.google.code.gson:gson:2.14.0")
+
+    compileOnly(project(":annotation-processor"))
+    annotationProcessor(project(":annotation-processor"))
 }
 
 java {
