@@ -1,6 +1,6 @@
 name: Hardlands
 version: '${version}'
-main: io.github.pepe3012.hardlands.Hardlands
+main: org.heather.hardlands.Hardlands
 api-version: '26.2'
 load: POSTWORLD
 authors:
