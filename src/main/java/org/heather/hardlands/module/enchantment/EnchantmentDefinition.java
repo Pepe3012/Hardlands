@@ -1,10 +1,10 @@
 package org.heather.hardlands.module.enchantment;
 
 import org.heather.hardlands.common.item.ItemBuilder;
-import org.heather.hardlands.util.RomanNumber;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
+import org.heather.hardlands.util.RomanNumerals;
 
 import java.util.Locale;
 
@@ -44,7 +44,7 @@ public enum EnchantmentDefinition {
         }
 
         return new ItemBuilder(Material.ENCHANTED_BOOK).lore(
-                "<gray>" + this.displayName + " " + RomanNumber.format(level),
+                "<gray>" + this.displayName + " " + RomanNumerals.format(level),
                 "<dark_gray>" + this.description
         ).build();
     }

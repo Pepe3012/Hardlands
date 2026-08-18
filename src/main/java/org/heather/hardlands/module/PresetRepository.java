@@ -10,9 +10,10 @@ import java.nio.file.Path;
 public final class PresetRepository {
 
     private record Preset(
+            @SerializedName("general") JsonObject general,
             @SerializedName("world") JsonObject world,
             @SerializedName("scenarios") JsonObject scenarios//,
-            //@SerializedName("timer") JsonObject timer
+           // @SerializedName("timer") JsonObject timer
     ) {}
 
     private final Hardlands plugin;
@@ -24,20 +25,22 @@ public final class PresetRepository {
     }
 
     public static PresetRepository create(Hardlands plugin) {
-        return new PresetRepository(plugin, plugin.getDataPath().resolve("templates"));
+        return new PresetRepository(plugin, plugin.getDataPath().resolve("presets"));
     }
 
     public void save(String name) {
-        managerFor(name).write(new Preset(
-                plugin.getWorldManager().toJson().getAsJsonObject(),
-                plugin.getScenarioManager().toJson().getAsJsonObject()
+        this.managerFor(name).write(new Preset(
+                this.plugin.getGeneralConfiguration().toJson().getAsJsonObject(),
+                this.plugin.getWorldManager().toJson().getAsJsonObject(),
+                this.plugin.getScenarioManager().toJson().getAsJsonObject()
         ));
     }
 
     public void load(String name) {
-        managerFor(name).read().ifPresent(preset -> {
-            plugin.getWorldManager().fromJson(preset.world());
-            plugin.getScenarioManager().fromJson(preset.scenarios());
+        this.managerFor(name).read().ifPresent(preset -> {
+            this.plugin.getGeneralConfiguration().fromJson(preset.general());
+            this.plugin.getWorldManager().fromJson(preset.world());
+            this.plugin.getScenarioManager().fromJson(preset.scenarios());
         });
     }
 

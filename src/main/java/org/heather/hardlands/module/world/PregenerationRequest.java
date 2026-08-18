@@ -11,14 +11,23 @@ public record PregenerationRequest(
         int worldSize
 ) {
 
-    public Optional<PregenerationRequest> reviewAndAccept(final ChunkyAPI chunky) {
+    public Optional<PregenerationRequest> reviewAndAccept(ChunkyAPI chunky) {
         if (chunky.isRunning(this.worldName)) {
             throw new IllegalStateException("Chunky is already pregenerating " + this.worldName);
         }
 
         double radius = this.worldSize / 2.0D;
-        return chunky.startTask(this.worldName, "square", this.centerX, this.centerZ, radius, radius, "concentric")
-                ? Optional.of(this)
-                : Optional.empty();
+
+        boolean accepted = chunky.startTask(
+                this.worldName,
+                "square",
+                this.centerX,
+                this.centerZ,
+                radius,
+                radius,
+                "concentric"
+        );
+
+        return accepted ? Optional.of(this) : Optional.empty();
     }
 }

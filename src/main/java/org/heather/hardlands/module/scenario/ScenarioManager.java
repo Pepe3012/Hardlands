@@ -14,9 +14,9 @@ import java.util.Set;
 
 public final class ScenarioManager implements JsonConvertible {
 
-    private final Map<String, Scenario> registeredScenarios = new LinkedHashMap<>();
-    private final Set<String> activeScenarios = new LinkedHashSet<>();
     private final Hardlands plugin;
+    private final Map<String, Scenario> scenarios = new LinkedHashMap<>();
+    private final Set<String> enabledScenarioIds = new LinkedHashSet<>();
 
     public ScenarioManager(Hardlands plugin) {
         this.plugin = plugin;
@@ -24,55 +24,56 @@ public final class ScenarioManager implements JsonConvertible {
     }
 
     public boolean enableScenario(String identifier) {
-        if (this.activeScenarios.contains(identifier)) return false;
+        Scenario scenario = this.scenarios.get(identifier);
 
-        var scenario = this.registeredScenarios.get(identifier);
-        if (scenario == null) return false;
+        if (scenario == null || this.enabledScenarioIds.contains(identifier)) return false;
 
         scenario.enable();
-        this.activeScenarios.add(identifier);
+        this.enabledScenarioIds.add(identifier);
 
         return true;
     }
 
     public boolean disableScenario(String identifier) {
-        if (!this.activeScenarios.contains(identifier)) return false;
+        Scenario scenario = this.scenarios.get(identifier);
 
-        var scenario = this.registeredScenarios.get(identifier);
-        if (scenario == null) return false;
+        if (scenario == null || !this.enabledScenarioIds.contains(identifier)) return false;
 
         scenario.disable();
-        this.activeScenarios.remove(identifier);
+        this.enabledScenarioIds.remove(identifier);
 
         return true;
     }
 
     public boolean toggleScenario(String identifier) {
-        return this.activeScenarios.contains(identifier)
+        return this.enabledScenarioIds.contains(identifier)
                 ? this.disableScenario(identifier)
                 : this.enableScenario(identifier);
     }
 
-    public Optional<Scenario> findRegisteredScenario(String identifier) {
-        return Optional.ofNullable(this.registeredScenarios.get(identifier));
+    public Optional<Scenario> findScenario(String identifier) {
+        return Optional.ofNullable(this.scenarios.get(identifier));
     }
 
-    public Optional<Scenario> findActiveScenario(String identifier) {
-        if (!this.activeScenarios.contains(identifier)) return Optional.empty();
-
-        return this.findRegisteredScenario(identifier);
+    public Optional<Scenario> findEnabledScenario(String identifier) {
+        if (!this.enabledScenarioIds.contains(identifier)) return Optional.empty();
+        return this.findScenario(identifier);
     }
 
     public List<Scenario> getScenarios() {
-        return List.copyOf(this.registeredScenarios.values());
+        return List.copyOf(this.scenarios.values());
+    }
+
+    public boolean isScenarioEnabled(String identifier) {
+        return this.enabledScenarioIds.contains(identifier);
     }
 
     @Override
     public JsonElement toJson() {
-        var json = new JsonObject();
+        JsonObject json = new JsonObject();
 
-        for (var identifier : this.activeScenarios) {
-            json.add(identifier, this.registeredScenarios.get(identifier).toJson());
+        for (String identifier : this.enabledScenarioIds) {
+            json.add(identifier, this.scenarios.get(identifier).toJson());
         }
 
         return json;
@@ -80,12 +81,12 @@ public final class ScenarioManager implements JsonConvertible {
 
     @Override
     public void fromJson(JsonElement json) {
-        for (var identifier : Set.copyOf(this.activeScenarios)) {
+        for (String identifier : List.copyOf(this.enabledScenarioIds)) {
             this.disableScenario(identifier);
         }
 
-        for (var entry : json.getAsJsonObject().entrySet()) {
-            var scenario = this.registeredScenarios.get(entry.getKey());
+        for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
+            Scenario scenario = this.scenarios.get(entry.getKey());
             if (scenario == null) continue;
 
             scenario.fromJson(entry.getValue());
@@ -94,14 +95,14 @@ public final class ScenarioManager implements JsonConvertible {
     }
 
     private void registerScenarios() {
-        for (var definition : ScenarioDefinition.values()) {
-            var identifier = definition.getIdentifier();
-            var scenario = definition.createScenario();
+        for (ScenarioDefinition definition : ScenarioDefinition.values()) {
+            String identifier = definition.getIdentifier();
+            Scenario scenario = definition.createScenario();
 
             scenario.initialize(this.plugin, identifier);
 
-            if (this.registeredScenarios.putIfAbsent(identifier, scenario) != null) {
-                throw new IllegalStateException("Scenario already registered: " + identifier);
+            if (this.scenarios.putIfAbsent(identifier, scenario) != null) {
+                throw new IllegalStateException("Scenario is already registered: " + identifier);
             }
         }
     }

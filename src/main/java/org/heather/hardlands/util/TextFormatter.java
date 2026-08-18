@@ -2,22 +2,18 @@ package org.heather.hardlands.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 
-public final class TextComponents {
+public final class TextFormatter {
 
-    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-    private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();
-
-    private TextComponents() {}
+    private TextFormatter() {}
 
     public static Component parse(String text) {
-        return MINI_MESSAGE.deserialize(text);
+        return MiniMessage.miniMessage().deserialize(text);
     }
 
     public static String toPlainText(Component component) {
-        return PLAIN_TEXT.serialize(component);
+        return MiniMessage.miniMessage().serialize(component);
     }
 
     public static String formatPlayer(Player player) {

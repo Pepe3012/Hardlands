@@ -1,7 +1,5 @@
 package org.heather.hardlands.listener;
 
-import org.heather.hardlands.common.item.InventoryItem;
-import org.heather.hardlands.module.inventory.InventoryRegistry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,50 +8,57 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
+import org.heather.hardlands.common.item.inventory.InventoryItem;
+import org.heather.hardlands.module.inventory.InventoryRegistry;
 
 public final class InventoryListener implements Listener {
 
     @EventHandler
     private void onInventoryClick(InventoryClickEvent event) {
-        var topInventory = event.getView().getTopInventory();
+        Inventory topInventory = event.getView().getTopInventory();
 
-        if (!InventoryRegistry.isManaged(topInventory) || !(event.getWhoClicked() instanceof Player player)) return;
+        if (!InventoryRegistry.isRegistered(topInventory)
+                || !(event.getWhoClicked() instanceof Player player)) return;
 
-        var action = event.getAction();
-        var clickedTop = event.getClickedInventory() == topInventory;
-        var affectsTop = clickedTop 
-                || action == InventoryAction.MOVE_TO_OTHER_INVENTORY 
-                || action == InventoryAction.COLLECT_TO_CURSOR;
+        boolean clickedTop = event.getClickedInventory() == topInventory;
 
-        if (!affectsTop) return;
+        if (!clickedTop && !affectsTopInventory(event.getAction())) return;
 
         event.setCancelled(true);
 
         if (!clickedTop) return;
 
         InventoryItem.find(event.getCurrentItem()).ifPresent(item -> {
-            if (!item.execute(topInventory, player, event.getClick())) return;
-            player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.5F);
+            if (item.execute(topInventory, player, event.getClick())) {
+                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.5F);
+            }
         });
     }
 
     @EventHandler
-    public void onInventoryDrag(InventoryDragEvent event) {
-        var topInventory = event.getView().getTopInventory();
+    private void onInventoryDrag(InventoryDragEvent event) {
+        Inventory topInventory = event.getView().getTopInventory();
 
-        if (!InventoryRegistry.isManaged(topInventory)) return;
+        if (!InventoryRegistry.isRegistered(topInventory)) return;
 
-        boolean affectsTop = event.getRawSlots().stream()
-                .anyMatch(slot -> slot >= 0 && slot < topInventory.getSize());
-        if (affectsTop) event.setCancelled(true);
+        boolean affectsTop = event.getRawSlots().stream().anyMatch(slot -> slot < topInventory.getSize());
+        if (affectsTop) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
+    private void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player player)) return;
 
-        var topInventory = event.getView().getTopInventory();
-        InventoryRegistry.findDefinition(topInventory)
-                .ifPresent(definition -> definition.handleClose(topInventory, player));
+        Inventory inventory = event.getView().getTopInventory();
+        InventoryRegistry.findDefinition(inventory)
+                .ifPresent(definition -> definition.handleClose(inventory, player));
+    }
+
+    private static boolean affectsTopInventory(InventoryAction action) {
+        return action == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                || action == InventoryAction.COLLECT_TO_CURSOR;
     }
 }

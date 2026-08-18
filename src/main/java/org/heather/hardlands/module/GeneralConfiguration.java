@@ -1,20 +1,22 @@
 package org.heather.hardlands.module;
 
-import org.heather.hardlands.core.config.Configuration;
-import org.heather.hardlands.core.config.Option;
+import org.heather.hardlands.config.ConfigBuilder;
+import org.heather.hardlands.config.OptionDef;
 import org.bukkit.Material;
 
 import java.util.Set;
 
-public final class GeneralConfiguration extends Configuration {
-
-    private final Option<Set<Material>> blacklistedMaterials = super.registerSet("blacklisted-materials", Material.class);
-
-    public GeneralConfiguration() {
-        super("general");
-    }
+@ConfigBuilder(
+        identifier = "general",
+        options = @OptionDef(
+                type = Set.class,
+                elementType = Material.class,
+                name = "blacklistedMaterials"
+        )
+)
+public final class GeneralConfiguration extends GeneralConfigurationConfiguration {
 
     public boolean isBlacklisted(Material material) {
-        return this.blacklistedMaterials.getValue().contains(material);
+        return super.blacklistedMaterials.getValue().contains(material);
     }
 }

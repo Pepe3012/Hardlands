@@ -1,7 +1,5 @@
 package org.heather.hardlands.common.item;
 
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.core.data.PersistentData;
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
@@ -19,14 +17,20 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.core.data.PersistentData;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class ItemBuilder {
 
-    private static final int LORE_CHARACTER_LIMIT = 30;
-    private static final String ID_KEY = "id";
+    private static final int MAX_LORE_LINE_LENGTH = 30;
+    private static final NamespacedKey ID_KEY = new NamespacedKey("hardlands", "id");
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final ComponentFlattener COMPONENT_FLATTENER = ComponentFlattener.basic();
@@ -34,7 +38,7 @@ public final class ItemBuilder {
     private final ItemStack item;
 
     public ItemBuilder(Material material) {
-        this.item = new ItemStack(material);
+        this.item = ItemStack.of(material);
     }
 
     public ItemBuilder(ItemStack item) {
@@ -42,84 +46,88 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder name(String name) {
-        return name(MINI_MESSAGE.deserialize(name));
+        return this.name(MINI_MESSAGE.deserialize(name));
     }
 
     public ItemBuilder name(Component name) {
-        item.setData(DataComponentTypes.CUSTOM_NAME, nonItalic(name));
+        this.item.setData(DataComponentTypes.CUSTOM_NAME, nonItalic(name));
         return this;
     }
 
     public ItemBuilder lore(String... lines) {
-        item.setData(DataComponentTypes.LORE, ItemLore.lore(deserializeLore(lines)));
+        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(parseLore(lines)));
         return this;
     }
 
     public ItemBuilder addLore(String... lines) {
-        ItemLore current = item.getData(DataComponentTypes.LORE);
-        List<Component> lore = new ArrayList<>(current == null ? List.of() : current.lines());
+        ItemLore currentLore = this.item.getData(DataComponentTypes.LORE);
+        List<Component> lore = new ArrayList<>(currentLore == null ? List.of() : currentLore.lines());
 
-        lore.addAll(deserializeLore(lines));
-        item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+        lore.addAll(parseLore(lines));
+        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
 
         return this;
     }
 
     public ItemBuilder enchant(Enchantment enchantment, int level) {
-        item.addUnsafeEnchantment(enchantment, level);
+        this.item.addUnsafeEnchantment(enchantment, level);
         return this;
     }
 
     public ItemBuilder unbreakable() {
-        item.editMeta(meta -> meta.setUnbreakable(true));
+        this.item.editMeta(meta -> meta.setUnbreakable(true));
         return this;
     }
 
     public ItemBuilder glint(boolean glint) {
-        item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glint);
+        this.item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glint);
         return this;
     }
 
     public ItemBuilder skullOwner(String owner) {
-        item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
-        return hideTooltip(DataComponentTypes.PROFILE);
+        this.item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
+        return this.hideTooltip(DataComponentTypes.PROFILE);
     }
 
     public ItemBuilder hideTooltip(DataComponentType... components) {
-        TooltipDisplay current = item.getData(DataComponentTypes.TOOLTIP_DISPLAY);
+        TooltipDisplay currentDisplay = this.item.getData(DataComponentTypes.TOOLTIP_DISPLAY);
         TooltipDisplay.Builder builder = TooltipDisplay.tooltipDisplay();
 
-        if (current != null) {
-            builder.hideTooltip(current.hideTooltip());
-            builder.hiddenComponents(current.hiddenComponents());
+        if (currentDisplay != null) {
+            builder.hideTooltip(currentDisplay.hideTooltip());
+            builder.hiddenComponents(currentDisplay.hiddenComponents());
         }
 
-        item.setData(DataComponentTypes.TOOLTIP_DISPLAY, builder.addHiddenComponents(components).build());
+        this.item.setData(
+                DataComponentTypes.TOOLTIP_DISPLAY,
+                builder.addHiddenComponents(components).build()
+        );
+
         return this;
     }
 
     public <P, C> ItemBuilder setData(NamespacedKey key, PersistentDataType<P, C> type, C value) {
-        item.editMeta(meta -> PersistentData.set(meta, key, type, value));
+        this.item.editMeta(meta -> PersistentData.set(meta, key, type, value));
         return this;
     }
 
     public <P, C> Optional<C> getData(NamespacedKey key, PersistentDataType<P, C> type) {
-        return PersistentData.find(item.getItemMeta(), key, type);
+        return PersistentData.find(this.item.getItemMeta(), key, type);
     }
 
     public ItemBuilder setId(String id) {
-        return setData(Hardlands.namespacedKey(ID_KEY), PersistentDataType.STRING, id);
+        return this.setData(ID_KEY, PersistentDataType.STRING, id);
     }
 
     public Optional<String> findId() {
-        return getData(Hardlands.namespacedKey(ID_KEY), PersistentDataType.STRING);
+        return this.getData(ID_KEY, PersistentDataType.STRING);
     }
 
     public ItemStack build() {
         return this.item.clone();
     }
 
-    private static List<Component> deserializeLore(String[] lines) {
+    private static List<Component> parseLore(String[] lines) {
         return Stream.of(lines)
                 .flatMap(line -> wrapLore(MINI_MESSAGE.deserialize(line)).stream())
                 .map(ItemBuilder::nonItalic)
@@ -127,34 +135,31 @@ public final class ItemBuilder {
     }
 
     private static List<Component> wrapLore(Component component) {
-        List<StyledCharacter> characters = flatten(component);
+        List<StyledCodePoint> characters = flatten(component);
 
         if (characters.isEmpty()) {
             return List.of(Component.empty());
         }
 
         List<Component> lines = new ArrayList<>();
-        List<StyledCharacter> currentLine = new ArrayList<>();
-        List<StyledCharacter> currentWord = new ArrayList<>();
+        List<StyledCodePoint> currentLine = new ArrayList<>();
+        List<StyledCodePoint> currentWord = new ArrayList<>();
+
         boolean spaceBeforeWord = false;
 
-        for (StyledCharacter character : characters) {
+        for (StyledCodePoint character : characters) {
             int codePoint = character.codePoint();
 
             if (isLineBreak(codePoint)) {
                 appendWord(lines, currentLine, currentWord, spaceBeforeWord);
                 flushLine(lines, currentLine);
                 spaceBeforeWord = false;
-                continue;
-            }
-
-            if (Character.isWhitespace(codePoint)) {
+            } else if (Character.isWhitespace(codePoint)) {
                 appendWord(lines, currentLine, currentWord, spaceBeforeWord);
                 spaceBeforeWord = !currentLine.isEmpty();
-                continue;
+            } else {
+                currentWord.add(character);
             }
-
-            currentWord.add(character);
         }
 
         appendWord(lines, currentLine, currentWord, spaceBeforeWord);
@@ -166,32 +171,36 @@ public final class ItemBuilder {
         return lines.isEmpty() ? List.of(Component.empty()) : lines;
     }
 
-    private static void appendWord(List<Component> lines, List<StyledCharacter> currentLine,
-                                   List<StyledCharacter> word, boolean spaceBeforeWord) {
+    private static void appendWord(
+            List<Component> lines,
+            List<StyledCodePoint> currentLine,
+            List<StyledCodePoint> word,
+            boolean spaceBeforeWord
+    ) {
         if (word.isEmpty()) {
             return;
         }
 
         int requiredLength = word.size() + (spaceBeforeWord && !currentLine.isEmpty() ? 1 : 0);
 
-        if (!currentLine.isEmpty() && currentLine.size() + requiredLength > LORE_CHARACTER_LIMIT) {
+        if (!currentLine.isEmpty() && currentLine.size() + requiredLength > MAX_LORE_LINE_LENGTH) {
             flushLine(lines, currentLine);
         }
 
-        if (!currentLine.isEmpty() && spaceBeforeWord) {
-            currentLine.add(new StyledCharacter(' ', word.getFirst().styles()));
+        if (spaceBeforeWord && !currentLine.isEmpty()) {
+            currentLine.add(new StyledCodePoint(' ', word.getFirst().styles()));
         }
 
         currentLine.addAll(word);
         word.clear();
     }
 
-    private static void flushLine(List<Component> lines, List<StyledCharacter> characters) {
+    private static void flushLine(List<Component> lines, List<StyledCodePoint> characters) {
         lines.add(buildComponent(characters));
         characters.clear();
     }
 
-    private static Component buildComponent(List<StyledCharacter> characters) {
+    private static Component buildComponent(List<StyledCodePoint> characters) {
         if (characters.isEmpty()) {
             return Component.empty();
         }
@@ -200,7 +209,7 @@ public final class ItemBuilder {
         int start = 0;
 
         while (start < characters.size()) {
-            StyledCharacter first = characters.get(start);
+            StyledCodePoint first = characters.get(start);
             int end = start + 1;
 
             while (end < characters.size() && first.styles().equals(characters.get(end).styles())) {
@@ -232,8 +241,8 @@ public final class ItemBuilder {
         return component;
     }
 
-    private static List<StyledCharacter> flatten(Component component) {
-        List<StyledCharacter> characters = new ArrayList<>();
+    private static List<StyledCodePoint> flatten(Component component) {
+        List<StyledCodePoint> characters = new ArrayList<>();
         Deque<Style> styles = new ArrayDeque<>();
 
         COMPONENT_FLATTENER.flatten(component, new FlattenerListener() {
@@ -246,7 +255,10 @@ public final class ItemBuilder {
             @Override
             public void component(String text) {
                 List<Style> activeStyles = List.copyOf(styles);
-                text.codePoints().forEach(codePoint -> characters.add(new StyledCharacter(codePoint, activeStyles)));
+
+                text.codePoints().forEach(codePoint ->
+                        characters.add(new StyledCodePoint(codePoint, activeStyles))
+                );
             }
 
             @Override
@@ -266,5 +278,5 @@ public final class ItemBuilder {
         return component.decoration(TextDecoration.ITALIC, false);
     }
 
-    private record StyledCharacter(int codePoint, List<Style> styles) {}
+    private record StyledCodePoint(int codePoint, List<Style> styles) {}
 }

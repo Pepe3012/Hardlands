@@ -1,22 +1,21 @@
 package org.heather.hardlands.module.phase;
 
+import org.heather.hardlands.config.ConfigBuilder;
+import org.heather.hardlands.config.OptionDef;
 import org.heather.hardlands.core.ThreadScheduler;
 import org.heather.hardlands.core.config.Option;
-import org.heather.hardlands.annotation.ConfigOption;
-import org.heather.hardlands.annotation.ConfigurationSpec;
+import org.heather.hardlands.core.config.Validator;
 
-@ConfigurationSpec(
+@ConfigBuilder(
         identifier = "timer",
         options = {
-                @ConfigOption(name = "pvpStartMinute", type = Integer.class),
-                @ConfigOption(name = "borderStartMinute", type = Integer.class),
-                @ConfigOption(name = "meetupStartMinute", type = Integer.class),
-                @ConfigOption(name = "deathmatchStartMinute", type = Integer.class)
+                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "pvpStartMinute"),
+                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "borderStartMinute"),
+                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "meetupStartMinute"),
+                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "deathmatchStartMinute")
         }
 )
 public final class PhaseTimer extends PhaseTimerConfiguration {
-
-    private static final long TICKS_PER_MINUTE = 20L * 60L;
 
     private final ThreadScheduler scheduler;
 
@@ -25,20 +24,17 @@ public final class PhaseTimer extends PhaseTimerConfiguration {
     }
 
     public void scheduleForOption(Runnable runnable, Option<Integer> option) {
-        long ticks = option.getValue() * TICKS_PER_MINUTE;
+        long ticks = option.getValue() * 20L * 60L;
         this.scheduler.scheduleSync(runnable, ticks);
     }
 
     @Override
     protected boolean isConfigurationValid() {
-        int pvp = this.pvpStartMinute.getValue();
-        int border = this.borderStartMinute.getValue();
-        int meetup = this.meetupStartMinute.getValue();
-        int deathmatch = this.deathmatchStartMinute.getValue();
+        int pvp = super.pvpStartMinute.getValue();
+        int border = super.borderStartMinute.getValue();
+        int meetup = super.meetupStartMinute.getValue();
+        int deathmatch = super.deathmatchStartMinute.getValue();
 
-        return pvp >= 0
-                && pvp < border
-                && border < meetup
-                && meetup < deathmatch;
+        return pvp < border && border < meetup && meetup < deathmatch;
     }
 }

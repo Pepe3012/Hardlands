@@ -1,14 +1,16 @@
 package org.heather.hardlands.util;
 
-public final class RomanNumber {
+public final class RomanNumerals {
 
     private static final int[] VALUES = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
     private static final String[] SYMBOLS = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
 
-    private RomanNumber() {}
+    private RomanNumerals() {}
 
     public static String format(int number) {
-        if (number <= 0) throw new IllegalArgumentException("Number must be greater than 0");
+        if (number <= 0) {
+            throw new IllegalArgumentException("Number must be greater than 0");
+        }
 
         StringBuilder result = new StringBuilder();
 

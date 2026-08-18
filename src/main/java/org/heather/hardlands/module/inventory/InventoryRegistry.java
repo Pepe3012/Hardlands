@@ -12,9 +12,9 @@ public final class InventoryRegistry {
 
     private InventoryRegistry() {}
 
-    public static void register(InventoryDefinition... definitions) {
-        for (InventoryDefinition definition : definitions) {
-            if (INVENTORIES.containsKey(definition)) {
+    public static void initialize() {
+        for (InventoryDefinition definition : InventoryDefinition.values()) {
+            if (isRegistered(definition)) {
                 throw new IllegalStateException("Inventory is already registered: " + definition.name());
             }
 
@@ -22,7 +22,7 @@ public final class InventoryRegistry {
         }
     }
 
-    public static Inventory get(InventoryDefinition definition) {
+    public static Inventory getInventory(InventoryDefinition definition) {
         Inventory inventory = INVENTORIES.get(definition);
 
         if (inventory == null) {
@@ -33,14 +33,15 @@ public final class InventoryRegistry {
     }
 
     public static Optional<InventoryDefinition> findDefinition(Inventory inventory) {
-        return InventoryDefinition.find(inventory).filter(definition -> INVENTORIES.get(definition) == inventory);
+        return InventoryDefinition.find(inventory)
+                .filter(definition -> INVENTORIES.get(definition) == inventory);
     }
 
     public static boolean isRegistered(InventoryDefinition definition) {
         return INVENTORIES.containsKey(definition);
     }
 
-    public static boolean isManaged(Inventory inventory) {
+    public static boolean isRegistered(Inventory inventory) {
         return findDefinition(inventory).isPresent();
     }
 }
