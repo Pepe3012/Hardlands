@@ -1,4 +1,4 @@
-package org.heather.hardlands.common.item;
+package org.heather.hardlands.item;
 
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -9,7 +9,6 @@ import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.flattener.FlattenerListener;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -17,22 +16,21 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.heather.hardlands.Hardlands;
 import org.heather.hardlands.core.data.PersistentData;
+import org.heather.hardlands.text.TextFormatter;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
 public final class ItemBuilder {
 
     private static final int MAX_LORE_LINE_LENGTH = 30;
-    private static final NamespacedKey ID_KEY = new NamespacedKey("hardlands", "id");
 
-    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    private static final NamespacedKey ID_KEY = new NamespacedKey("hardlands", "id");
     private static final ComponentFlattener COMPONENT_FLATTENER = ComponentFlattener.basic();
 
     private final ItemStack item;
@@ -46,7 +44,7 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder name(String name) {
-        return this.name(MINI_MESSAGE.deserialize(name));
+        return this.name(TextFormatter.parse(name));
     }
 
     public ItemBuilder name(Component name) {
@@ -55,18 +53,39 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder lore(String... lines) {
-        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(parseLore(lines)));
+        return this.setLore(lines, TextFormatter::parse);
+    }
+
+    public ItemBuilder formattedLore(String... lines) {
+        return this.setLore(lines, TextFormatter::formatHighlighted);
+    }
+
+    public ItemBuilder tinyCapsLore(String... lines) {
+        return this.setLore(lines, TextFormatter::formatTinyCaps);
+    }
+
+    public ItemBuilder addLore(Component... lines) {
+        ItemLore currentLore = this.item.getData(DataComponentTypes.LORE);
+        List<Component> lore = new ArrayList<>(currentLore == null ? List.of() : currentLore.lines());
+
+        for (Component line : lines) {
+            lore.add(nonItalic(line));
+        }
+
+        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
         return this;
     }
 
     public ItemBuilder addLore(String... lines) {
-        ItemLore currentLore = this.item.getData(DataComponentTypes.LORE);
-        List<Component> lore = new ArrayList<>(currentLore == null ? List.of() : currentLore.lines());
+        return this.addLore(lines, TextFormatter::parse);
+    }
 
-        lore.addAll(parseLore(lines));
-        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+    public ItemBuilder addFormattedLore(String... lines) {
+        return this.addLore(lines, TextFormatter::formatHighlighted);
+    }
 
-        return this;
+    public ItemBuilder addTinyCapsLore(String... lines) {
+        return this.addLore(lines, TextFormatter::formatTinyCaps);
     }
 
     public ItemBuilder enchant(Enchantment enchantment, int level) {
@@ -85,7 +104,10 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder skullOwner(String owner) {
-        this.item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
+        this.item.editMeta(SkullMeta.class, meta ->
+                meta.setPlayerProfile(Bukkit.createProfile(owner))
+        );
+
         return this.hideTooltip(DataComponentTypes.PROFILE);
     }
 
@@ -127,11 +149,44 @@ public final class ItemBuilder {
         return this.item.clone();
     }
 
-    private static List<Component> parseLore(String[] lines) {
-        return Stream.of(lines)
-                .flatMap(line -> wrapLore(MINI_MESSAGE.deserialize(line)).stream())
-                .map(ItemBuilder::nonItalic)
-                .toList();
+    private ItemBuilder setLore(String[] lines, Function<String, Component> formatter) {
+        this.item.setData(
+                DataComponentTypes.LORE,
+                ItemLore.lore(formatLore(lines, formatter))
+        );
+
+        return this;
+    }
+
+    private ItemBuilder addLore(String[] lines, Function<String, Component> formatter) {
+        ItemLore currentLore = this.item.getData(DataComponentTypes.LORE);
+        List<Component> lore = new ArrayList<>();
+
+        if (currentLore != null) {
+            lore.addAll(currentLore.lines());
+        }
+
+        lore.addAll(formatLore(lines, formatter));
+        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(lore));
+
+        return this;
+    }
+
+    private static List<Component> formatLore(
+            String[] lines,
+            Function<String, Component> formatter
+    ) {
+        List<Component> result = new ArrayList<>();
+
+        for (String line : lines) {
+            Component component = formatter.apply(line);
+
+            for (Component wrappedLine : wrapLore(component)) {
+                result.add(nonItalic(wrappedLine));
+            }
+        }
+
+        return result;
     }
 
     private static List<Component> wrapLore(Component component) {
@@ -154,12 +209,16 @@ public final class ItemBuilder {
                 appendWord(lines, currentLine, currentWord, spaceBeforeWord);
                 flushLine(lines, currentLine);
                 spaceBeforeWord = false;
-            } else if (Character.isWhitespace(codePoint)) {
+                continue;
+            }
+
+            if (Character.isWhitespace(codePoint)) {
                 appendWord(lines, currentLine, currentWord, spaceBeforeWord);
                 spaceBeforeWord = !currentLine.isEmpty();
-            } else {
-                currentWord.add(character);
+                continue;
             }
+
+            currentWord.add(character);
         }
 
         appendWord(lines, currentLine, currentWord, spaceBeforeWord);
@@ -181,9 +240,14 @@ public final class ItemBuilder {
             return;
         }
 
-        int requiredLength = word.size() + (spaceBeforeWord && !currentLine.isEmpty() ? 1 : 0);
+        int requiredLength = word.size();
 
-        if (!currentLine.isEmpty() && currentLine.size() + requiredLength > MAX_LORE_LINE_LENGTH) {
+        if (spaceBeforeWord && !currentLine.isEmpty()) {
+            requiredLength++;
+        }
+
+        if (!currentLine.isEmpty()
+                && currentLine.size() + requiredLength > MAX_LORE_LINE_LENGTH) {
             flushLine(lines, currentLine);
         }
 
@@ -195,7 +259,10 @@ public final class ItemBuilder {
         word.clear();
     }
 
-    private static void flushLine(List<Component> lines, List<StyledCodePoint> characters) {
+    private static void flushLine(
+            List<Component> lines,
+            List<StyledCodePoint> characters
+    ) {
         lines.add(buildComponent(characters));
         characters.clear();
     }
@@ -212,7 +279,8 @@ public final class ItemBuilder {
             StyledCodePoint first = characters.get(start);
             int end = start + 1;
 
-            while (end < characters.size() && first.styles().equals(characters.get(end).styles())) {
+            while (end < characters.size()
+                    && first.styles().equals(characters.get(end).styles())) {
                 end++;
             }
 
@@ -256,9 +324,9 @@ public final class ItemBuilder {
             public void component(String text) {
                 List<Style> activeStyles = List.copyOf(styles);
 
-                text.codePoints().forEach(codePoint ->
-                        characters.add(new StyledCodePoint(codePoint, activeStyles))
-                );
+                for (int codePoint : text.codePoints().toArray()) {
+                    characters.add(new StyledCodePoint(codePoint, activeStyles));
+                }
             }
 
             @Override

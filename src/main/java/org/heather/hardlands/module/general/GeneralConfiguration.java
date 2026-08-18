@@ -1,4 +1,4 @@
-package org.heather.hardlands.module;
+package org.heather.hardlands.module.general;
 
 import org.heather.hardlands.config.ConfigBuilder;
 import org.heather.hardlands.config.OptionDef;
@@ -8,11 +8,9 @@ import java.util.Set;
 
 @ConfigBuilder(
         identifier = "general",
-        options = @OptionDef(
-                type = Set.class,
-                elementType = Material.class,
-                name = "blacklistedMaterials"
-        )
+        options = {
+                @OptionDef(type = Set.class, elementType = Material.class, name = "blacklistedMaterials")
+        }
 )
 public final class GeneralConfiguration extends GeneralConfigurationConfiguration {
 

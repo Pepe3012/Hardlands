@@ -1,6 +1,6 @@
 package org.heather.hardlands.module.scenario;
 
-import org.heather.hardlands.common.item.inventory.InventoryItem;
+import org.heather.hardlands.item.inventory.InventoryItem;
 import org.heather.hardlands.module.scenario.scenarios.AppleGroveScenario;
 import org.heather.hardlands.module.scenario.scenarios.BonanzaScenario;
 import org.heather.hardlands.module.scenario.scenarios.MagicManScenario;

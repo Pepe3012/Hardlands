@@ -1,4 +1,4 @@
-package org.heather.hardlands.module.inventory;
+package org.heather.hardlands.inventory;
 
 import org.bukkit.inventory.Inventory;
 

@@ -7,16 +7,17 @@ import com.google.gson.GsonBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.heather.hardlands.common.command.HardlandsCommand;
+import org.heather.hardlands.command.HardlandsCommand;
 import org.heather.hardlands.core.ThreadScheduler;
-import org.heather.hardlands.listener.InventoryListener;
-import org.heather.hardlands.listener.PlayerListener;
-import org.heather.hardlands.module.GeneralConfiguration;
+import org.heather.hardlands.inventory.InventoryListener;
+import org.heather.hardlands.player.PlayerListener;
+import org.heather.hardlands.module.general.GeneralConfiguration;
 import org.heather.hardlands.module.PresetRepository;
-import org.heather.hardlands.module.inventory.InventoryRegistry;
+import org.heather.hardlands.inventory.InventoryRegistry;
 import org.heather.hardlands.module.phase.PhaseController;
 import org.heather.hardlands.module.scenario.ScenarioManager;
 import org.heather.hardlands.module.world.WorldManager;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -28,17 +29,19 @@ public final class Hardlands extends JavaPlugin {
     private static Hardlands instance;
 
     private final GeneralConfiguration generalConfiguration = new GeneralConfiguration();
-    private final WorldManager worldManager = new WorldManager();
-    private final PresetRepository presetRepository = PresetRepository.create(this);
     private final ThreadScheduler threadScheduler = new ThreadScheduler(this);
     private final ScenarioManager scenarioManager = new ScenarioManager(this);
     private final PhaseController phaseController = new PhaseController(this);
+    private final PresetRepository presetRepository = PresetRepository.create(this);
+
+    @Nullable private WorldManager worldManager;
 
     @Override
     public void onEnable() {
         super.getLogger().info("Initializing...");
         setInstance(this);
 
+        this.worldManager = new WorldManager();
         InventoryRegistry.initialize();
 
         this.registerListeners(

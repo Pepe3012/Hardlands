@@ -1,6 +1,6 @@
 package org.heather.hardlands.module.enchantment;
 
-import org.heather.hardlands.common.item.ItemBuilder;
+import org.heather.hardlands.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;

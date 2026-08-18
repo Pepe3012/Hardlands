@@ -1,12 +1,12 @@
-package org.heather.hardlands.common.item.inventory;
+package org.heather.hardlands.item.inventory;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.common.item.ItemBuilder;
-import org.heather.hardlands.module.inventory.InventoryDefinition;
+import org.heather.hardlands.item.ItemBuilder;
+import org.heather.hardlands.inventory.InventoryDefinition;
 
 import java.util.List;
 import java.util.Optional;
@@ -105,10 +105,7 @@ public enum InventoryItem {
     public record Display(Material material, String description) {
 
         public ItemStack build(String name) {
-            return new ItemBuilder(this.material)
-                    .name(name)
-                    .lore("<gray>" + this.description)
-                    .build();
+            return new ItemBuilder(this.material).name(name).lore("<gray>" + this.description).build();
         }
     }
 

@@ -1,4 +1,4 @@
-package org.heather.hardlands.listener;
+package org.heather.hardlands.module.general;
 
 import org.bukkit.event.Listener;
 

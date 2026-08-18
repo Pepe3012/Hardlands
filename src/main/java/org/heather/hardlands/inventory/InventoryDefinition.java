@@ -1,4 +1,4 @@
-package org.heather.hardlands.module.inventory;
+package org.heather.hardlands.inventory;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -8,10 +8,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.common.item.ItemBuilder;
-import org.heather.hardlands.common.item.inventory.InventoryItem;
-import org.heather.hardlands.common.item.inventory.PreparationItem;
-import org.heather.hardlands.module.inventory.handler.InventoryHandler;
+import org.heather.hardlands.item.ItemBuilder;
+import org.heather.hardlands.item.inventory.InventoryItem;
+import org.heather.hardlands.item.inventory.PreparationItem;
+import org.heather.hardlands.inventory.handler.InventoryHandler;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.heather.hardlands.common.item;
+package org.heather.hardlands.item;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

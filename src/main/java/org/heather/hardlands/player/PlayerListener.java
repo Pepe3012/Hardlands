@@ -1,9 +1,9 @@
-package org.heather.hardlands.listener;
+package org.heather.hardlands.player;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.heather.hardlands.util.TextFormatter;
+import org.heather.hardlands.text.TextFormatter;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
