@@ -14,6 +14,7 @@ import org.heather.hardlands.listener.PlayerListener;
 import org.heather.hardlands.module.GeneralConfiguration;
 import org.heather.hardlands.module.PresetRepository;
 import org.heather.hardlands.module.inventory.InventoryRegistry;
+import org.heather.hardlands.module.phase.PhaseController;
 import org.heather.hardlands.module.scenario.ScenarioManager;
 import org.heather.hardlands.module.world.WorldManager;
 
@@ -28,9 +29,10 @@ public final class Hardlands extends JavaPlugin {
 
     private final GeneralConfiguration generalConfiguration = new GeneralConfiguration();
     private final WorldManager worldManager = new WorldManager();
-    private final ThreadScheduler threadScheduler = new ThreadScheduler(this);
     private final PresetRepository presetRepository = PresetRepository.create(this);
+    private final ThreadScheduler threadScheduler = new ThreadScheduler(this);
     private final ScenarioManager scenarioManager = new ScenarioManager(this);
+    private final PhaseController phaseController = new PhaseController(this);
 
     @Override
     public void onEnable() {
@@ -86,6 +88,10 @@ public final class Hardlands extends JavaPlugin {
 
     public ScenarioManager getScenarioManager() {
         return this.scenarioManager;
+    }
+
+    public PhaseController getPhaseController() {
+        return this.phaseController;
     }
 
     private void registerListeners(Listener... listeners) {

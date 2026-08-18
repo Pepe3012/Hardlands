@@ -1,5 +1,6 @@
 package org.heather.hardlands.module.phase;
 
+import org.heather.hardlands.Hardlands;
 import org.heather.hardlands.config.ConfigBuilder;
 import org.heather.hardlands.config.OptionDef;
 import org.heather.hardlands.core.ThreadScheduler;
@@ -15,17 +16,24 @@ import org.heather.hardlands.core.config.Validator;
                 @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "deathmatchStartMinute")
         }
 )
-public final class PhaseTimer extends PhaseTimerConfiguration {
+public final class PhaseController extends PhaseControllerConfiguration {
 
+    private final Hardlands plugin;
     private final ThreadScheduler scheduler;
 
-    public PhaseTimer(ThreadScheduler scheduler) {
-        this.scheduler = scheduler;
+    private Phase phase;
+
+    public PhaseController(Hardlands plugin) {
+        this.plugin = plugin;
+        this.scheduler = plugin.getThreadScheduler();
+    }
+
+    public void startPhase(Phase phase) {
+        this.phase = phase;
     }
 
     public void scheduleForOption(Runnable runnable, Option<Integer> option) {
-        long ticks = option.getValue() * 20L * 60L;
-        this.scheduler.scheduleSync(runnable, ticks);
+        this.scheduler.scheduleSync(runnable, option.getValue() * 20L * 60L);
     }
 
     @Override
