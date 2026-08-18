@@ -1,0 +1,118 @@
+package org.heather.hardlands;
+
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.PaperCommandManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.heather.hardlands.common.command.HardlandsCommand;
+import org.heather.hardlands.core.ThreadScheduler;
+import org.heather.hardlands.listener.InventoryListener;
+import org.heather.hardlands.listener.PlayerListener;
+import org.heather.hardlands.module.GeneralConfiguration;
+import org.heather.hardlands.module.PresetRepository;
+import org.heather.hardlands.module.inventory.InventoryRegistry;
+import org.heather.hardlands.module.phase.PhaseController;
+import org.heather.hardlands.module.scenario.ScenarioManager;
+import org.heather.hardlands.module.world.WorldManager;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+public final class Hardlands extends JavaPlugin {
+
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
+
+    private static Hardlands instance;
+
+    private final GeneralConfiguration generalConfiguration = new GeneralConfiguration();
+    private final WorldManager worldManager = new WorldManager();
+    private final PresetRepository presetRepository = PresetRepository.create(this);
+    private final ThreadScheduler threadScheduler = new ThreadScheduler(this);
+    private final ScenarioManager scenarioManager = new ScenarioManager(this);
+    private final PhaseController phaseController = new PhaseController(this);
+
+    @Override
+    public void onEnable() {
+        super.getLogger().info("Initializing...");
+        setInstance(this);
+
+        InventoryRegistry.initialize();
+
+        this.registerListeners(
+                new PlayerListener(),
+                new InventoryListener()
+        );
+
+        this.registerCommands(
+                new HardlandsCommand()
+        );
+
+        super.getLogger().info(System.lineSeparator() + """
+             _    _          _____  _____  _               _   _ _____   _____
+            | |  | |   /\\   |  __ \\|  __ \\| |        /\\   | \\ | |  __ \\ / ____|
+            | |__| |  /  \\  | |__) | |  | | |       /  \\  |  \\| | |  | | (___
+            |  __  | / /\\ \\ |  _  /| |  | | |      / /\\ \\ | . ` | |  | |\\___ \\
+            | |  | |/ ____ \\| | \\ \\| |__| | |____ / ____ \\| |\\  | |__| |____) |
+            |_|  |_/_/    \\_\\_|  \\_\\_____/|______/_/    \\_\\_| \\_|_____/|_____/
+            """);
+        super.getLogger().info("Initialized.");
+    }
+
+    @Override
+    public void onDisable() {
+        super.getLogger().info("Disabling...");
+
+        this.threadScheduler.terminate();
+
+        super.getLogger().info("Plugin successfully disabled.");
+    }
+
+    public GeneralConfiguration getGeneralConfiguration() {
+        return this.generalConfiguration;
+    }
+
+    public WorldManager getWorldManager() {
+        return this.worldManager;
+    }
+
+    public ThreadScheduler getThreadScheduler() {
+        return this.threadScheduler;
+    }
+
+    public PresetRepository getPresetRepository() {
+        return this.presetRepository;
+    }
+
+    public ScenarioManager getScenarioManager() {
+        return this.scenarioManager;
+    }
+
+    public PhaseController getPhaseController() {
+        return this.phaseController;
+    }
+
+    private void registerListeners(Listener... listeners) {
+        for (Listener listener : listeners) {
+            Bukkit.getPluginManager().registerEvents(listener, this);
+        }
+    }
+
+    private void registerCommands(BaseCommand... commands) {
+        PaperCommandManager commandManager = new PaperCommandManager(this);
+
+        for (BaseCommand command : commands) {
+            commandManager.registerCommand(command);
+        }
+    }
+
+    public static Hardlands getInstance() {
+        return instance;
+    }
+
+    private static void setInstance(Hardlands instance) {
+        Hardlands.instance = instance;
+    }
+}

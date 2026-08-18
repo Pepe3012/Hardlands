@@ -1,0 +1,66 @@
+package org.heather.hardlands.module.scenario.scenarios;
+
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.config.ConfigBuilder;
+import org.heather.hardlands.config.OptionDef;
+import org.heather.hardlands.core.config.Validator;
+import org.heather.hardlands.module.scenario.Scenario;
+import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.block.Block;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.BlockDropItemEvent;
+import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Optional;
+
+@ConfigBuilder(
+        superclass = Scenario.class,
+        options = {
+                @OptionDef(type = Boolean.class, name = "allTreeTypes"),
+                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "appleDropRate"),
+                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "goldenAppleDropRate"),
+                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "enchantedGoldenAppleDropRate")
+        }
+)
+public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
+
+    @EventHandler(ignoreCancelled = true)
+    private void onLeavesDecay(LeavesDecayEvent event) {
+        this.tryDropApple(event);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private void onBlockDropItem(BlockDropItemEvent event) {
+        this.tryDropApple(event);
+    }
+
+    private void tryDropApple(BlockEvent event) {
+        Block block = event.getBlock();
+        if (!this.isEligibleLeaf(block.getType())) return;
+
+        this.findAppleDrop().ifPresent(drop ->
+                block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(drop)));
+    }
+
+    private Optional<Material> findAppleDrop() {
+        float roll = Hardlands.RANDOM.nextFloat();
+
+        float enchantedRate = super.enchantedGoldenAppleDropRate.getValue();
+        float goldenRate = enchantedRate + super.goldenAppleDropRate.getValue();
+        float appleRate = goldenRate + super.appleDropRate.getValue();
+
+        if (roll < enchantedRate) return Optional.of(Material.ENCHANTED_GOLDEN_APPLE);
+        if (roll < goldenRate) return Optional.of(Material.GOLDEN_APPLE);
+        if (roll < appleRate) return Optional.of(Material.APPLE);
+
+        return Optional.empty();
+    }
+
+    private boolean isEligibleLeaf(Material material) {
+        return Tag.LEAVES.isTagged(material)
+                && (super.allTreeTypes.getValue() || material == Material.OAK_LEAVES);
+    }
+}

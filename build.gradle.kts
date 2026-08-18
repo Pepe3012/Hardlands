@@ -17,7 +17,11 @@ dependencies {
     compileOnly(libs.paper.api)
     compileOnly(libs.chunky.common)
     implementation(libs.acf.paper)
+
     compileOnly("com.google.code.gson:gson:2.14.0")
+
+    compileOnly(project(":annotation-processor"))
+    annotationProcessor(project(":annotation-processor"))
 }
 
 java {
@@ -31,8 +35,8 @@ tasks {
 
     shadowJar {
         archiveClassifier.set("")
-        relocate("co.aikar.commands", "io.github.pepe3012.hardlands.libs.acf.commands")
-        relocate("co.aikar.locales", "io.github.pepe3012.hardlands.libs.acf.locales")
+        relocate("co.aikar.commands", "org.heather.hardlands.libs.acf.commands")
+        relocate("co.aikar.locales", "org.heather.hardlands.libs.acf.locales")
     }
 
     assemble {
@@ -41,7 +45,7 @@ tasks {
 
     runServer {
         minecraftVersion(libs.versions.minecraft.get())
-        jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
+        jvmArgs("-Xms4G", "-Xmx4G", "-Dcom.mojang.eula.agree=true")
     }
 
     processResources {
