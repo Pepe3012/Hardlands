@@ -71,7 +71,7 @@ public final class WorldManager extends WorldManagerConfiguration {
 
     private void shrinkWorldBorders(Option<Integer> targetSizeOption, Option<Integer> shrinkDurationMinutesOption) {
         int targetSize = targetSizeOption.getValue();
-        long shrinkDurationTicks = shrinkDurationMinutesOption.getValue() * 60L * 20L;
+        long shrinkDurationTicks = shrinkDurationMinutesOption.getValue() * 1200L;
 
         this.forEachEnabledWorld(world ->
                 world.getWorldBorder().changeSize(this.scaleForDimension(world, targetSize), shrinkDurationTicks));

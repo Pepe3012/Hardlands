@@ -19,7 +19,8 @@ public enum InventoryItem {
             click(ClickType.LEFT, (inventory, player) -> InventoryDefinition.find(inventory).ifPresent(definition -> definition.openParent(player)))
     ),
     NEXT(
-            head("MHF_ArrowRight", "Siguiente", "Avanza a la siguiente página.")
+            head("MHF_ArrowRight", "Siguiente", "Avanza a la siguiente página."),
+            click(ClickType.LEFT, (inventory, player) -> {})
     ),
 
     SCENARIOS(() -> InventoryDefinition.SCENARIOS, Material.CHERRY_SAPLING, "Activa, desactiva y configura los escenarios de la partida."),

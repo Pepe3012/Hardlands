@@ -106,41 +106,41 @@ public final class PregenerationManager {
 
     public enum State {
 
-        IDLE("idle", "Sin iniciar", NamedTextColor.GRAY, Material.BEDROCK),
-        RUNNING("running", "En progreso", NamedTextColor.YELLOW, Material.DIRT),
-        PAUSED("paused", "Pausado", NamedTextColor.GOLD, Material.STONE),
-        COMPLETED("completed", "Completado", NamedTextColor.GREEN, Material.GRASS_BLOCK);
+        IDLE("idle", "Sin iniciar", Material.BEDROCK, NamedTextColor.GRAY),
+        RUNNING("running", "En progreso", Material.DIRT, NamedTextColor.YELLOW),
+        PAUSED("paused", "Pausado", Material.STONE, NamedTextColor.GOLD),
+        COMPLETED("completed", "Completado", Material.GRASS_BLOCK, NamedTextColor.GREEN);
 
         private final String key;
-        private final String displayName;
-        private final TextColor color;
+        private final String name;
         private final Material material;
+        private final TextColor textColor;
 
-        State(String key, String displayName, TextColor color, Material material) {
+        State(String key, String name, Material material, TextColor textColor) {
             this.key = key;
-            this.displayName = displayName;
-            this.color = color;
+            this.name = name;
             this.material = material;
+            this.textColor = textColor;
         }
 
         public String getKey() {
             return this.key;
         }
 
-        public String getDisplayName() {
-            return this.displayName;
-        }
-
-        public TextColor getColor() {
-            return this.color;
-        }
-
-        public Component getDisplay() {
-            return Component.text(this.displayName, this.color);
+        public String getName() {
+            return this.name;
         }
 
         public Material getMaterial() {
             return this.material;
+        }
+
+        public TextColor getTextColor() {
+            return this.textColor;
+        }
+
+        public Component getDisplay() {
+            return Component.text(this.name, this.textColor);
         }
     }
 }

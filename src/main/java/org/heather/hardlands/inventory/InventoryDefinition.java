@@ -146,7 +146,7 @@ public enum InventoryDefinition {
 
         inventory.setItem(
                 slot(row, PREPARATION_COLUMN),
-                PreparationItem.build(Hardlands.getInstance().getWorldManager().getPregenerationManager())
+                PreparationItem.build(Hardlands.getInstance().getWorldManagerOrThrow().getPregenerationManager())
         );
     }
 

@@ -39,7 +39,7 @@ public final class Hardlands extends JavaPlugin {
     @Override
     public void onEnable() {
         super.getLogger().info("Initializing...");
-        setInstance(this);
+        instance = this;
 
         this.worldManager = new WorldManager();
         InventoryRegistry.initialize();
@@ -64,6 +64,19 @@ public final class Hardlands extends JavaPlugin {
         super.getLogger().info("Initialized.");
     }
 
+    private void registerListeners(Listener... listeners) {
+        for (Listener listener : listeners) {
+            Bukkit.getPluginManager().registerEvents(listener, this);
+        }
+    }
+
+    private void registerCommands(BaseCommand... commands) {
+        PaperCommandManager commandManager = new PaperCommandManager(this);
+        for (BaseCommand command : commands) {
+            commandManager.registerCommand(command);
+        }
+    }
+
     @Override
     public void onDisable() {
         super.getLogger().info("Disabling...");
@@ -73,20 +86,16 @@ public final class Hardlands extends JavaPlugin {
         super.getLogger().info("Plugin successfully disabled.");
     }
 
+    public static Hardlands getInstance() {
+        return instance;
+    }
+
     public GeneralConfiguration getGeneralConfiguration() {
         return this.generalConfiguration;
     }
 
-    public WorldManager getWorldManager() {
-        return this.worldManager;
-    }
-
     public ThreadScheduler getThreadScheduler() {
         return this.threadScheduler;
-    }
-
-    public PresetRepository getPresetRepository() {
-        return this.presetRepository;
     }
 
     public ScenarioManager getScenarioManager() {
@@ -97,25 +106,14 @@ public final class Hardlands extends JavaPlugin {
         return this.phaseController;
     }
 
-    private void registerListeners(Listener... listeners) {
-        for (Listener listener : listeners) {
-            Bukkit.getPluginManager().registerEvents(listener, this);
+    public PresetRepository getPresetRepository() {
+        return this.presetRepository;
+    }
+
+    public WorldManager getWorldManagerOrThrow() {
+        if (this.worldManager == null) {
+            throw new IllegalStateException("WorldManager is null");
         }
-    }
-
-    private void registerCommands(BaseCommand... commands) {
-        PaperCommandManager commandManager = new PaperCommandManager(this);
-
-        for (BaseCommand command : commands) {
-            commandManager.registerCommand(command);
-        }
-    }
-
-    public static Hardlands getInstance() {
-        return instance;
-    }
-
-    private static void setInstance(Hardlands instance) {
-        Hardlands.instance = instance;
+        return this.worldManager;
     }
 }

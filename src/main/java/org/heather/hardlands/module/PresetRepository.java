@@ -13,7 +13,7 @@ public final class PresetRepository {
             @SerializedName("general") JsonObject general,
             @SerializedName("world") JsonObject world,
             @SerializedName("scenarios") JsonObject scenarios,
-           @SerializedName("timer") JsonObject timer
+            @SerializedName("phase") JsonObject phase
     ) {}
 
     private final Hardlands plugin;
@@ -31,7 +31,7 @@ public final class PresetRepository {
     public void save(String name) {
         this.managerFor(name).write(new Preset(
                 this.plugin.getGeneralConfiguration().toJson().getAsJsonObject(),
-                this.plugin.getWorldManager().toJson().getAsJsonObject(),
+                this.plugin.getWorldManagerOrThrow().toJson().getAsJsonObject(),
                 this.plugin.getScenarioManager().toJson().getAsJsonObject(),
                 this.plugin.getPhaseController().toJson().getAsJsonObject()
         ));
@@ -40,8 +40,9 @@ public final class PresetRepository {
     public void load(String name) {
         this.managerFor(name).read().ifPresent(preset -> {
             this.plugin.getGeneralConfiguration().fromJson(preset.general());
-            this.plugin.getWorldManager().fromJson(preset.world());
+            this.plugin.getWorldManagerOrThrow().fromJson(preset.world());
             this.plugin.getScenarioManager().fromJson(preset.scenarios());
+            this.plugin.getPhaseController().fromJson(preset.phase());
         });
     }
 

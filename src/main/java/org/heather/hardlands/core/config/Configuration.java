@@ -24,7 +24,9 @@ public abstract class Configuration implements JsonConvertible {
     }
 
     public final String getIdentifier() {
-        if (this.identifier == null) throw new IllegalStateException("Configuration identifier has not been set");
+        if (this.identifier == null) {
+            throw new IllegalStateException("Configuration identifier has not been set");
+        }
         return this.identifier;
     }
 
@@ -50,7 +52,7 @@ public abstract class Configuration implements JsonConvertible {
     }
 
     @Override
-    public final void fromJson(JsonElement json) {
+    public void fromJson(JsonElement json) {
         for (var entry : json.getAsJsonObject().entrySet()) {
             var option = this.options.get(entry.getKey());
 
