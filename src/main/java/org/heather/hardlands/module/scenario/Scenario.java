@@ -1,10 +1,10 @@
 package org.heather.hardlands.module.scenario;
 
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.core.config.Configuration;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.core.config.Configuration;
 
 public abstract class Scenario extends Configuration implements Listener {
 
@@ -32,7 +32,8 @@ public abstract class Scenario extends Configuration implements Listener {
 
     final void enable() {
         if (!this.isValid()) {
-            throw new IllegalStateException("Scenario configuration is invalid: " + this.getIdentifier());
+            throw new IllegalStateException(
+                    "Scenario configuration is invalid: " + this.getIdentifier());
         }
 
         Bukkit.getPluginManager().registerEvents(this, this.plugin);

@@ -2,15 +2,14 @@ package org.heather.hardlands.module.scenario;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.core.data.json.JsonConvertible;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.core.data.json.JsonConvertible;
 
 public final class ScenarioManager implements JsonConvertible {
 

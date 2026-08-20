@@ -1,21 +1,22 @@
 package org.heather.hardlands.inventory;
 
-import org.bukkit.inventory.Inventory;
-
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import org.bukkit.inventory.Inventory;
 
 public final class InventoryRegistry {
 
-    private static final Map<InventoryDefinition, Inventory> INVENTORIES = new EnumMap<>(InventoryDefinition.class);
+    private static final Map<InventoryDefinition, Inventory> INVENTORIES =
+            new EnumMap<>(InventoryDefinition.class);
 
     private InventoryRegistry() {}
 
     public static void initialize() {
         for (InventoryDefinition definition : InventoryDefinition.values()) {
             if (isRegistered(definition)) {
-                throw new IllegalStateException("Inventory is already registered: " + definition.name());
+                throw new IllegalStateException(
+                        "Inventory is already registered: " + definition.name());
             }
 
             INVENTORIES.put(definition, definition.createInventory());

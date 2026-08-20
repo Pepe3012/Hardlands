@@ -1,12 +1,11 @@
 package org.heather.hardlands.core;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 
 public class ThreadScheduler {
 

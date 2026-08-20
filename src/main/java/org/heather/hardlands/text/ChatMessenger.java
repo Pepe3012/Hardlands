@@ -6,7 +6,9 @@ import org.bukkit.entity.Player;
 
 public final class ChatMessenger {
 
-    private static final String PREFIX = "<dark_gray>[%sHardlands<dark_gray>] <gray>» <white>".formatted(HardlandsColor.PRIMARY.value());
+    private static final String PREFIX =
+            "<dark_gray>[%sHardlands<dark_gray>] <gray>» <white>"
+                    .formatted(HardlandsColor.PRIMARY.value());
 
     private ChatMessenger() {}
 

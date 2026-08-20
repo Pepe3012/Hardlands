@@ -1,5 +1,7 @@
 package org.heather.hardlands.text;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -8,13 +10,11 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.heather.hardlands.util.TinyCaps;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public final class TextFormatter {
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-    private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();
+    private static final PlainTextComponentSerializer PLAIN_TEXT =
+            PlainTextComponentSerializer.plainText();
     private static final Pattern HIGHLIGHT_PATTERN = Pattern.compile("<([^<>\\s]+)>");
 
     private TextFormatter() {}

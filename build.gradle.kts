@@ -2,6 +2,8 @@ plugins {
     id("java-library")
     kotlin("jvm")
 
+    id("com.diffplug.spotless") version "8.9.0"
+
     alias(libs.plugins.run.paper)
     alias(libs.plugins.shadow)
 }
@@ -28,6 +30,19 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
 }
 
+spotless {
+    encoding("UTF-8")
+
+    java {
+        importOrder()
+        removeUnusedImports()
+        forbidWildcardImports()
+
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
 tasks {
     jar {
         archiveClassifier.set("unshaded")
@@ -51,6 +66,7 @@ tasks {
     processResources {
         val props = mapOf("version" to version)
         inputs.properties(props)
+
         filesMatching("paper-plugin.yml") {
             expand(props)
         }

@@ -1,24 +1,25 @@
 package org.heather.hardlands.player;
 
-import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.heather.hardlands.text.TextFormatter;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.heather.hardlands.text.TextFormatter;
 
 public final class PlayerListener implements Listener {
 
     private static final String DEATH_COLOR = "<#B22222>";
-    private static final String KILL_MESSAGE = "<#FFFFFF>☠ <#B22222>¡Has eliminado a <#FFFFFF>%s<#B22222>! <#FFFFFF>☠";
+    private static final String KILL_MESSAGE =
+            "<#FFFFFF>☠ <#B22222>¡Has eliminado a <#FFFFFF>%s<#B22222>! <#FFFFFF>☠";
 
     @EventHandler
     private void onPlayerDeath(PlayerDeathEvent event) {
@@ -31,7 +32,8 @@ public final class PlayerListener implements Listener {
         placeTombstone(player);
     }
 
-    private static void updateDeathMessage(PlayerDeathEvent event, Player player, Entity causingEntity) {
+    private static void updateDeathMessage(
+            PlayerDeathEvent event, Player player, Entity causingEntity) {
         Component deathMessage = event.deathMessage();
         if (deathMessage == null) return;
 
@@ -52,10 +54,13 @@ public final class PlayerListener implements Listener {
     private static void playDeathSounds(Location location) {
         location.getWorld().playSound(location, Sound.ITEM_TRIDENT_THUNDER, 0.75F, 1.75F);
 
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.playSound(player, Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.0F, 0.65F);
-            player.playSound(player, Sound.ENTITY_GUARDIAN_DEATH, 1.0F, 0.5F);
-        });
+        Bukkit.getOnlinePlayers()
+                .forEach(
+                        player -> {
+                            player.playSound(
+                                    player, Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.0F, 0.65F);
+                            player.playSound(player, Sound.ENTITY_GUARDIAN_DEATH, 1.0F, 0.5F);
+                        });
     }
 
     private static void placeTombstone(Player player) {

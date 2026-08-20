@@ -4,22 +4,21 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.PaperCommandManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.heather.hardlands.command.HardlandsCommand;
 import org.heather.hardlands.core.ThreadScheduler;
 import org.heather.hardlands.inventory.InventoryListener;
-import org.heather.hardlands.player.PlayerListener;
-import org.heather.hardlands.module.general.GeneralConfiguration;
-import org.heather.hardlands.module.PresetRepository;
 import org.heather.hardlands.inventory.InventoryRegistry;
+import org.heather.hardlands.module.PresetRepository;
+import org.heather.hardlands.module.general.GeneralConfiguration;
 import org.heather.hardlands.module.phase.PhaseController;
 import org.heather.hardlands.module.scenario.ScenarioManager;
 import org.heather.hardlands.module.world.WorldManager;
+import org.heather.hardlands.player.PlayerListener;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 public final class Hardlands extends JavaPlugin {
 
@@ -44,14 +43,9 @@ public final class Hardlands extends JavaPlugin {
         this.worldManager = new WorldManager();
         InventoryRegistry.initialize();
 
-        this.registerListeners(
-                new PlayerListener(),
-                new InventoryListener()
-        );
+        this.registerListeners(new PlayerListener(), new InventoryListener());
 
-        this.registerCommands(
-                new HardlandsCommand()
-        );
+        this.registerCommands(new HardlandsCommand());
 
         super.getLogger().info(System.lineSeparator() + """
              _    _          _____  _____  _               _   _ _____   _____

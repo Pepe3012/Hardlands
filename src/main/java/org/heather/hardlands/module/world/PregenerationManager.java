@@ -1,5 +1,7 @@
 package org.heather.hardlands.module.world;
 
+import java.util.HashMap;
+import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -7,9 +9,6 @@ import org.bukkit.Material;
 import org.popcraft.chunky.api.ChunkyAPI;
 import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
 import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public final class PregenerationManager {
 
@@ -27,9 +26,11 @@ public final class PregenerationManager {
 
         if (task == null) return;
 
-        this.pregenerating.put(event.world(), event.progress() >= 100
-                ? task.withCompletedState()
-                : task.withProgress(event.progress()));
+        this.pregenerating.put(
+                event.world(),
+                event.progress() >= 100
+                        ? task.withCompletedState()
+                        : task.withProgress(event.progress()));
     }
 
     private synchronized void handleGenerationComplete(GenerationCompleteEvent event) {
@@ -51,13 +52,15 @@ public final class PregenerationManager {
     }
 
     public synchronized void pause() {
-        this.pregenerating.replaceAll((worldName, task) -> {
-            if (!this.chunky.pauseTask(worldName)) {
-                throw new IllegalStateException("Unable to pause pregeneration for world: " + worldName);
-            }
+        this.pregenerating.replaceAll(
+                (worldName, task) -> {
+                    if (!this.chunky.pauseTask(worldName)) {
+                        throw new IllegalStateException(
+                                "Unable to pause pregeneration for world: " + worldName);
+                    }
 
-            return task.withPausedState();
-        });
+                    return task.withPausedState();
+                });
     }
 
     public synchronized State getState() {
@@ -105,7 +108,6 @@ public final class PregenerationManager {
     }
 
     public enum State {
-
         IDLE("idle", "Sin iniciar", Material.BEDROCK, NamedTextColor.GRAY),
         RUNNING("running", "En progreso", Material.DIRT, NamedTextColor.YELLOW),
         PAUSED("paused", "Pausado", Material.STONE, NamedTextColor.GOLD),

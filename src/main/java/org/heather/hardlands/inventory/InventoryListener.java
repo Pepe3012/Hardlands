@@ -28,11 +28,13 @@ public final class InventoryListener implements Listener {
 
         if (!clickedTop) return;
 
-        InventoryItem.find(event.getCurrentItem()).ifPresent(item -> {
-            if (item.execute(topInventory, player, event.getClick())) {
-                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.5F);
-            }
-        });
+        InventoryItem.find(event.getCurrentItem())
+                .ifPresent(
+                        item -> {
+                            if (item.execute(topInventory, player, event.getClick())) {
+                                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.5F);
+                            }
+                        });
     }
 
     @EventHandler
@@ -41,7 +43,8 @@ public final class InventoryListener implements Listener {
 
         if (!InventoryRegistry.isRegistered(topInventory)) return;
 
-        boolean affectsTop = event.getRawSlots().stream().anyMatch(slot -> slot < topInventory.getSize());
+        boolean affectsTop =
+                event.getRawSlots().stream().anyMatch(slot -> slot < topInventory.getSize());
         if (affectsTop) {
             event.setCancelled(true);
         }

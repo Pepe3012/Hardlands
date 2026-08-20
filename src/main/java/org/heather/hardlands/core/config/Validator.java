@@ -72,12 +72,14 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
         public static Validator<Collection<?>> minSize(int minimum) {
             requireNonNegative(minimum, "Minimum size");
-            return new Validator<>(parameterizedKey(Keys.MIN_SIZE, minimum), value -> value.size() >= minimum);
+            return new Validator<>(
+                    parameterizedKey(Keys.MIN_SIZE, minimum), value -> value.size() >= minimum);
         }
 
         public static Validator<Collection<?>> maxSize(int maximum) {
             requireNonNegative(maximum, "Maximum size");
-            return new Validator<>(parameterizedKey(Keys.MAX_SIZE, maximum), value -> value.size() <= maximum);
+            return new Validator<>(
+                    parameterizedKey(Keys.MAX_SIZE, maximum), value -> value.size() <= maximum);
         }
 
         public static Validator<Collection<?>> sizeBetween(int minimum, int maximum) {
@@ -85,8 +87,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.SIZE_BETWEEN, minimum, maximum),
-                    value -> value.size() >= minimum && value.size() <= maximum
-            );
+                    value -> value.size() >= minimum && value.size() <= maximum);
         }
     }
 
@@ -105,7 +106,9 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
                 new Validator<>(Keys.POSITIVE, value -> Double.isFinite(value) && value > 0.0);
 
         public static final Validator<Double> UNIT_INTERVAL =
-                new Validator<>(Keys.UNIT_INTERVAL, value -> Double.isFinite(value) && value >= 0.0 && value <= 1.0);
+                new Validator<>(
+                        Keys.UNIT_INTERVAL,
+                        value -> Double.isFinite(value) && value >= 0.0 && value <= 1.0);
 
         private Doubles() {}
 
@@ -114,8 +117,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.AT_LEAST, minimum),
-                    value -> Double.isFinite(value) && value >= minimum
-            );
+                    value -> Double.isFinite(value) && value >= minimum);
         }
 
         public static Validator<Double> atMost(double maximum) {
@@ -123,8 +125,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.AT_MOST, maximum),
-                    value -> Double.isFinite(value) && value <= maximum
-            );
+                    value -> Double.isFinite(value) && value <= maximum);
         }
 
         public static Validator<Double> between(double minimum, double maximum) {
@@ -134,8 +135,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.BETWEEN, minimum, maximum),
-                    value -> Double.isFinite(value) && value >= minimum && value <= maximum
-            );
+                    value -> Double.isFinite(value) && value >= minimum && value <= maximum);
         }
     }
 
@@ -154,7 +154,9 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
                 new Validator<>(Keys.POSITIVE, value -> Float.isFinite(value) && value > 0.0F);
 
         public static final Validator<Float> UNIT_INTERVAL =
-                new Validator<>(Keys.UNIT_INTERVAL, value -> Float.isFinite(value) && value >= 0.0F && value <= 1.0F);
+                new Validator<>(
+                        Keys.UNIT_INTERVAL,
+                        value -> Float.isFinite(value) && value >= 0.0F && value <= 1.0F);
 
         private Floats() {}
 
@@ -163,8 +165,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.AT_LEAST, minimum),
-                    value -> Float.isFinite(value) && value >= minimum
-            );
+                    value -> Float.isFinite(value) && value >= minimum);
         }
 
         public static Validator<Float> atMost(float maximum) {
@@ -172,8 +173,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.AT_MOST, maximum),
-                    value -> Float.isFinite(value) && value <= maximum
-            );
+                    value -> Float.isFinite(value) && value <= maximum);
         }
 
         public static Validator<Float> between(float minimum, float maximum) {
@@ -183,8 +183,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.BETWEEN, minimum, maximum),
-                    value -> Float.isFinite(value) && value >= minimum && value <= maximum
-            );
+                    value -> Float.isFinite(value) && value >= minimum && value <= maximum);
         }
     }
 
@@ -211,11 +210,13 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
         private Integers() {}
 
         public static Validator<Integer> atLeast(int minimum) {
-            return new Validator<>(parameterizedKey(Keys.AT_LEAST, minimum), value -> value >= minimum);
+            return new Validator<>(
+                    parameterizedKey(Keys.AT_LEAST, minimum), value -> value >= minimum);
         }
 
         public static Validator<Integer> atMost(int maximum) {
-            return new Validator<>(parameterizedKey(Keys.AT_MOST, maximum), value -> value <= maximum);
+            return new Validator<>(
+                    parameterizedKey(Keys.AT_MOST, maximum), value -> value <= maximum);
         }
 
         public static Validator<Integer> between(int minimum, int maximum) {
@@ -223,8 +224,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.BETWEEN, minimum, maximum),
-                    value -> value >= minimum && value <= maximum
-            );
+                    value -> value >= minimum && value <= maximum);
         }
     }
 
@@ -245,11 +245,13 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
         private Longs() {}
 
         public static Validator<Long> atLeast(long minimum) {
-            return new Validator<>(parameterizedKey(Keys.AT_LEAST, minimum), value -> value >= minimum);
+            return new Validator<>(
+                    parameterizedKey(Keys.AT_LEAST, minimum), value -> value >= minimum);
         }
 
         public static Validator<Long> atMost(long maximum) {
-            return new Validator<>(parameterizedKey(Keys.AT_MOST, maximum), value -> value <= maximum);
+            return new Validator<>(
+                    parameterizedKey(Keys.AT_MOST, maximum), value -> value <= maximum);
         }
 
         public static Validator<Long> between(long minimum, long maximum) {
@@ -257,8 +259,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.BETWEEN, minimum, maximum),
-                    value -> value >= minimum && value <= maximum
-            );
+                    value -> value >= minimum && value <= maximum);
         }
     }
 
@@ -271,12 +272,14 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
         public static Validator<Map<?, ?>> minSize(int minimum) {
             requireNonNegative(minimum, "Minimum size");
-            return new Validator<>(parameterizedKey(Keys.MIN_SIZE, minimum), value -> value.size() >= minimum);
+            return new Validator<>(
+                    parameterizedKey(Keys.MIN_SIZE, minimum), value -> value.size() >= minimum);
         }
 
         public static Validator<Map<?, ?>> maxSize(int maximum) {
             requireNonNegative(maximum, "Maximum size");
-            return new Validator<>(parameterizedKey(Keys.MAX_SIZE, maximum), value -> value.size() <= maximum);
+            return new Validator<>(
+                    parameterizedKey(Keys.MAX_SIZE, maximum), value -> value.size() <= maximum);
         }
 
         public static Validator<Map<?, ?>> sizeBetween(int minimum, int maximum) {
@@ -284,8 +287,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.SIZE_BETWEEN, minimum, maximum),
-                    value -> value.size() >= minimum && value.size() <= maximum
-            );
+                    value -> value.size() >= minimum && value.size() <= maximum);
         }
     }
 
@@ -301,12 +303,14 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
         public static Validator<String> minLength(int minimum) {
             requireNonNegative(minimum, "Minimum length");
-            return new Validator<>(parameterizedKey(Keys.MIN_LENGTH, minimum), value -> value.length() >= minimum);
+            return new Validator<>(
+                    parameterizedKey(Keys.MIN_LENGTH, minimum), value -> value.length() >= minimum);
         }
 
         public static Validator<String> maxLength(int maximum) {
             requireNonNegative(maximum, "Maximum length");
-            return new Validator<>(parameterizedKey(Keys.MAX_LENGTH, maximum), value -> value.length() <= maximum);
+            return new Validator<>(
+                    parameterizedKey(Keys.MAX_LENGTH, maximum), value -> value.length() <= maximum);
         }
 
         public static Validator<String> lengthBetween(int minimum, int maximum) {
@@ -314,13 +318,13 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
 
             return new Validator<>(
                     parameterizedKey(Keys.LENGTH_BETWEEN, minimum, maximum),
-                    value -> value.length() >= minimum && value.length() <= maximum
-            );
+                    value -> value.length() >= minimum && value.length() <= maximum);
         }
 
         public static Validator<String> matches(Pattern pattern) {
             Objects.requireNonNull(pattern, "pattern");
-            return new Validator<>(parameterizedKey(Keys.MATCHES, pattern.pattern()), pattern.asMatchPredicate());
+            return new Validator<>(
+                    parameterizedKey(Keys.MATCHES, pattern.pattern()), pattern.asMatchPredicate());
         }
     }
 

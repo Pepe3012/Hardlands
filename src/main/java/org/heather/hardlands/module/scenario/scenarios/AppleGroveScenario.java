@@ -1,10 +1,6 @@
 package org.heather.hardlands.module.scenario.scenarios;
 
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.config.ConfigBuilder;
-import org.heather.hardlands.config.OptionDef;
-import org.heather.hardlands.core.config.Validator;
-import org.heather.hardlands.module.scenario.Scenario;
+import java.util.Optional;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -13,18 +9,29 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Optional;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.config.ConfigBuilder;
+import org.heather.hardlands.config.OptionDef;
+import org.heather.hardlands.core.config.Validator;
+import org.heather.hardlands.module.scenario.Scenario;
 
 @ConfigBuilder(
         superclass = Scenario.class,
         options = {
-                @OptionDef(type = Boolean.class, name = "allTreeTypes"),
-                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "appleDropRate"),
-                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "goldenAppleDropRate"),
-                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "enchantedGoldenAppleDropRate")
-        }
-)
+            @OptionDef(type = Boolean.class, name = "allTreeTypes"),
+            @OptionDef(
+                    type = Float.class,
+                    validators = Validator.Keys.UNIT_INTERVAL,
+                    name = "appleDropRate"),
+            @OptionDef(
+                    type = Float.class,
+                    validators = Validator.Keys.UNIT_INTERVAL,
+                    name = "goldenAppleDropRate"),
+            @OptionDef(
+                    type = Float.class,
+                    validators = Validator.Keys.UNIT_INTERVAL,
+                    name = "enchantedGoldenAppleDropRate")
+        })
 public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
 
     @EventHandler(ignoreCancelled = true)
@@ -41,8 +48,12 @@ public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
         Block block = event.getBlock();
         if (!this.isEligibleLeaf(block.getType())) return;
 
-        this.findAppleDrop().ifPresent(drop ->
-                block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(drop)));
+        this.findAppleDrop()
+                .ifPresent(
+                        drop ->
+                                block.getWorld()
+                                        .dropItemNaturally(
+                                                block.getLocation(), new ItemStack(drop)));
     }
 
     private Optional<Material> findAppleDrop() {

@@ -19,14 +19,15 @@ public final class PreparationItem {
         int borderSize = worldManager.getSurvivalSizeOption().getValue();
         float progress = pregenerationManager.getProgress();
 
-        return new ItemBuilder(state.getMaterial()).name(TextFormatter.formatTinyCaps("Preparación"))
+        return new ItemBuilder(state.getMaterial())
+                .name(TextFormatter.formatTinyCaps("Preparación"))
                 .formattedLore(
                         "Establece los <World Borders> según lo configurado e inicia la <pregeneración> de los mundos abiertos.",
                         "",
                         "World Border: <%1$d × %1$d>".formatted(borderSize),
-                        "Progreso: <%.1f%%>".formatted(progress)
-                )
-                .addLore(Component.text("Estado: ", NamedTextColor.WHITE).append(state.getDisplay()))
+                        "Progreso: <%.1f%%>".formatted(progress))
+                .addLore(
+                        Component.text("Estado: ", NamedTextColor.WHITE).append(state.getDisplay()))
                 .build();
     }
 }

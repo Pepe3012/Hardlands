@@ -1,5 +1,9 @@
 package org.heather.hardlands.inventory;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -8,32 +12,27 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.inventory.handler.InventoryHandler;
 import org.heather.hardlands.item.ItemBuilder;
 import org.heather.hardlands.item.inventory.InventoryItem;
 import org.heather.hardlands.item.inventory.PreparationItem;
-import org.heather.hardlands.inventory.handler.InventoryHandler;
 import org.jspecify.annotations.NonNull;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public enum InventoryDefinition {
 
     MAIN("Hardlands", Material.RED_STAINED_GLASS_PANE, new Layout("""
-        -------
-        -SPDWV-
-        ---T---
-        -------
-        """, Map.of(
+            -------
+            -SPDWV-
+            ---T---
+            -------
+            """, Map.of(
             'S', () -> InventoryItem.SCENARIOS,
             'P', () -> InventoryItem.PLAYERS,
             'D', () -> InventoryItem.DURATION,
             'W', () -> InventoryItem.WORLD,
             'V', () -> InventoryItem.VANILLA_CHANGES,
-            'T', () -> InventoryItem.TEMPLATES
-    )), null),
+            'T', () -> InventoryItem.TEMPLATES)),
+            null),
 
     SCENARIOS("Escenarios", Material.PINK_STAINED_GLASS_PANE, MAIN),
     PLAYERS("Jugadores", Material.YELLOW_STAINED_GLASS_PANE, MAIN),
@@ -43,25 +42,30 @@ public enum InventoryDefinition {
     TEMPLATES("Plantillas", Material.PURPLE_STAINED_GLASS_PANE, MAIN);
 
     private final String title;
-    private final Material outline;
+    private final Material outlineMaterial;
     private final Layout layout;
     private final InventoryHandler handler;
     private final InventoryDefinition parent;
 
-    InventoryDefinition(String title, Material outline, Layout layout, InventoryHandler handler, InventoryDefinition parent) {
+    InventoryDefinition(
+            String title,
+            Material outlineMaterial,
+            Layout layout,
+            InventoryHandler handler,
+            InventoryDefinition parent) {
         this.title = title;
-        this.outline = outline;
+        this.outlineMaterial = outlineMaterial;
         this.layout = layout;
         this.handler = handler;
         this.parent = parent;
     }
 
-    InventoryDefinition(String title, Material outline, InventoryDefinition parent) {
-        this(title, outline, Layout.BLANK, InventoryHandler.EMPTY, parent);
+    InventoryDefinition(String title, Material outlineMaterial, InventoryDefinition parent) {
+        this(title, outlineMaterial, Layout.BLANK, InventoryHandler.EMPTY, parent);
     }
 
-    InventoryDefinition(String title, Material outline, Layout layout, InventoryDefinition parent) {
-        this(title, outline, layout, InventoryHandler.EMPTY, parent);
+    InventoryDefinition(String title, Material outlineMaterial, Layout layout, InventoryDefinition parent) {
+        this(title, outlineMaterial, layout, InventoryHandler.EMPTY, parent);
     }
 
     private static final int ROW_SIZE = 9;
@@ -106,11 +110,7 @@ public enum InventoryDefinition {
 
     Inventory createInventory() {
         DefinitionHolder holder = new DefinitionHolder(this);
-        Inventory inventory = Bukkit.createInventory(
-                holder,
-                this.layout.getSize(),
-                Component.text(this.title)
-        );
+        Inventory inventory = Bukkit.createInventory(holder, this.layout.getSize(), Component.text(this.title));
 
         holder.inventory = inventory;
 
@@ -123,18 +123,16 @@ public enum InventoryDefinition {
 
     private void renderFrame(Inventory inventory) {
         int rows = inventory.getSize() / ROW_SIZE;
-        ItemStack outline = new ItemBuilder(this.outline)
-                .name("")
-                .build();
+        ItemStack outlineStack = new ItemBuilder(this.outlineMaterial).name("").build();
 
         for (int column = 1; column <= ROW_SIZE; column++) {
-            inventory.setItem(slot(1, column), outline);
-            inventory.setItem(slot(rows, column), outline);
+            inventory.setItem(slot(1, column), outlineStack);
+            inventory.setItem(slot(rows, column), outlineStack);
         }
 
         for (int row = 2; row < rows; row++) {
-            inventory.setItem(slot(row, 1), outline);
-            inventory.setItem(slot(row, ROW_SIZE), outline);
+            inventory.setItem(slot(row, 1), outlineStack);
+            inventory.setItem(slot(row, ROW_SIZE), outlineStack);
         }
 
         inventory.setItem(slot(rows, PREVIOUS_COLUMN), InventoryItem.PREVIOUS.build());
@@ -142,11 +140,9 @@ public enum InventoryDefinition {
     }
 
     private void renderPreparationItem(Inventory inventory) {
-        int row = inventory.getSize() / ROW_SIZE;
-
         inventory.setItem(
-                slot(row, PREPARATION_COLUMN),
-                PreparationItem.build(Hardlands.getInstance().getWorldManagerOrThrow().getPregenerationManager())
+                slot(inventory.getSize() / ROW_SIZE, PREPARATION_COLUMN),
+                PreparationItem.build(Hardlands.getInstance().getWorldManagerOrThrow())
         );
     }
 
@@ -169,10 +165,7 @@ public enum InventoryDefinition {
         }
     }
 
-    private record Layout(
-            List<String> rows,
-            Map<Character, Supplier<InventoryItem>> items
-    ) {
+    private record Layout(List<String> rows, Map<Character, Supplier<InventoryItem>> items) {
 
         private static final char EMPTY = '-';
         private static final int CONTENT_WIDTH = 7;
@@ -189,9 +182,7 @@ public enum InventoryDefinition {
 
             for (String row : this.rows) {
                 if (row.length() != CONTENT_WIDTH) {
-                    throw new IllegalArgumentException(
-                            "Layout rows must contain exactly " + CONTENT_WIDTH + " columns"
-                    );
+                    throw new IllegalArgumentException("Layout rows must contain exactly " + CONTENT_WIDTH + " columns");
                 }
             }
         }

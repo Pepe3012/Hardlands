@@ -1,19 +1,22 @@
 package org.heather.hardlands.module.scenario.scenarios;
 
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
-import org.heather.hardlands.config.ConfigBuilder;
-import org.heather.hardlands.config.OptionDef;
-import org.heather.hardlands.module.scenario.Scenario;
+import java.util.Map;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Map;
+import org.heather.hardlands.config.ConfigBuilder;
+import org.heather.hardlands.config.OptionDef;
+import org.heather.hardlands.module.scenario.Scenario;
 
 @ConfigBuilder(
         superclass = Scenario.class,
-        options = @OptionDef(type = Map.class, keyType = Enchantment.class, valueType = Integer.class, name = "enchantments")
-)
+        options =
+                @OptionDef(
+                        type = Map.class,
+                        keyType = Enchantment.class,
+                        valueType = Integer.class,
+                        name = "enchantments"))
 public class MagicManScenario extends MagicManScenarioConfiguration {
 
     @EventHandler
@@ -36,7 +39,9 @@ public class MagicManScenario extends MagicManScenarioConfiguration {
     }
 
     private static boolean applyEnchantment(ItemStack item, Enchantment enchantment, int level) {
-        if (level <= 0 || !enchantment.canEnchantItem(item) || item.getEnchantmentLevel(enchantment) >= level) {
+        if (level <= 0
+                || !enchantment.canEnchantItem(item)
+                || item.getEnchantmentLevel(enchantment) >= level) {
             return false;
         }
 

@@ -8,6 +8,8 @@ public interface InventoryHandler {
     InventoryHandler EMPTY = new InventoryHandler() {};
 
     default void onCreate(Inventory inventory) {}
+
     default void onOpen(Inventory inventory, Player player) {}
+
     default void onClose(Inventory inventory, Player player) {}
 }

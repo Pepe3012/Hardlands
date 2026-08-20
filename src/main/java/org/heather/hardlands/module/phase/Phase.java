@@ -1,7 +1,6 @@
 package org.heather.hardlands.module.phase;
 
 public enum Phase {
-
     IDLE("Idle"),
     PRE_GAME("Pre-Game"),
     SURVIVAL("Survival"),
