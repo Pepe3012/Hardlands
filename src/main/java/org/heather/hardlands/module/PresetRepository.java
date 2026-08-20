@@ -12,7 +12,8 @@ public final class PresetRepository {
             @SerializedName("general") JsonObject general,
             @SerializedName("world") JsonObject world,
             @SerializedName("scenarios") JsonObject scenarios,
-            @SerializedName("phase") JsonObject phase) {}
+            @SerializedName("phase") JsonObject phase
+    ) {}
 
     private final Hardlands plugin;
     private final Path directory;
@@ -44,6 +45,9 @@ public final class PresetRepository {
     }
 
     private JsonDataManager<Preset> managerFor(String name) {
-        return new JsonDataManager<>(Hardlands.GSON, this.directory.resolve(name + ".json"), Preset.class);
+        return new JsonDataManager<>(
+                Hardlands.GSON,
+                this.directory.resolve(name + ".json"),
+                Preset.class);
     }
 }

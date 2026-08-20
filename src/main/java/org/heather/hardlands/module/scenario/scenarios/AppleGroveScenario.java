@@ -18,19 +18,10 @@ import org.heather.hardlands.module.scenario.Scenario;
 @ConfigBuilder(
         superclass = Scenario.class,
         options = {
-            @OptionDef(type = Boolean.class, name = "allTreeTypes"),
-            @OptionDef(
-                    type = Float.class,
-                    validators = Validator.Keys.UNIT_INTERVAL,
-                    name = "appleDropRate"),
-            @OptionDef(
-                    type = Float.class,
-                    validators = Validator.Keys.UNIT_INTERVAL,
-                    name = "goldenAppleDropRate"),
-            @OptionDef(
-                    type = Float.class,
-                    validators = Validator.Keys.UNIT_INTERVAL,
-                    name = "enchantedGoldenAppleDropRate")
+                @OptionDef(type = Boolean.class, name = "allTreeTypes"),
+                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "appleDropRate"),
+                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "goldenAppleDropRate"),
+                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "enchantedGoldenAppleDropRate")
         })
 public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
 
@@ -49,11 +40,7 @@ public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
         if (!this.isEligibleLeaf(block.getType())) return;
 
         this.findAppleDrop()
-                .ifPresent(
-                        drop ->
-                                block.getWorld()
-                                        .dropItemNaturally(
-                                                block.getLocation(), new ItemStack(drop)));
+                .ifPresent(drop -> block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(drop)));
     }
 
     private Optional<Material> findAppleDrop() {
@@ -71,7 +58,6 @@ public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
     }
 
     private boolean isEligibleLeaf(Material material) {
-        return Tag.LEAVES.isTagged(material)
-                && (super.allTreeTypes.getValue() || material == Material.OAK_LEAVES);
+        return Tag.LEAVES.isTagged(material) && (super.allTreeTypes.getValue() || material == Material.OAK_LEAVES);
     }
 }

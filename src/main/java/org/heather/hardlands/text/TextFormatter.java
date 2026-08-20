@@ -11,10 +11,10 @@ import org.bukkit.entity.Player;
 import org.heather.hardlands.util.TinyCaps;
 
 public final class TextFormatter {
-
     private static final Pattern HIGHLIGHT_PATTERN = Pattern.compile("<([^<>\\s]+)>");
 
-    private TextFormatter() {}
+    private TextFormatter() {
+    }
 
     public static Component parse(String text) {
         return MiniMessage.miniMessage().deserialize(text);

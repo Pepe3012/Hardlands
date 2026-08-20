@@ -21,18 +21,14 @@ import org.heather.hardlands.module.world.WorldManager;
 import org.jetbrains.annotations.Nullable;
 
 public final class Hardlands extends JavaPlugin {
-
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     public static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
-
     private static Hardlands instance;
-
     private final GeneralConfiguration generalConfiguration = new GeneralConfiguration();
     private final ThreadScheduler threadScheduler = new ThreadScheduler(this);
     private final ScenarioManager scenarioManager = new ScenarioManager(this);
     private final PhaseController phaseController = new PhaseController(this);
     private final PresetRepository presetRepository = PresetRepository.create(this);
-
     @Nullable private WorldManager worldManager;
 
     @Override
@@ -47,14 +43,19 @@ public final class Hardlands extends JavaPlugin {
 
         this.registerCommands(new HardlandsCommand());
 
-        super.getLogger().info(System.lineSeparator() + """
+        super
+            .getLogger()
+            .info(
+                            System.lineSeparator()
+                    + """
              _    _          _____  _____  _               _   _ _____   _____
             | |  | |   /\\   |  __ \\|  __ \\| |        /\\   | \\ | |  __ \\ / ____|
             | |__| |  /  \\  | |__) | |  | | |       /  \\  |  \\| | |  | | (___
             |  __  | / /\\ \\ |  _  /| |  | | |      / /\\ \\ | . ` | |  | |\\___ \\
             | |  | |/ ____ \\| | \\ \\| |__| | |____ / ____ \\| |\\  | |__| |____) |
             |_|  |_/_/    \\_\\_|  \\_\\_____/|______/_/    \\_\\_| \\_|_____/|_____/
-            """);
+            """
+            );
         super.getLogger().info("Initialized.");
     }
 

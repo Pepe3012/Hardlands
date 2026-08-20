@@ -22,6 +22,19 @@ public final class ScenarioManager implements JsonConvertible {
         this.registerScenarios();
     }
 
+    private void registerScenarios() {
+        for (ScenarioDefinition definition : ScenarioDefinition.values()) {
+            String identifier = definition.getIdentifier();
+            Scenario scenario = definition.createScenario();
+
+            scenario.initialize(this.plugin, identifier);
+
+            if (this.scenarios.putIfAbsent(identifier, scenario) != null) {
+                throw new IllegalStateException("Scenario is already registered: " + identifier);
+            }
+        }
+    }
+
     public boolean enableScenario(String identifier) {
         Scenario scenario = this.scenarios.get(identifier);
 
@@ -71,38 +84,22 @@ public final class ScenarioManager implements JsonConvertible {
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
 
-        for (String identifier : this.enabledScenarioIds) {
-            json.add(identifier, this.scenarios.get(identifier).toJson());
-        }
+        this.enabledScenarioIds.forEach(identifier ->
+                json.add(identifier, this.scenarios.get(identifier).toJson()));
 
         return json;
     }
 
     @Override
     public void fromJson(JsonElement json) {
-        for (String identifier : List.copyOf(this.enabledScenarioIds)) {
-            this.disableScenario(identifier);
-        }
+        this.enabledScenarioIds.forEach(this::disableScenario);
 
-        for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
+        json.getAsJsonObject().entrySet().forEach(entry -> {
             Scenario scenario = this.scenarios.get(entry.getKey());
-            if (scenario == null) continue;
+            if (scenario == null) return;
 
             scenario.fromJson(entry.getValue());
             this.enableScenario(entry.getKey());
-        }
-    }
-
-    private void registerScenarios() {
-        for (ScenarioDefinition definition : ScenarioDefinition.values()) {
-            String identifier = definition.getIdentifier();
-            Scenario scenario = definition.createScenario();
-
-            scenario.initialize(this.plugin, identifier);
-
-            if (this.scenarios.putIfAbsent(identifier, scenario) != null) {
-                throw new IllegalStateException("Scenario is already registered: " + identifier);
-            }
-        }
+        });
     }
 }

@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 public class ThreadScheduler {
-
     private final ScheduledExecutorService thread = Executors.newSingleThreadScheduledExecutor();
     private final Plugin plugin;
 

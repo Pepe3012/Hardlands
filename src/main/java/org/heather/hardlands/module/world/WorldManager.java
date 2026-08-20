@@ -40,11 +40,8 @@ public final class WorldManager extends WorldManagerConfiguration {
 
     public void pregenerate() {
         this.forEachEnabledWorld((world, centerX, centerZ, survivalSize) ->
-                this.pregenerationManager.reviewAndAccept(new PregenerationRequest(
-                        world.getName(),
-                        centerX,
-                        centerZ,
-                        survivalSize)));
+                this.pregenerationManager.reviewAndAccept(
+                        new PregenerationRequest(world.getName(), centerX, centerZ, survivalSize)));
     }
 
     public void shrinkForMeetup() {
@@ -96,7 +93,8 @@ public final class WorldManager extends WorldManagerConfiguration {
                 world,
                 centerX,
                 centerZ,
-                this.scaleForDimension(world, survivalSize)));
+                this.scaleForDimension(world, survivalSize)
+        ));
     }
 
     @FunctionalInterface

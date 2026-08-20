@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 public final class JsonDataManager<T> {
-
     private final Gson gson;
     private final Path path;
     private final Class<T> dataType;
@@ -21,7 +20,9 @@ public final class JsonDataManager<T> {
     public void write(T data) {
         try {
             Path parent = this.path.getParent();
-            if (parent != null) Files.createDirectories(parent);
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
 
             String json = this.gson.toJson(data);
             Files.writeString(this.path, json);
@@ -31,7 +32,9 @@ public final class JsonDataManager<T> {
     }
 
     public Optional<T> read() {
-        if (Files.notExists(this.path)) return Optional.empty();
+        if (Files.notExists(this.path)) {
+            return Optional.empty();
+        }
 
         try {
             String json = Files.readString(this.path);
@@ -39,8 +42,7 @@ public final class JsonDataManager<T> {
 
             return Optional.ofNullable(data);
         } catch (IOException exception) {
-            throw new IllegalStateException(
-                    "Failed to read JSON data from " + this.path, exception);
+            throw new IllegalStateException("Failed to read JSON data from " + this.path, exception);
         }
     }
 }

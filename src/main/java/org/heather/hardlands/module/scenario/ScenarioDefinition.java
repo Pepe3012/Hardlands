@@ -15,19 +15,22 @@ public enum ScenarioDefinition {
             AppleGroveScenario::new,
             InventoryItem.display(
                     Material.GOLDEN_APPLE,
-                    "Aumenta la obtención de manzanas y permite conseguir variantes doradas o encantadas.")),
+                    "Aumenta la obtención de manzanas y permite conseguir variantes doradas o encantadas."
+            )
+    ),
     BONANZA(
             "Bonanza",
             BonanzaScenario::new,
-            InventoryItem.display(
-                    Material.GOLD_ORE, "Multiplica los recursos obtenidos al extraer minerales.")),
+            InventoryItem.display(Material.GOLD_ORE, "Multiplica los recursos obtenidos al extraer minerales.")
+    ),
     MAGIC_MAN(
             "Magic Man",
             MagicManScenario::new,
             InventoryItem.display(
                     Material.ENCHANTING_TABLE,
-                    "Aplica los encantamientos configurados a sus herramientas respectivas."));
-
+                    "Aplica los encantamientos configurados a sus herramientas respectivas."
+            )
+    );
     private final String name;
     private final Supplier<Scenario> factory;
     private final InventoryItem.Display display;

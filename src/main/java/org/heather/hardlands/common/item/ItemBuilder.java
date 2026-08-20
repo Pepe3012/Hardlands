@@ -26,12 +26,9 @@ import org.heather.hardlands.core.data.PersistentData;
 import org.heather.hardlands.text.TextFormatter;
 
 public final class ItemBuilder {
-
     private static final int MAX_LORE_LINE_LENGTH = 30;
-
     private static final NamespacedKey ID_KEY = new NamespacedKey("hardlands", "id");
     private static final ComponentFlattener COMPONENT_FLATTENER = ComponentFlattener.basic();
-
     private final ItemStack item;
 
     public ItemBuilder(Material material) {
@@ -65,8 +62,7 @@ public final class ItemBuilder {
 
     public ItemBuilder addLore(Component... lines) {
         ItemLore currentLore = this.item.getData(DataComponentTypes.LORE);
-        List<Component> lore =
-                new ArrayList<>(currentLore == null ? List.of() : currentLore.lines());
+        List<Component> lore = new ArrayList<>(currentLore == null ? List.of() : currentLore.lines());
 
         for (Component line : lines) {
             lore.add(nonItalic(line));
@@ -104,8 +100,7 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder skullOwner(String owner) {
-        this.item.editMeta(
-                SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
+        this.item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
 
         return this.hideTooltip(DataComponentTypes.PROFILE);
     }
@@ -119,9 +114,7 @@ public final class ItemBuilder {
             builder.hiddenComponents(currentDisplay.hiddenComponents());
         }
 
-        this.item.setData(
-                DataComponentTypes.TOOLTIP_DISPLAY,
-                builder.addHiddenComponents(components).build());
+        this.item.setData(DataComponentTypes.TOOLTIP_DISPLAY, builder.addHiddenComponents(components).build());
 
         return this;
     }
@@ -167,8 +160,7 @@ public final class ItemBuilder {
         return this;
     }
 
-    private static List<Component> formatLore(
-            String[] lines, Function<String, Component> formatter) {
+    private static List<Component> formatLore(String[] lines, Function<String, Component> formatter) {
         List<Component> result = new ArrayList<>();
 
         for (String line : lines) {
@@ -227,7 +219,8 @@ public final class ItemBuilder {
             List<Component> lines,
             List<StyledCodePoint> currentLine,
             List<StyledCodePoint> word,
-            boolean spaceBeforeWord) {
+            boolean spaceBeforeWord
+    ) {
         if (word.isEmpty()) {
             return;
         }
@@ -298,29 +291,26 @@ public final class ItemBuilder {
         List<StyledCodePoint> characters = new ArrayList<>();
         Deque<Style> styles = new ArrayDeque<>();
 
-        COMPONENT_FLATTENER.flatten(
-                component,
-                new FlattenerListener() {
+        COMPONENT_FLATTENER.flatten(component, new FlattenerListener() {
+            @Override
+            public void pushStyle(Style style) {
+                styles.addLast(style);
+            }
 
-                    @Override
-                    public void pushStyle(Style style) {
-                        styles.addLast(style);
-                    }
+            @Override
+            public void component(String text) {
+                List<Style> activeStyles = List.copyOf(styles);
 
-                    @Override
-                    public void component(String text) {
-                        List<Style> activeStyles = List.copyOf(styles);
+                for (int codePoint : text.codePoints().toArray()) {
+                    characters.add(new StyledCodePoint(codePoint, activeStyles));
+                }
+            }
 
-                        for (int codePoint : text.codePoints().toArray()) {
-                            characters.add(new StyledCodePoint(codePoint, activeStyles));
-                        }
-                    }
-
-                    @Override
-                    public void popStyle(Style style) {
-                        styles.removeLast();
-                    }
-                });
+            @Override
+            public void popStyle(Style style) {
+                styles.removeLast();
+            }
+        });
 
         return characters;
     }

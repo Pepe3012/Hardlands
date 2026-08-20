@@ -32,8 +32,7 @@ public abstract class Scenario extends Configuration implements Listener {
 
     final void enable() {
         if (!this.isValid()) {
-            throw new IllegalStateException(
-                    "Scenario configuration is invalid: " + this.getIdentifier());
+            throw new IllegalStateException("Scenario configuration is invalid: " + this.getIdentifier());
         }
 
         Bukkit.getPluginManager().registerEvents(this, this.plugin);

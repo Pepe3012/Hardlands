@@ -9,8 +9,8 @@ import org.heather.hardlands.module.world.WorldManager;
 import org.heather.hardlands.text.TextFormatter;
 
 public final class PreparationItem {
-
-    private PreparationItem() {}
+    private PreparationItem() {
+    }
 
     public static ItemStack build(WorldManager worldManager) {
         PregenerationManager pregenerationManager = worldManager.getPregenerationManager();
@@ -20,14 +20,14 @@ public final class PreparationItem {
         float progress = pregenerationManager.getProgress();
 
         return new ItemBuilder(state.getMaterial())
-                .name(TextFormatter.formatTinyCaps("Preparación"))
-                .formattedLore(
-                        "Establece los <World Borders> según lo configurado e inicia la <pregeneración> de los mundos abiertos.",
-                        "",
-                        "World Border: <%1$d × %1$d>".formatted(borderSize),
-                        "Progreso: <%.1f%%>".formatted(progress))
-                .addLore(
-                        Component.text("Estado: ", NamedTextColor.WHITE).append(state.display()))
-                .build();
+            .name(TextFormatter.formatTinyCaps("Preparación"))
+            .formattedLore(
+                    "Establece los <World Borders> según lo configurado e inicia la " + "<pregeneración> de los mundos abiertos.",
+                    "",
+                    "World Border: <%1$d × %1$d>".formatted(borderSize),
+                    "Progreso: <%.1f%%>".formatted(progress)
+            )
+            .addLore(Component.text("Estado: ", NamedTextColor.WHITE).append(state.display()))
+            .build();
     }
 }

@@ -7,16 +7,14 @@ import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 public final class PersistentData {
+    private PersistentData() {
+    }
 
-    private PersistentData() {}
-
-    public static <P, C> Optional<C> find(
-            PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
+    public static <P, C> Optional<C> find(PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
         return Optional.ofNullable(get(holder, key, type));
     }
 
-    public static <P, C> C get(
-            PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
+    public static <P, C> C get(PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
         return container(holder).get(key, type);
     }
 
@@ -24,7 +22,8 @@ public final class PersistentData {
             PersistentDataHolder holder,
             NamespacedKey key,
             PersistentDataType<P, C> type,
-            C value) {
+            C value
+    ) {
         container(holder).set(key, type, value);
     }
 
@@ -32,12 +31,12 @@ public final class PersistentData {
             PersistentDataHolder holder,
             NamespacedKey key,
             PersistentDataType<P, C> type,
-            C defaultValue) {
+            C defaultValue
+    ) {
         return container(holder).getOrDefault(key, type, defaultValue);
     }
 
-    public static <P, C> boolean has(
-            PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
+    public static <P, C> boolean has(PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
         return container(holder).has(key, type);
     }
 

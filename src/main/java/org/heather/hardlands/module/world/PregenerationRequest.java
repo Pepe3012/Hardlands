@@ -2,11 +2,7 @@ package org.heather.hardlands.module.world;
 
 import org.popcraft.chunky.api.ChunkyAPI;
 
-public record PregenerationRequest(
-        String worldName,
-        double centerX,
-        double centerZ,
-        double worldSize) {
+public record PregenerationRequest(String worldName, double centerX, double centerZ, double worldSize) {
 
     public boolean review(ChunkyAPI chunky) {
         double radius = this.worldSize / 2.0D;
@@ -15,7 +11,8 @@ public record PregenerationRequest(
                 "square",
                 this.centerX,
                 this.centerZ,
-                radius, radius,
+                radius,
+                radius,
                 "concentric");
     }
 }

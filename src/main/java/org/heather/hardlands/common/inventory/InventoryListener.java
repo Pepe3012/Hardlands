@@ -12,39 +12,47 @@ import org.bukkit.inventory.Inventory;
 import org.heather.hardlands.common.item.inventory.InventoryItem;
 
 public final class InventoryListener implements Listener {
-
     @EventHandler
     private void onInventoryClick(InventoryClickEvent event) {
         Inventory topInventory = event.getView().getTopInventory();
 
-        if (!InventoryRegistry.isRegistered(topInventory)
-                || !(event.getWhoClicked() instanceof Player player)) return;
+        if (!InventoryRegistry.isRegistered(topInventory) || !(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
 
         boolean clickedTop = event.getClickedInventory() == topInventory;
 
-        if (!clickedTop && !affectsTopInventory(event.getAction())) return;
+        if (!clickedTop && !affectsTopInventory(event.getAction())) {
+            return;
+        }
 
         event.setCancelled(true);
 
-        if (!clickedTop) return;
+        if (!clickedTop) {
+            return;
+        }
 
-        InventoryItem.find(event.getCurrentItem())
-                .ifPresent(
-                        item -> {
-                            if (item.execute(topInventory, player, event.getClick())) {
-                                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.5F);
-                            }
-                        });
+        InventoryItem
+            .find(event.getCurrentItem())
+            .ifPresent(item -> {
+                if (item.execute(topInventory, player, event.getClick())) {
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.5F);
+                }
+            });
     }
 
     @EventHandler
     private void onInventoryDrag(InventoryDragEvent event) {
         Inventory topInventory = event.getView().getTopInventory();
 
-        if (!InventoryRegistry.isRegistered(topInventory)) return;
+        if (!InventoryRegistry.isRegistered(topInventory)) {
+            return;
+        }
 
-        boolean affectsTop =
-                event.getRawSlots().stream().anyMatch(slot -> slot < topInventory.getSize());
+        boolean affectsTop = event
+            .getRawSlots()
+            .stream()
+            .anyMatch(slot -> slot < topInventory.getSize());
         if (affectsTop) {
             event.setCancelled(true);
         }
@@ -52,15 +60,17 @@ public final class InventoryListener implements Listener {
 
     @EventHandler
     private void onInventoryClose(InventoryCloseEvent event) {
-        if (!(event.getPlayer() instanceof Player player)) return;
+        if (!(event.getPlayer() instanceof Player player)) {
+            return;
+        }
 
         Inventory inventory = event.getView().getTopInventory();
-        InventoryRegistry.findDefinition(inventory)
-                .ifPresent(definition -> definition.handleClose(inventory, player));
+        InventoryRegistry
+            .findDefinition(inventory)
+            .ifPresent(definition -> definition.handleClose(inventory, player));
     }
 
     private static boolean affectsTopInventory(InventoryAction action) {
-        return action == InventoryAction.MOVE_TO_OTHER_INVENTORY
-                || action == InventoryAction.COLLECT_TO_CURSOR;
+        return action == InventoryAction.MOVE_TO_OTHER_INVENTORY || action == InventoryAction.COLLECT_TO_CURSOR;
     }
 }

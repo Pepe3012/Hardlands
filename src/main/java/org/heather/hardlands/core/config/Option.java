@@ -4,11 +4,9 @@ import java.lang.reflect.Type;
 import java.util.function.Predicate;
 
 public final class Option<T> {
-
     private final String key;
     private final Type dataType;
     private final Predicate<T> predicate;
-
     private T value;
 
     public Option(String key, Type dataType) {

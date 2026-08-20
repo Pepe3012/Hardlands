@@ -10,28 +10,15 @@ import org.heather.hardlands.core.config.Validator;
 @ConfigBuilder(
         identifier = "timer",
         options = {
-            @OptionDef(
-                    type = Integer.class,
-                    validators = Validator.Keys.NON_NEGATIVE,
-                    name = "pvpStartMinute"),
-            @OptionDef(
-                    type = Integer.class,
-                    validators = Validator.Keys.NON_NEGATIVE,
-                    name = "borderStartMinute"),
-            @OptionDef(
-                    type = Integer.class,
-                    validators = Validator.Keys.NON_NEGATIVE,
-                    name = "meetupStartMinute"),
-            @OptionDef(
-                    type = Integer.class,
-                    validators = Validator.Keys.NON_NEGATIVE,
-                    name = "deathmatchStartMinute")
+                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "pvpStartMinute"),
+                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "borderStartMinute"),
+                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "meetupStartMinute"),
+                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "deathmatchStartMinute")
         })
 public final class PhaseController extends PhaseControllerConfiguration {
 
     private final Hardlands plugin;
     private final ThreadScheduler scheduler;
-
     private Phase phase;
 
     public PhaseController(Hardlands plugin) {

@@ -83,7 +83,6 @@ public final class PregenerationManager {
     }
 
     private record PregenerationTask(State state, float progress) {
-
         private PregenerationTask withProgress(float progress) {
             return new PregenerationTask(this.state, progress);
         }

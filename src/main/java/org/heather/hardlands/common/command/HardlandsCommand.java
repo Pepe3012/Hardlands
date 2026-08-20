@@ -10,7 +10,6 @@ import org.heather.hardlands.common.inventory.InventoryDefinition;
 @CommandAlias("hardlands|hl")
 @CommandPermission("hardlands.admin")
 public final class HardlandsCommand extends BaseCommand {
-
     @Default
     private void onDefault(Player player) {
         InventoryDefinition.MAIN.openInventory(player);

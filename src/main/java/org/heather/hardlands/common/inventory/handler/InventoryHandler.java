@@ -4,8 +4,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 public interface InventoryHandler {
-
-    InventoryHandler EMPTY = new InventoryHandler() {};
+    InventoryHandler EMPTY = new InventoryHandler() {
+    };
 
     default void onCreate(Inventory inventory) {}
 
