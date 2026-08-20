@@ -1,4 +1,4 @@
-package org.heather.hardlands.item.inventory;
+package org.heather.hardlands.common.item.inventory;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.inventory.InventoryDefinition;
-import org.heather.hardlands.item.ItemBuilder;
+import org.heather.hardlands.common.inventory.InventoryDefinition;
+import org.heather.hardlands.common.item.ItemBuilder;
 
 public enum InventoryItem {
     PREVIOUS(
@@ -17,7 +17,7 @@ public enum InventoryItem {
             click(
                     ClickType.LEFT,
                     (inventory, player) ->
-                            InventoryDefinition.find(inventory)
+                            InventoryDefinition.findDefinition(inventory)
                                     .ifPresent(definition -> definition.openParent(player)))),
     NEXT(
             head("MHF_ArrowRight", "Siguiente", "Avanza a la siguiente página."),

@@ -34,12 +34,17 @@ spotless {
     encoding("UTF-8")
 
     java {
-        importOrder()
         removeUnusedImports()
+        importOrder("", "\\#")
         forbidWildcardImports()
+        forbidModuleImports()
+
+        formatAnnotations()
 
         trimTrailingWhitespace()
         endWithNewline()
+
+        toggleOffOn()
     }
 }
 

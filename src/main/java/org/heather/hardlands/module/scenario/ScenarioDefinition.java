@@ -4,7 +4,7 @@ import java.util.Locale;
 import java.util.function.Supplier;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.item.inventory.InventoryItem;
+import org.heather.hardlands.common.item.inventory.InventoryItem;
 import org.heather.hardlands.module.scenario.scenarios.AppleGroveScenario;
 import org.heather.hardlands.module.scenario.scenarios.BonanzaScenario;
 import org.heather.hardlands.module.scenario.scenarios.MagicManScenario;

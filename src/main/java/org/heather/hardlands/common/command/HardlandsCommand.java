@@ -1,11 +1,11 @@
-package org.heather.hardlands.command;
+package org.heather.hardlands.common.command;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import org.bukkit.entity.Player;
-import org.heather.hardlands.inventory.InventoryDefinition;
+import org.heather.hardlands.common.inventory.InventoryDefinition;
 
 @CommandAlias("hardlands|hl")
 @CommandPermission("hardlands.admin")

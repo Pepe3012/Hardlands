@@ -1,4 +1,4 @@
-package org.heather.hardlands.item;
+package org.heather.hardlands.common.item;
 
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;

@@ -12,19 +12,16 @@ import org.heather.hardlands.util.TinyCaps;
 
 public final class TextFormatter {
 
-    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-    private static final PlainTextComponentSerializer PLAIN_TEXT =
-            PlainTextComponentSerializer.plainText();
     private static final Pattern HIGHLIGHT_PATTERN = Pattern.compile("<([^<>\\s]+)>");
 
     private TextFormatter() {}
 
     public static Component parse(String text) {
-        return MINI_MESSAGE.deserialize(text);
+        return MiniMessage.miniMessage().deserialize(text);
     }
 
     public static String toPlainText(Component component) {
-        return PLAIN_TEXT.serialize(component);
+        return PlainTextComponentSerializer.plainText().serialize(component);
     }
 
     public static Component formatHighlighted(String text) {

@@ -26,11 +26,9 @@ public final class PregenerationManager {
 
         if (task == null) return;
 
-        this.pregenerating.put(
-                event.world(),
-                event.progress() >= 100
-                        ? task.withCompletedState()
-                        : task.withProgress(event.progress()));
+        this.pregenerating.put(event.world(), event.progress() >= 100
+                ? task.withCompletedState()
+                : task.withProgress(event.progress()));
     }
 
     private synchronized void handleGenerationComplete(GenerationCompleteEvent event) {
@@ -52,25 +50,21 @@ public final class PregenerationManager {
     }
 
     public synchronized void pause() {
-        this.pregenerating.replaceAll(
-                (worldName, task) -> {
-                    if (!this.chunky.pauseTask(worldName)) {
-                        throw new IllegalStateException(
-                                "Unable to pause pregeneration for world: " + worldName);
-                    }
+        this.pregenerating.replaceAll((worldName, task) -> {
+            if (!this.chunky.pauseTask(worldName)) {
+                throw new IllegalStateException("Unable to pause pregeneration for world: " + worldName);
+            }
 
-                    return task.withPausedState();
-                });
+            return task.withPausedState();
+        });
     }
 
     public synchronized State getState() {
         if (this.pregenerating.isEmpty()) return State.IDLE;
 
         for (PregenerationTask task : this.pregenerating.values()) {
-            State state = task.state();
-
-            if (state == State.RUNNING) return State.RUNNING;
-            if (state == State.PAUSED) return State.PAUSED;
+            if (task.state() == State.RUNNING) return State.RUNNING;
+            if (task.state() == State.PAUSED) return State.PAUSED;
         }
 
         return State.COMPLETED;
@@ -108,6 +102,7 @@ public final class PregenerationManager {
     }
 
     public enum State {
+
         IDLE("idle", "Sin iniciar", Material.BEDROCK, NamedTextColor.GRAY),
         RUNNING("running", "En progreso", Material.DIRT, NamedTextColor.YELLOW),
         PAUSED("paused", "Pausado", Material.STONE, NamedTextColor.GOLD),
@@ -116,13 +111,17 @@ public final class PregenerationManager {
         private final String key;
         private final String name;
         private final Material material;
-        private final TextColor textColor;
+        private final TextColor color;
 
-        State(String key, String name, Material material, TextColor textColor) {
+        State(String key, String name, Material material, TextColor color) {
             this.key = key;
             this.name = name;
             this.material = material;
-            this.textColor = textColor;
+            this.color = color;
+        }
+
+        public Component display() {
+            return Component.text(this.name, this.color);
         }
 
         public String getKey() {
@@ -137,12 +136,8 @@ public final class PregenerationManager {
             return this.material;
         }
 
-        public TextColor getTextColor() {
-            return this.textColor;
-        }
-
-        public Component getDisplay() {
-            return Component.text(this.name, this.textColor);
+        public TextColor getColor() {
+            return this.color;
         }
     }
 }

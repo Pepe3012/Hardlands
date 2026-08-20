@@ -1,4 +1,4 @@
-package org.heather.hardlands.inventory;
+package org.heather.hardlands.common.inventory;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
-import org.heather.hardlands.item.inventory.InventoryItem;
+import org.heather.hardlands.common.item.inventory.InventoryItem;
 
 public final class InventoryListener implements Listener {
 

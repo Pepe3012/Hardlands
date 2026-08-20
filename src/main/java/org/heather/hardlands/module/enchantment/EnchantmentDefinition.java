@@ -4,7 +4,7 @@ import java.util.Locale;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.item.ItemBuilder;
+import org.heather.hardlands.common.item.ItemBuilder;
 import org.heather.hardlands.util.RomanNumerals;
 
 public enum EnchantmentDefinition {

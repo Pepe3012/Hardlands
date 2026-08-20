@@ -1,4 +1,4 @@
-package org.heather.hardlands.inventory;
+package org.heather.hardlands.common.inventory;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ public final class InventoryRegistry {
     }
 
     public static Optional<InventoryDefinition> findDefinition(Inventory inventory) {
-        return InventoryDefinition.find(inventory)
+        return InventoryDefinition.findDefinition(inventory)
                 .filter(definition -> INVENTORIES.get(definition) == inventory);
     }
 

@@ -1,4 +1,4 @@
-package org.heather.hardlands.item;
+package org.heather.hardlands.common.item;
 
 import java.util.Optional;
 import org.bukkit.Material;

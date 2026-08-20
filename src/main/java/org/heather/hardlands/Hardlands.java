@@ -8,16 +8,16 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.heather.hardlands.command.HardlandsCommand;
+import org.heather.hardlands.common.command.HardlandsCommand;
+import org.heather.hardlands.common.inventory.InventoryListener;
+import org.heather.hardlands.common.inventory.InventoryRegistry;
+import org.heather.hardlands.common.player.PlayerListener;
 import org.heather.hardlands.core.ThreadScheduler;
-import org.heather.hardlands.inventory.InventoryListener;
-import org.heather.hardlands.inventory.InventoryRegistry;
 import org.heather.hardlands.module.PresetRepository;
 import org.heather.hardlands.module.general.GeneralConfiguration;
 import org.heather.hardlands.module.phase.PhaseController;
 import org.heather.hardlands.module.scenario.ScenarioManager;
 import org.heather.hardlands.module.world.WorldManager;
-import org.heather.hardlands.player.PlayerListener;
 import org.jetbrains.annotations.Nullable;
 
 public final class Hardlands extends JavaPlugin {
