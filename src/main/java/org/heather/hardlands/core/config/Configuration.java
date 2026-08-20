@@ -13,67 +13,51 @@ import org.heather.hardlands.Hardlands;
 import org.heather.hardlands.core.data.json.JsonConvertible;
 
 public abstract class Configuration implements JsonConvertible {
+
     private final Map<String, Option<?>> options = new LinkedHashMap<>();
     private String identifier;
 
-    protected Configuration() {
-    }
-
+    protected Configuration() {}
     protected Configuration(String identifier) {
-        this.setIdentifier(identifier);
-    }
-
-    public final String getIdentifier() {
-        if (this.identifier == null) {
-            throw new IllegalStateException("Configuration identifier has not been set");
-        }
-        return this.identifier;
-    }
-
-    public final Map<String, Option<?>> getOptions() {
-        return Map.copyOf(this.options);
-    }
-
-    public final boolean isValid() {
-        return this.options.values().stream().allMatch(Option::isValid) && this.isConfigurationValid();
+        this.setConfigurationIdentifier(identifier);
     }
 
     @Override
     public final JsonElement toJson() {
-        var json = new JsonObject();
+        JsonObject json = new JsonObject();
 
-        for (var option : this.options.values()) {
-            if (option.isValid()) {
-                continue;
-            }
-
+        this.options.values().forEach(option -> {
+            if (!option.isValid()) return;
             json.add(option.getKey(), Hardlands.GSON.toJsonTree(option.getValue()));
-        }
+        });
 
         return json;
     }
 
     @Override
     public void fromJson(JsonElement json) {
-        for (var entry : json.getAsJsonObject().entrySet()) {
-            var option = this.options.get(entry.getKey());
+        json.getAsJsonObject().entrySet().forEach(entry -> {
+            Option<?> option = this.options.get(entry.getKey());
 
-            if (option == null) {
-                continue;
-            }
+            if (option == null) return;
 
             option.setValue(Hardlands.GSON.fromJson(entry.getValue(), option.getDataType()));
-        }
+        });
     }
 
-    protected boolean isConfigurationValid() {
-        return true;
+    public final Map<String, Option<?>> getConfigurationOptions() {
+        return Map.copyOf(this.options);
     }
 
-    protected final void setIdentifier(String identifier) {
-        if (identifier == null || identifier.isBlank()) {
-            throw new IllegalArgumentException("Identifier cannot be null or blank");
+    public final String getConfigurationIdentifier() {
+        if (this.identifier == null) {
+            throw new IllegalStateException("Configuration identifier has not been set");
         }
+
+        return this.identifier;
+    }
+
+    protected final void setConfigurationIdentifier(String identifier) {
         if (this.identifier != null) {
             throw new IllegalStateException("Configuration identifier is already set");
         }
@@ -81,10 +65,16 @@ public abstract class Configuration implements JsonConvertible {
         this.identifier = identifier;
     }
 
+    public final boolean isConfigurationValid() {
+        return this.options.values().stream().allMatch(Option::isValid);
+    }
+
+    // Registry
     protected final <T> Option<T> registerOption(Option<T> option) {
         if (this.options.putIfAbsent(option.getKey(), option) != null) {
             throw new IllegalArgumentException("Option already registered: " + option.getKey());
         }
+
         return option;
     }
 
@@ -120,8 +110,7 @@ public abstract class Configuration implements JsonConvertible {
             String key,
             Class<K> keyType,
             Class<V> valueType,
-            Predicate<Map<K, V>> validator
-    ) {
+            Predicate<Map<K, V>> validator) {
         return this.registerOption(key, TypeToken.getParameterized(Map.class, keyType, valueType).getType(), validator);
     }
 

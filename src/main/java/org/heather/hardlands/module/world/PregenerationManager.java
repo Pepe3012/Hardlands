@@ -42,7 +42,7 @@ public final class PregenerationManager {
     public synchronized void reviewAndAccept(PregenerationRequest request) {
         String worldName = request.worldName();
 
-        if (!request.review(this.chunky)) {
+        if (!request.reviewAndStart(this.chunky)) {
             throw new IllegalStateException("Chunky is already pregenerating world: " + worldName);
         }
 

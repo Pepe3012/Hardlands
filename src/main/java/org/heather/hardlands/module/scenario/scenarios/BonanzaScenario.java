@@ -1,6 +1,5 @@
 package org.heather.hardlands.module.scenario.scenarios;
 
-import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockDropItemEvent;
