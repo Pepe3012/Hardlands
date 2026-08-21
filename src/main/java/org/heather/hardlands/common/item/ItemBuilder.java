@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.heather.hardlands.core.data.PersistentData;
-import org.heather.hardlands.text.TextFormatter;
+import org.heather.hardlands.util.text.TextFormatter;
 
 public final class ItemBuilder {
     private static final int MAX_LORE_LINE_LENGTH = 30;

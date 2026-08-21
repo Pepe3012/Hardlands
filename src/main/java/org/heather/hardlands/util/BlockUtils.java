@@ -11,8 +11,8 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 
 public final class BlockUtils {
-    private BlockUtils() {
-    }
+
+    private BlockUtils() {}
 
     public static void floodFill(Block origin, Predicate<Block> predicate) {
         Queue<Block> pending = new ArrayDeque<>();

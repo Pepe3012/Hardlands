@@ -1,4 +1,4 @@
-package org.heather.hardlands.text;
+package org.heather.hardlands.util.text;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,10 +11,10 @@ import org.bukkit.entity.Player;
 import org.heather.hardlands.util.TinyCaps;
 
 public final class TextFormatter {
-    private static final Pattern HIGHLIGHT_PATTERN = Pattern.compile("<([^<>\\s]+)>");
 
-    private TextFormatter() {
-    }
+    private static final Pattern HIGHLIGHT_PATTERN = Pattern.compile("\\{([^{}]+)}");
+
+    private TextFormatter() {}
 
     public static Component parse(String text) {
         return MiniMessage.miniMessage().deserialize(text);
@@ -30,12 +30,12 @@ public final class TextFormatter {
         int position = 0;
 
         while (matcher.find()) {
-            result.append(Component.text(text.substring(position, matcher.start())));
+            result.append(parse(text.substring(position, matcher.start())));
             result.append(Component.text(matcher.group(1), HardlandsColor.PRIMARY));
             position = matcher.end();
         }
 
-        result.append(Component.text(text.substring(position)));
+        result.append(parse(text.substring(position)));
         return result.build();
     }
 

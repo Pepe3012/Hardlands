@@ -6,10 +6,10 @@ import java.util.Optional;
 import org.bukkit.inventory.Inventory;
 
 public final class InventoryRegistry {
+
     private static final Map<InventoryDefinition, Inventory> INVENTORIES = new EnumMap<>(InventoryDefinition.class);
 
-    private InventoryRegistry() {
-    }
+    private InventoryRegistry() {}
 
     public static void initialize() {
         for (InventoryDefinition definition : InventoryDefinition.values()) {

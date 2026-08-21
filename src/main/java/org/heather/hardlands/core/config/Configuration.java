@@ -65,7 +65,7 @@ public abstract class Configuration implements JsonConvertible {
         this.identifier = identifier;
     }
 
-    public final boolean isConfigurationValid() {
+    public boolean isConfigurationValid() {
         return this.options.values().stream().allMatch(Option::isValid);
     }
 

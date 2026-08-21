@@ -13,11 +13,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.heather.hardlands.text.TextFormatter;
+import org.heather.hardlands.util.text.TextFormatter;
 
 public final class PlayerListener implements Listener {
-    private static final String DEATH_COLOR = "<#B22222>";
-    private static final String KILL_MESSAGE = "<#FFFFFF>☠ <#B22222>¡Has eliminado a <#FFFFFF>%s<#B22222>! <#FFFFFF>☠";
+
+    private static final String KILL_MESSAGE = "☠ {¡Has eliminado a} %s{!} ☠";
 
     @EventHandler
     private void onPlayerDeath(PlayerDeathEvent event) {
@@ -41,7 +41,7 @@ public final class PlayerListener implements Listener {
             text = formatUsernameAtText(text, killer);
         }
 
-        event.deathMessage(TextFormatter.parse(DEATH_COLOR + formatUsernameAtText(text, player)));
+        event.deathMessage(TextFormatter.parse("<#B22222>" + formatUsernameAtText(text, player)));
     }
 
     private static void sendKillMessage(Player victim, Entity causingEntity) {
@@ -49,7 +49,7 @@ public final class PlayerListener implements Listener {
             return;
         }
 
-        killer.sendActionBar(TextFormatter.parse(KILL_MESSAGE.formatted(formatUsername(victim))));
+        killer.sendActionBar(TextFormatter.formatHighlighted(KILL_MESSAGE.formatted(formatUsername(victim))));
     }
 
     private static void playDeathSounds(Location location) {

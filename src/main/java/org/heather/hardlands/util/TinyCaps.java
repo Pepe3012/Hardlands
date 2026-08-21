@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 
 public final class TinyCaps {
+
+    private static final Pattern LOWERCASE_TEXT = Pattern.compile("[a-z]+");
     private static final Map<Character, Character> MAP = Map.ofEntries(
             Map.entry('a', 'ᴀ'),
             Map.entry('b', 'ʙ'),
@@ -33,15 +35,12 @@ public final class TinyCaps {
             Map.entry('y', 'ʏ'),
             Map.entry('z', 'ᴢ')
     );
-    private static final Pattern LOWERCASE_TEXT = Pattern.compile("[a-z]+");
 
-    private TinyCaps() {
-    }
+    private TinyCaps() {}
 
     public static Component format(Component component) {
-        return component.replaceText(config -> config
-            .match(LOWERCASE_TEXT)
-            .replacement((match, builder) -> builder.content(format(match.group()))));
+        return component.replaceText(config -> config.match(LOWERCASE_TEXT)
+                .replacement((match, builder) -> builder.content(format(match.group()))));
     }
 
     public static String format(String text) {

@@ -19,6 +19,7 @@ public final class PhaseController extends PhaseControllerConfiguration {
 
     private final Hardlands plugin;
     private final ThreadScheduler scheduler;
+
     private Phase phase;
 
     public PhaseController(Hardlands plugin) {
@@ -35,7 +36,7 @@ public final class PhaseController extends PhaseControllerConfiguration {
     }
 
     @Override
-    protected boolean isConfigurationValid() {
+    public boolean isConfigurationValid() {
         int pvp = super.pvpStartMinute.getValue();
         int border = super.borderStartMinute.getValue();
         int meetup = super.meetupStartMinute.getValue();
