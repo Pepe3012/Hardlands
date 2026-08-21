@@ -34,10 +34,31 @@ spotless {
     encoding("UTF-8")
 
     java {
+        // Import hygiene
         removeUnusedImports()
         importOrder("", "\\#")
         forbidWildcardImports()
         forbidModuleImports()
+
+        // Annotation normalization
+        formatAnnotations()
+
+        // Java formatting
+        princeOfSpace("2.2.0")
+            .indentStyle("SPACES")
+            .indentSize(4)
+            .lineLength(120)
+            .wrapStyle("BALANCED")
+            .closingParenOnNewLine(true)
+            .trailingCommas(false)
+            .javaLanguageLevel(25)
+
+        // Source hygiene
+        trimTrailingWhitespace()
+        endWithNewline()
+
+        // Escape hatch: // spotless:off / // spotless:on
+        toggleOffOn()
     }
 }
 
