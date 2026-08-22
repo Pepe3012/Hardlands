@@ -11,20 +11,18 @@ import org.heather.hardlands.core.config.Option;
 import org.heather.hardlands.core.config.Validator;
 import org.popcraft.chunky.api.ChunkyAPI;
 
-@ConfigBuilder(
-        identifier = "world",
-        options = {
-                @OptionDef(type = Set.class, elementType = String.class, name = "enabledWorlds"),
-                @OptionDef(type = Integer.class, validators = Validator.Keys.POSITIVE, name = "survivalSize"),
-                @OptionDef(type = Integer.class, validators = Validator.Keys.POSITIVE, name = "meetupSize"),
-                @OptionDef(type = Integer.class, validators = Validator.Keys.POSITIVE, name = "deathmatchSize"),
-                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "meetupShrinkTime"),
-                @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "deathmatchShrinkTime"),
-                @OptionDef(type = Boolean.class, name = "surfaceTeleport"),
-                @OptionDef(type = Boolean.class, name = "borderDamage"),
-                @OptionDef(type = Double.class, name = "centerX"),
-                @OptionDef(type = Double.class, name = "centerZ")
-        })
+@ConfigBuilder(identifier = "world", options = {
+        @OptionDef(type = Set.class, elementType = String.class, name = "enabledWorlds"),
+        @OptionDef(type = Integer.class, validators = Validator.Keys.POSITIVE, name = "survivalSize"),
+        @OptionDef(type = Integer.class, validators = Validator.Keys.POSITIVE, name = "meetupSize"),
+        @OptionDef(type = Integer.class, validators = Validator.Keys.POSITIVE, name = "deathmatchSize"),
+        @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "meetupShrinkTime"),
+        @OptionDef(type = Integer.class, validators = Validator.Keys.NON_NEGATIVE, name = "deathmatchShrinkTime"),
+        @OptionDef(type = Boolean.class, name = "surfaceTeleport"),
+        @OptionDef(type = Boolean.class, name = "borderDamage"),
+        @OptionDef(type = Double.class, name = "centerX"),
+        @OptionDef(type = Double.class, name = "centerZ")
+})
 public final class WorldManager extends WorldManagerConfiguration {
 
     private final PregenerationManager pregenerationManager = new PregenerationManager(requireChunkyService());
@@ -32,7 +30,6 @@ public final class WorldManager extends WorldManagerConfiguration {
     public void configure() {
         this.forEachEnabledWorld((world, centerX, centerZ, survivalSize) -> {
             WorldBorder worldBorder = world.getWorldBorder();
-
             worldBorder.setCenter(centerX, centerZ);
             worldBorder.setSize(survivalSize);
         });
@@ -40,8 +37,11 @@ public final class WorldManager extends WorldManagerConfiguration {
 
     public void pregenerate() {
         this.forEachEnabledWorld((world, centerX, centerZ, survivalSize) ->
-                this.pregenerationManager.reviewAndAccept(
-                        new PregenerationRequest(world.getName(), centerX, centerZ, survivalSize)));
+                this.pregenerationManager.reviewAndAccept(new PregenerationRequest(
+                        world.getName(),
+                        centerX,
+                        centerZ,
+                        survivalSize)));
     }
 
     public void shrinkForMeetup() {
@@ -58,18 +58,15 @@ public final class WorldManager extends WorldManagerConfiguration {
 
     // Utility methods
     private double scaleForDimension(World world, double value) {
-        return world.getEnvironment() == World.Environment.NETHER
-                ? value * (1.0 / 8.0)
-                : value;
+        return world.getEnvironment() == World.Environment.NETHER ? value * (1.0 / 8.0) : value;
     }
 
     private void shrinkWorldBorders(Option<Integer> targetSizeOption, Option<Integer> shrinkDurationMinutesOption) {
         int targetSize = targetSizeOption.getValue();
         long shrinkDurationTicks = shrinkDurationMinutesOption.getValue() * 1200L;
 
-        this.forEachEnabledWorld(world -> world.getWorldBorder().changeSize(
-                this.scaleForDimension(world, targetSize),
-                shrinkDurationTicks));
+        this.forEachEnabledWorld(world -> world.getWorldBorder()
+                .changeSize(this.scaleForDimension(world, targetSize), shrinkDurationTicks));
     }
 
     private void forEachEnabledWorld(Consumer<World> action) {
@@ -93,8 +90,7 @@ public final class WorldManager extends WorldManagerConfiguration {
                 world,
                 centerX,
                 centerZ,
-                this.scaleForDimension(world, survivalSize)
-        ));
+                this.scaleForDimension(world, survivalSize)));
     }
 
     @FunctionalInterface

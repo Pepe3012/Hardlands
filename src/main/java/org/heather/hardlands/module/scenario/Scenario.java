@@ -11,7 +11,7 @@ public abstract class Scenario extends Configuration implements Listener {
 
     @Nullable private Hardlands plugin;
 
-    final void initialize(final Hardlands plugin, String identifier) {
+    final void initializeScenario(final Hardlands plugin, String identifier) {
         if (this.plugin != null) {
             throw new IllegalStateException("Scenario is already initialized");
         }
@@ -20,7 +20,7 @@ public abstract class Scenario extends Configuration implements Listener {
         this.plugin = plugin;
     }
 
-    final void enable() {
+    final void enableScenario() {
         if (!super.isConfigurationValid()) {
             throw new IllegalStateException("Scenario configuration is invalid: " + this.getConfigurationIdentifier());
         }
@@ -32,7 +32,7 @@ public abstract class Scenario extends Configuration implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this.plugin);
     }
 
-    final void disable() {
+    final void disableScenario() {
         HandlerList.unregisterAll(this);
     }
 

@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 public final class JsonDataManager<T> {
+
     private final Gson gson;
     private final Path path;
     private final Class<T> dataType;

@@ -26,9 +26,11 @@ import org.heather.hardlands.core.data.PersistentData;
 import org.heather.hardlands.util.text.TextFormatter;
 
 public final class ItemBuilder {
-    private static final int MAX_LORE_LINE_LENGTH = 30;
+
+    private static final int MAX_LORE_LINE_LENGTH = 40;
     private static final NamespacedKey ID_KEY = new NamespacedKey("hardlands", "id");
     private static final ComponentFlattener COMPONENT_FLATTENER = ComponentFlattener.basic();
+
     private final ItemStack item;
 
     public ItemBuilder(Material material) {

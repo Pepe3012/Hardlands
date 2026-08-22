@@ -9,26 +9,30 @@ import org.heather.hardlands.util.RomanNumerals;
 
 public enum EnchantmentDefinition {
 
-    DEAD_EYE(
-            "Dead Eye",
+    DEAD_EYE("Dead Eye",
             "Aumenta ligeramente el daño de cada golpe consecutivo realizado en combo.",
-            3, Tag.ITEMS_ENCHANTABLE_SHARP_WEAPON),
-    WISDOM(
-            "Wisdom",
+            3,
+            Tag.ITEMS_ENCHANTABLE_SHARP_WEAPON),
+
+    WISDOM("Wisdom",
             "Incrementa en un 25% por nivel la experiencia obtenida al extraer bloques.",
-            5, Tag.ITEMS_ENCHANTABLE_MINING),
-    SMELTING_TOUCH(
-            "Smelting Touch",
+            5,
+            Tag.ITEMS_ENCHANTABLE_MINING),
+
+    SMELTING_TOUCH("Smelting Touch",
             "Funde automáticamente cualquier drop que tenga una receta válida de horno.",
-            1, Tag.ITEMS_ENCHANTABLE_MINING),
-    TIMBER(
-            "Timber",
+            1,
+            Tag.ITEMS_ENCHANTABLE_MINING),
+
+    TIMBER("Timber",
             "Al romper un tronco, rompe automáticamente todos los troncos " + "conectados que pertenezcan al mismo árbol.",
-            1, Tag.ITEMS_ENCHANTABLE_MINING),
-    VEIN_MINER(
-            "Vein Miner",
+            1,
+            Tag.ITEMS_ENCHANTABLE_MINING),
+
+    VEIN_MINER("Vein Miner",
             "Al romper una mena, rompe automáticamente todas las menas conectadas " + "que pertenezcan a la misma veta.",
-            1, Tag.ITEMS_ENCHANTABLE_MINING);
+            1,
+            Tag.ITEMS_ENCHANTABLE_MINING);
 
     private final String displayName;
     private final String description;

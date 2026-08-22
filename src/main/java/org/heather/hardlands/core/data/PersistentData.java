@@ -7,7 +7,15 @@ import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 public final class PersistentData {
-    private PersistentData() {
+
+    private PersistentData() {}
+
+    public static <P, C> void set(
+            PersistentDataHolder holder,
+            NamespacedKey key,
+            PersistentDataType<P, C> type,
+            C value) {
+        container(holder).set(key, type, value);
     }
 
     public static <P, C> Optional<C> find(PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
@@ -16,15 +24,6 @@ public final class PersistentData {
 
     public static <P, C> C get(PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
         return container(holder).get(key, type);
-    }
-
-    public static <P, C> void set(
-            PersistentDataHolder holder,
-            NamespacedKey key,
-            PersistentDataType<P, C> type,
-            C value
-    ) {
-        container(holder).set(key, type, value);
     }
 
     public static <P, C> C getOrDefault(

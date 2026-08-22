@@ -15,6 +15,7 @@ import org.heather.hardlands.core.data.json.JsonConvertible;
 public abstract class Configuration implements JsonConvertible {
 
     private final Map<String, Option<?>> options = new LinkedHashMap<>();
+
     private String identifier;
 
     protected Configuration() {}
@@ -110,7 +111,8 @@ public abstract class Configuration implements JsonConvertible {
             String key,
             Class<K> keyType,
             Class<V> valueType,
-            Predicate<Map<K, V>> validator) {
+            Predicate<Map<K, V>> validator
+    ) {
         return this.registerOption(key, TypeToken.getParameterized(Map.class, keyType, valueType).getType(), validator);
     }
 

@@ -16,7 +16,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.heather.hardlands.util.text.TextFormatter;
 
 public final class PlayerListener implements Listener {
-
     private static final String KILL_MESSAGE = "☠ {¡Has eliminado a} %s{!} ☠";
 
     @EventHandler

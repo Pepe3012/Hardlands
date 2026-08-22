@@ -32,9 +32,8 @@ public final class InventoryRegistry {
     }
 
     public static Optional<InventoryDefinition> findDefinition(Inventory inventory) {
-        return InventoryDefinition
-            .findDefinition(inventory)
-            .filter(definition -> INVENTORIES.get(definition) == inventory);
+        return InventoryDefinition.findDefinition(inventory)
+                .filter(definition -> INVENTORIES.get(definition) == inventory);
     }
 
     public static boolean isRegistered(InventoryDefinition definition) {

@@ -45,9 +45,6 @@ public final class PresetRepository {
     }
 
     private JsonDataManager<Preset> managerFor(String name) {
-        return new JsonDataManager<>(
-                Hardlands.GSON,
-                this.directory.resolve(name + ".json"),
-                Preset.class);
+        return new JsonDataManager<>(Hardlands.GSON, this.directory.resolve(name + ".json"), Preset.class);
     }
 }

@@ -4,30 +4,30 @@ import java.util.Locale;
 import java.util.function.Supplier;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.common.item.inventory.InventoryItem;
+import org.heather.hardlands.common.item.InventoryItem;
 import org.heather.hardlands.module.scenario.scenarios.AppleGroveScenario;
 import org.heather.hardlands.module.scenario.scenarios.BonanzaScenario;
 import org.heather.hardlands.module.scenario.scenarios.MagicManScenario;
 
 public enum ScenarioDefinition {
 
-    APPLE_GROVE("Apple Grove", AppleGroveScenario::new, InventoryItem.display(Material.GOLDEN_APPLE,
+    APPLE_GROVE("Apple Grove", AppleGroveScenario::new, InventoryItem.createDisplayItem(Material.GOLDEN_APPLE,
             "Aumenta la obtención de manzanas y permite conseguir variantes doradas o encantadas.")),
 
-    BONANZA("Bonanza", BonanzaScenario::new, InventoryItem.display(Material.GOLD_ORE,
+    BONANZA("Bonanza", BonanzaScenario::new, InventoryItem.createDisplayItem(Material.GOLD_ORE,
             "Multiplica los recursos obtenidos al extraer minerales.")),
 
-    MAGIC_MAN("Magic Man", MagicManScenario::new, InventoryItem.display(Material.ENCHANTING_TABLE,
+    MAGIC_MAN("Magic Man", MagicManScenario::new, InventoryItem.createDisplayItem(Material.ENCHANTING_TABLE,
             "Aplica los encantamientos configurados a sus herramientas respectivas."));
 
     private final String name;
     private final Supplier<Scenario> factory;
-    private final InventoryItem.Display display;
+    private final InventoryItem.DisplayItem displayItem;
 
-    ScenarioDefinition(String name, Supplier<Scenario> factory, InventoryItem.Display display) {
+    ScenarioDefinition(String name, Supplier<Scenario> factory, InventoryItem.DisplayItem displayItem) {
         this.name = name;
         this.factory = factory;
-        this.display = display;
+        this.displayItem = displayItem;
     }
 
     public String identifier() {
@@ -39,7 +39,7 @@ public enum ScenarioDefinition {
     }
 
     public ItemStack createDisplayItem() {
-        return this.display.build("<yellow>" + this.name);
+        return this.displayItem.buildItem("<yellow>" + this.name);
     }
 
     public String getName() {

@@ -33,14 +33,14 @@ public final class TinyCaps {
             Map.entry('w', 'ᴡ'),
             Map.entry('x', 'x'),
             Map.entry('y', 'ʏ'),
-            Map.entry('z', 'ᴢ')
-    );
+            Map.entry('z', 'ᴢ'));
 
     private TinyCaps() {}
 
     public static Component format(Component component) {
-        return component.replaceText(config -> config.match(LOWERCASE_TEXT)
-                .replacement((match, builder) -> builder.content(format(match.group()))));
+        return component.replaceText(config -> config
+            .match(LOWERCASE_TEXT)
+            .replacement((match, builder) -> builder.content(format(match.group()))));
     }
 
     public static String format(String text) {

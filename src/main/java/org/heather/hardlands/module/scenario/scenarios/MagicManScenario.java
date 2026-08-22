@@ -9,11 +9,9 @@ import org.heather.hardlands.config.ConfigBuilder;
 import org.heather.hardlands.config.OptionDef;
 import org.heather.hardlands.module.scenario.Scenario;
 
-@ConfigBuilder(
-        superclass = Scenario.class,
-        options = {
-                @OptionDef(type = Map.class, keyType = Enchantment.class, valueType = Integer.class, name = "enchantments")
-        })
+@ConfigBuilder(superclass = Scenario.class, options = {
+        @OptionDef(type = Map.class, keyType = Enchantment.class, valueType = Integer.class, name = "enchantments")
+})
 public class MagicManScenario extends MagicManScenarioConfiguration {
 
     @EventHandler

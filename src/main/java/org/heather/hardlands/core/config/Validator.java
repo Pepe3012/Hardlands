@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public record Validator<T>(String key, Predicate<T> predicate) implements Predicate<T> {
+
     public Validator {
         if (key == null || key.isBlank()) {
             throw new IllegalArgumentException("Key cannot be null or blank");
@@ -37,6 +38,7 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
     }
 
     public static final class Keys {
+
         public static final String AT_LEAST = "at-least";
         public static final String AT_MOST = "at-most";
         public static final String BETWEEN = "between";
@@ -58,16 +60,14 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
         public static final String SIZE_BETWEEN = "size-between";
         public static final String UNIT_INTERVAL = "unit-interval";
 
-        private Keys() {
-        }
+        private Keys() {}
     }
 
     public static final class Collections {
-        public static final Validator<Collection<?>> NON_EMPTY =
-                new Validator<>(Keys.NON_EMPTY, value -> !value.isEmpty());
 
-        private Collections() {
-        }
+        public static final Validator<Collection<?>> NON_EMPTY = new Validator<>(Keys.NON_EMPTY, value -> !value.isEmpty());
+
+        private Collections() {}
 
         public static Validator<Collection<?>> minSize(int minimum) {
             requireNonNegative(minimum, "Minimum size");
@@ -82,38 +82,33 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
         public static Validator<Collection<?>> sizeBetween(int minimum, int maximum) {
             requireRange(minimum, maximum);
 
-            return new Validator<>(parameterizedKey(Keys.SIZE_BETWEEN, minimum, maximum), value -> value.size() >= minimum
-                    && value.size() <= maximum);
+            return new Validator<>(parameterizedKey(Keys.SIZE_BETWEEN, minimum, maximum), value ->
+                    value.size() >= minimum && value.size() <= maximum);
         }
     }
 
     public static final class Doubles {
-        public static final Validator<Double> NEGATIVE =
-                new Validator<>(Keys.NEGATIVE, value -> Double.isFinite(value) && value < 0.0);
-        public static final Validator<Double> NON_NEGATIVE =
-                new Validator<>(Keys.NON_NEGATIVE, value -> Double.isFinite(value) && value >= 0.0);
-        public static final Validator<Double> NON_POSITIVE =
-                new Validator<>(Keys.NON_POSITIVE, value -> Double.isFinite(value) && value <= 0.0);
-        public static final Validator<Double> POSITIVE =
-                new Validator<>(Keys.POSITIVE, value -> Double.isFinite(value) && value > 0.0);
-        public static final Validator<Double> UNIT_INTERVAL =
-                new Validator<>(Keys.UNIT_INTERVAL, value -> Double.isFinite(value) && value >= 0.0 && value <= 1.0);
 
-        private Doubles() {
-        }
+        public static final Validator<Double> NEGATIVE = new Validator<>(Keys.NEGATIVE, value -> Double.isFinite(value) && value < 0.0);
+        public static final Validator<Double> NON_NEGATIVE = new Validator<>(Keys.NON_NEGATIVE, value -> Double.isFinite(value) && value >= 0.0);
+        public static final Validator<Double> NON_POSITIVE = new Validator<>(Keys.NON_POSITIVE, value -> Double.isFinite(value) && value <= 0.0);
+        public static final Validator<Double> POSITIVE = new Validator<>(Keys.POSITIVE, value -> Double.isFinite(value) && value > 0.0);
+        public static final Validator<Double> UNIT_INTERVAL = new Validator<>(Keys.UNIT_INTERVAL, value -> Double.isFinite(value) && value >= 0.0 && value <= 1.0);
+
+        private Doubles() {}
 
         public static Validator<Double> atLeast(double minimum) {
             requireFinite(minimum);
 
-            return new Validator<>(parameterizedKey(Keys.AT_LEAST, minimum), value -> Double.isFinite(value)
-                    && value >= minimum);
+            return new Validator<>(parameterizedKey(Keys.AT_LEAST, minimum), value ->
+                    Double.isFinite(value) && value >= minimum);
         }
 
         public static Validator<Double> atMost(double maximum) {
             requireFinite(maximum);
 
-            return new Validator<>(parameterizedKey(Keys.AT_MOST, maximum), value -> Double.isFinite(value)
-                    && value <= maximum);
+            return new Validator<>(parameterizedKey(Keys.AT_MOST, maximum), value ->
+                    Double.isFinite(value) && value <= maximum);
         }
 
         public static Validator<Double> between(double minimum, double maximum) {
@@ -121,9 +116,8 @@ public record Validator<T>(String key, Predicate<T> predicate) implements Predic
             requireFinite(maximum);
             requireRange(minimum, maximum);
 
-            return new Validator<>(parameterizedKey(Keys.BETWEEN, minimum, maximum), value -> Double.isFinite(value)
-                    && value >= minimum
-                    && value <= maximum);
+            return new Validator<>(parameterizedKey(Keys.BETWEEN, minimum, maximum), value ->
+                    Double.isFinite(value) && value >= minimum && value <= maximum);
         }
     }
 

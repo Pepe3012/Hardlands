@@ -5,22 +5,20 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public enum HardlandsItem {
+
     ENDER_BAG(new ItemBuilder(Material.CARROT_ON_A_STICK)
-        .name("<white>Ender Bag")
-        .lore("<gray>Abre tu <white>cofre de Ender<gray> al hacer <white>clic derecho<gray>.")
-    ),
+            .name("<white>Ender Bag")
+            .lore("<gray>Abre tu <white>cofre de Ender<gray> al hacer <white>clic derecho<gray>.")),
+
     VOID_BAG(new ItemBuilder(Material.CARROT_ON_A_STICK)
-        .name("<white>Void Bag")
-        .lore("<gray>Abre el <white>inventario compartido<gray> de tu equipo al hacer <white>clic derecho<gray>.")
-    ),
+            .name("<white>Void Bag")
+            .lore("<gray>Abre el <white>inventario compartido<gray> de tu equipo al hacer <white>clic derecho<gray>.")),
+
     GOLDEN_HEAD(new ItemBuilder(Material.PLAYER_HEAD)
-        .skullOwner("MHF_Apple")
-        .name("<white>Golden Head")
-        .lore(
-                "<gray>Se consume rápidamente y te otorga los efectos de una "
-                + "<white>manzana dorada<gray>, amplificados en <white>un nivel<gray>."
-        )
-    );
+            .skullOwner("MHF_Apple")
+            .name("<white>Golden Head")
+            .lore("<gray>Se consume rápidamente y te otorga los efectos de una <white>manzana dorada<gray>, amplificados en <white>un nivel<gray>."));
+
     private final ItemBuilder builder;
 
     HardlandsItem(ItemBuilder builder) {

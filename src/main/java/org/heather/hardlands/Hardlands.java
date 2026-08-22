@@ -41,6 +41,7 @@ public final class Hardlands extends JavaPlugin {
         instance = this;
 
         this.worldManager = new WorldManager();
+
         InventoryRegistry.initialize();
 
         this.registerListeners(new PlayerListener(), new InventoryListener());

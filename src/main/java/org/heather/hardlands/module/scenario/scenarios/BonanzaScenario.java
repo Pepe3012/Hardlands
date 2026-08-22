@@ -9,11 +9,9 @@ import org.heather.hardlands.config.OptionDef;
 import org.heather.hardlands.module.scenario.Scenario;
 import org.heather.hardlands.util.BlockUtils;
 
-@ConfigBuilder(
-        superclass = Scenario.class,
-        options = {
-                @OptionDef(type = Float.class, validators = "at-least:1.0", name = "dropMultiplier")
-        })
+@ConfigBuilder(superclass = Scenario.class, options = {
+        @OptionDef(type = Float.class, validators = "at-least:1.0", name = "dropMultiplier")
+})
 public class BonanzaScenario extends BonanzaScenarioConfiguration {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -24,7 +22,6 @@ public class BonanzaScenario extends BonanzaScenarioConfiguration {
 
         event.getItems().forEach(item -> {
             ItemStack itemStack = item.getItemStack();
-
             itemStack.setAmount(Math.round(itemStack.getAmount() * multiplier));
         });
     }
