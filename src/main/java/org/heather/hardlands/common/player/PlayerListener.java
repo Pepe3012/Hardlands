@@ -1,24 +1,22 @@
-package org.heather.hardlands.player;
+package org.heather.hardlands.common.player;
 
-import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.heather.hardlands.text.TextFormatter;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.heather.hardlands.util.text.TextFormatter;
 
 public final class PlayerListener implements Listener {
-
-    private static final String DEATH_COLOR = "<#B22222>";
-    private static final String KILL_MESSAGE = "<#FFFFFF>☠ <#B22222>¡Has eliminado a <#FFFFFF>%s<#B22222>! <#FFFFFF>☠";
+    private static final String KILL_MESSAGE = "☠ {¡Has eliminado a} %s{!} ☠";
 
     @EventHandler
     private void onPlayerDeath(PlayerDeathEvent event) {
@@ -33,20 +31,24 @@ public final class PlayerListener implements Listener {
 
     private static void updateDeathMessage(PlayerDeathEvent event, Player player, Entity causingEntity) {
         Component deathMessage = event.deathMessage();
-        if (deathMessage == null) return;
+        if (deathMessage == null) {
+            return;
+        }
 
         String text = TextFormatter.toPlainText(deathMessage);
         if (causingEntity instanceof Player killer) {
             text = formatUsernameAtText(text, killer);
         }
 
-        event.deathMessage(TextFormatter.parse(DEATH_COLOR + formatUsernameAtText(text, player)));
+        event.deathMessage(TextFormatter.parse("<#B22222>" + formatUsernameAtText(text, player)));
     }
 
     private static void sendKillMessage(Player victim, Entity causingEntity) {
-        if (!(causingEntity instanceof Player killer) || killer == victim) return;
+        if (!(causingEntity instanceof Player killer) || killer == victim) {
+            return;
+        }
 
-        killer.sendActionBar(TextFormatter.parse(KILL_MESSAGE.formatted(formatUsername(victim))));
+        killer.sendActionBar(TextFormatter.formatHighlighted(KILL_MESSAGE.formatted(formatUsername(victim))));
     }
 
     private static void playDeathSounds(Location location) {

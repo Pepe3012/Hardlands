@@ -1,4 +1,4 @@
-package org.heather.hardlands.inventory;
+package org.heather.hardlands.common.inventory;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
-import org.heather.hardlands.item.inventory.InventoryItem;
+import org.heather.hardlands.common.item.InventoryItem;
 
 public final class InventoryListener implements Listener {
 
@@ -28,9 +28,9 @@ public final class InventoryListener implements Listener {
 
         if (!clickedTop) return;
 
-        InventoryItem.find(event.getCurrentItem()).ifPresent(item -> {
-            if (item.execute(topInventory, player, event.getClick())) {
-                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.75F, 1.5F);
+        InventoryItem.findByItem(event.getCurrentItem()).ifPresent(item -> {
+            if (item.handleClick(topInventory, player, event.getClick())) {
+                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1.5F);
             }
         });
     }
@@ -41,10 +41,10 @@ public final class InventoryListener implements Listener {
 
         if (!InventoryRegistry.isRegistered(topInventory)) return;
 
-        boolean affectsTop = event.getRawSlots().stream().anyMatch(slot -> slot < topInventory.getSize());
-        if (affectsTop) {
-            event.setCancelled(true);
-        }
+        boolean affectsTop = event.getRawSlots().stream()
+                .anyMatch(slot -> slot < topInventory.getSize());
+
+        if (affectsTop) event.setCancelled(true);
     }
 
     @EventHandler
@@ -57,7 +57,6 @@ public final class InventoryListener implements Listener {
     }
 
     private static boolean affectsTopInventory(InventoryAction action) {
-        return action == InventoryAction.MOVE_TO_OTHER_INVENTORY
-                || action == InventoryAction.COLLECT_TO_CURSOR;
+        return action == InventoryAction.MOVE_TO_OTHER_INVENTORY || action == InventoryAction.COLLECT_TO_CURSOR;
     }
 }

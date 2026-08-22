@@ -1,4 +1,4 @@
-package org.heather.hardlands.text;
+package org.heather.hardlands.util.text;
 
 import net.kyori.adventure.text.format.TextColor;
 

@@ -1,5 +1,7 @@
 package org.heather.hardlands.module.world;
 
+import java.util.HashMap;
+import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -7,9 +9,6 @@ import org.bukkit.Material;
 import org.popcraft.chunky.api.ChunkyAPI;
 import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
 import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public final class PregenerationManager {
 
@@ -43,7 +42,7 @@ public final class PregenerationManager {
     public synchronized void reviewAndAccept(PregenerationRequest request) {
         String worldName = request.worldName();
 
-        if (!request.review(this.chunky)) {
+        if (!request.reviewAndStart(this.chunky)) {
             throw new IllegalStateException("Chunky is already pregenerating world: " + worldName);
         }
 
@@ -64,10 +63,8 @@ public final class PregenerationManager {
         if (this.pregenerating.isEmpty()) return State.IDLE;
 
         for (PregenerationTask task : this.pregenerating.values()) {
-            State state = task.state();
-
-            if (state == State.RUNNING) return State.RUNNING;
-            if (state == State.PAUSED) return State.PAUSED;
+            if (task.state() == State.RUNNING) return State.RUNNING;
+            if (task.state() == State.PAUSED) return State.PAUSED;
         }
 
         return State.COMPLETED;
@@ -86,7 +83,6 @@ public final class PregenerationManager {
     }
 
     private record PregenerationTask(State state, float progress) {
-
         private PregenerationTask withProgress(float progress) {
             return new PregenerationTask(this.state, progress);
         }
@@ -114,13 +110,17 @@ public final class PregenerationManager {
         private final String key;
         private final String name;
         private final Material material;
-        private final TextColor textColor;
+        private final TextColor color;
 
-        State(String key, String name, Material material, TextColor textColor) {
+        State(String key, String name, Material material, TextColor color) {
             this.key = key;
             this.name = name;
             this.material = material;
-            this.textColor = textColor;
+            this.color = color;
+        }
+
+        public Component display() {
+            return Component.text(this.name, this.color);
         }
 
         public String getKey() {
@@ -135,12 +135,8 @@ public final class PregenerationManager {
             return this.material;
         }
 
-        public TextColor getTextColor() {
-            return this.textColor;
-        }
-
-        public Component getDisplay() {
-            return Component.text(this.name, this.textColor);
+        public TextColor getColor() {
+            return this.color;
         }
     }
 }

@@ -1,10 +1,6 @@
 package org.heather.hardlands.module.scenario.scenarios;
 
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.config.ConfigBuilder;
-import org.heather.hardlands.config.OptionDef;
-import org.heather.hardlands.core.config.Validator;
-import org.heather.hardlands.module.scenario.Scenario;
+import java.util.Optional;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -13,18 +9,18 @@ import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.inventory.ItemStack;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.config.ConfigBuilder;
+import org.heather.hardlands.config.OptionDef;
+import org.heather.hardlands.core.config.Validator;
+import org.heather.hardlands.module.scenario.Scenario;
 
-import java.util.Optional;
-
-@ConfigBuilder(
-        superclass = Scenario.class,
-        options = {
-                @OptionDef(type = Boolean.class, name = "allTreeTypes"),
-                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "appleDropRate"),
-                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "goldenAppleDropRate"),
-                @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "enchantedGoldenAppleDropRate")
-        }
-)
+@ConfigBuilder(superclass = Scenario.class, options = {
+        @OptionDef(type = Boolean.class, name = "allTreeTypes"),
+        @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "appleDropRate"),
+        @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "goldenAppleDropRate"),
+        @OptionDef(type = Float.class, validators = Validator.Keys.UNIT_INTERVAL, name = "enchantedGoldenAppleDropRate")
+})
 public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
 
     @EventHandler(ignoreCancelled = true)
@@ -39,6 +35,7 @@ public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
 
     private void tryDropApple(BlockEvent event) {
         Block block = event.getBlock();
+
         if (!this.isEligibleLeaf(block.getType())) return;
 
         this.findAppleDrop().ifPresent(drop ->
@@ -60,7 +57,6 @@ public class AppleGroveScenario extends AppleGroveScenarioConfiguration {
     }
 
     private boolean isEligibleLeaf(Material material) {
-        return Tag.LEAVES.isTagged(material)
-                && (super.allTreeTypes.getValue() || material == Material.OAK_LEAVES);
+        return Tag.LEAVES.isTagged(material) && (super.allTreeTypes.getValue() || material == Material.OAK_LEAVES);
     }
 }

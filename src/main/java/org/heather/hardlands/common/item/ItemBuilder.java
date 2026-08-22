@@ -1,9 +1,15 @@
-package org.heather.hardlands.item;
+package org.heather.hardlands.common.item;
 
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.flattener.FlattenerListener;
@@ -17,19 +23,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.heather.hardlands.core.data.PersistentData;
-import org.heather.hardlands.text.TextFormatter;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
+import org.heather.hardlands.util.text.TextFormatter;
 
 public final class ItemBuilder {
 
-    private static final int MAX_LORE_LINE_LENGTH = 30;
-
+    private static final int MAX_LORE_LINE_LENGTH = 40;
     private static final NamespacedKey ID_KEY = new NamespacedKey("hardlands", "id");
     private static final ComponentFlattener COMPONENT_FLATTENER = ComponentFlattener.basic();
 
@@ -104,9 +102,7 @@ public final class ItemBuilder {
     }
 
     public ItemBuilder skullOwner(String owner) {
-        this.item.editMeta(SkullMeta.class, meta ->
-                meta.setPlayerProfile(Bukkit.createProfile(owner))
-        );
+        this.item.editMeta(SkullMeta.class, meta -> meta.setPlayerProfile(Bukkit.createProfile(owner)));
 
         return this.hideTooltip(DataComponentTypes.PROFILE);
     }
@@ -120,10 +116,7 @@ public final class ItemBuilder {
             builder.hiddenComponents(currentDisplay.hiddenComponents());
         }
 
-        this.item.setData(
-                DataComponentTypes.TOOLTIP_DISPLAY,
-                builder.addHiddenComponents(components).build()
-        );
+        this.item.setData(DataComponentTypes.TOOLTIP_DISPLAY, builder.addHiddenComponents(components).build());
 
         return this;
     }
@@ -150,10 +143,7 @@ public final class ItemBuilder {
     }
 
     private ItemBuilder setLore(String[] lines, Function<String, Component> formatter) {
-        this.item.setData(
-                DataComponentTypes.LORE,
-                ItemLore.lore(formatLore(lines, formatter))
-        );
+        this.item.setData(DataComponentTypes.LORE, ItemLore.lore(formatLore(lines, formatter)));
 
         return this;
     }
@@ -172,10 +162,7 @@ public final class ItemBuilder {
         return this;
     }
 
-    private static List<Component> formatLore(
-            String[] lines,
-            Function<String, Component> formatter
-    ) {
+    private static List<Component> formatLore(String[] lines, Function<String, Component> formatter) {
         List<Component> result = new ArrayList<>();
 
         for (String line : lines) {
@@ -246,8 +233,7 @@ public final class ItemBuilder {
             requiredLength++;
         }
 
-        if (!currentLine.isEmpty()
-                && currentLine.size() + requiredLength > MAX_LORE_LINE_LENGTH) {
+        if (!currentLine.isEmpty() && currentLine.size() + requiredLength > MAX_LORE_LINE_LENGTH) {
             flushLine(lines, currentLine);
         }
 
@@ -259,10 +245,7 @@ public final class ItemBuilder {
         word.clear();
     }
 
-    private static void flushLine(
-            List<Component> lines,
-            List<StyledCodePoint> characters
-    ) {
+    private static void flushLine(List<Component> lines, List<StyledCodePoint> characters) {
         lines.add(buildComponent(characters));
         characters.clear();
     }
@@ -279,8 +262,7 @@ public final class ItemBuilder {
             StyledCodePoint first = characters.get(start);
             int end = start + 1;
 
-            while (end < characters.size()
-                    && first.styles().equals(characters.get(end).styles())) {
+            while (end < characters.size() && first.styles().equals(characters.get(end).styles())) {
                 end++;
             }
 
@@ -301,9 +283,7 @@ public final class ItemBuilder {
         Component component = Component.text(text);
 
         for (int index = styles.size() - 1; index >= 0; index--) {
-            component = Component.empty()
-                    .style(styles.get(index))
-                    .append(component);
+            component = Component.empty().style(styles.get(index)).append(component);
         }
 
         return component;
@@ -314,7 +294,6 @@ public final class ItemBuilder {
         Deque<Style> styles = new ArrayDeque<>();
 
         COMPONENT_FLATTENER.flatten(component, new FlattenerListener() {
-
             @Override
             public void pushStyle(Style style) {
                 styles.addLast(style);

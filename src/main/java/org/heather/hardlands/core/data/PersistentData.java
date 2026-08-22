@@ -1,15 +1,22 @@
 package org.heather.hardlands.core.data;
 
+import java.util.Optional;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Optional;
-
 public final class PersistentData {
 
     private PersistentData() {}
+
+    public static <P, C> void set(
+            PersistentDataHolder holder,
+            NamespacedKey key,
+            PersistentDataType<P, C> type,
+            C value) {
+        container(holder).set(key, type, value);
+    }
 
     public static <P, C> Optional<C> find(PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type) {
         return Optional.ofNullable(get(holder, key, type));
@@ -19,11 +26,12 @@ public final class PersistentData {
         return container(holder).get(key, type);
     }
 
-    public static <P, C> void set(PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type, C value) {
-        container(holder).set(key, type, value);
-    }
-
-    public static <P, C> C getOrDefault(PersistentDataHolder holder, NamespacedKey key, PersistentDataType<P, C> type, C defaultValue) {
+    public static <P, C> C getOrDefault(
+            PersistentDataHolder holder,
+            NamespacedKey key,
+            PersistentDataType<P, C> type,
+            C defaultValue
+    ) {
         return container(holder).getOrDefault(key, type, defaultValue);
     }
 

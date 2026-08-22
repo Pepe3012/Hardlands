@@ -2,108 +2,106 @@ package org.heather.hardlands.module.scenario;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.core.data.json.JsonConvertible;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.core.data.json.JsonConvertible;
 
 public final class ScenarioManager implements JsonConvertible {
 
+    private final Map<String, Scenario> registeredScenarios = new LinkedHashMap<>();
+    private final Set<String> enabledScenarios = new LinkedHashSet<>();
     private final Hardlands plugin;
-    private final Map<String, Scenario> scenarios = new LinkedHashMap<>();
-    private final Set<String> enabledScenarioIds = new LinkedHashSet<>();
 
-    public ScenarioManager(Hardlands plugin) {
+    public ScenarioManager(final Hardlands plugin) {
         this.plugin = plugin;
         this.registerScenarios();
     }
 
-    public boolean enableScenario(String identifier) {
-        Scenario scenario = this.scenarios.get(identifier);
+    private void registerScenarios() {
+        for (ScenarioDefinition definition : ScenarioDefinition.values()) {
+            String identifier = definition.identifier();
+            Scenario scenario = definition.createScenario();
 
-        if (scenario == null || this.enabledScenarioIds.contains(identifier)) return false;
+            scenario.initializeScenario(this.plugin, identifier);
 
-        scenario.enable();
-        this.enabledScenarioIds.add(identifier);
-
-        return true;
-    }
-
-    public boolean disableScenario(String identifier) {
-        Scenario scenario = this.scenarios.get(identifier);
-
-        if (scenario == null || !this.enabledScenarioIds.contains(identifier)) return false;
-
-        scenario.disable();
-        this.enabledScenarioIds.remove(identifier);
-
-        return true;
-    }
-
-    public boolean toggleScenario(String identifier) {
-        return this.enabledScenarioIds.contains(identifier)
-                ? this.disableScenario(identifier)
-                : this.enableScenario(identifier);
-    }
-
-    public Optional<Scenario> findScenario(String identifier) {
-        return Optional.ofNullable(this.scenarios.get(identifier));
-    }
-
-    public Optional<Scenario> findEnabledScenario(String identifier) {
-        if (!this.enabledScenarioIds.contains(identifier)) return Optional.empty();
-        return this.findScenario(identifier);
-    }
-
-    public List<Scenario> getScenarios() {
-        return List.copyOf(this.scenarios.values());
-    }
-
-    public boolean isScenarioEnabled(String identifier) {
-        return this.enabledScenarioIds.contains(identifier);
+            if (this.registeredScenarios.putIfAbsent(identifier, scenario) != null) {
+                throw new IllegalStateException("Scenario is already registered: " + identifier);
+            }
+        }
     }
 
     @Override
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
 
-        for (String identifier : this.enabledScenarioIds) {
-            json.add(identifier, this.scenarios.get(identifier).toJson());
-        }
+        this.enabledScenarios.forEach(identifier -> json.add(
+                identifier,
+                this.registeredScenarios.get(identifier).toJson()));
 
         return json;
     }
 
     @Override
     public void fromJson(JsonElement json) {
-        for (String identifier : List.copyOf(this.enabledScenarioIds)) {
-            this.disableScenario(identifier);
-        }
+        this.enabledScenarios.forEach(this::disableScenario);
 
-        for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
-            Scenario scenario = this.scenarios.get(entry.getKey());
-            if (scenario == null) continue;
+        json.getAsJsonObject().entrySet().forEach(entry -> {
+            Scenario scenario = this.registeredScenarios.get(entry.getKey());
+
+            if (scenario == null) return;
 
             scenario.fromJson(entry.getValue());
             this.enableScenario(entry.getKey());
-        }
+        });
     }
 
-    private void registerScenarios() {
-        for (ScenarioDefinition definition : ScenarioDefinition.values()) {
-            String identifier = definition.getIdentifier();
-            Scenario scenario = definition.createScenario();
+    public boolean enableScenario(String identifier) {
+        Scenario scenario = this.registeredScenarios.get(identifier);
 
-            scenario.initialize(this.plugin, identifier);
+        if (scenario == null || this.enabledScenarios.contains(identifier)) return false;
 
-            if (this.scenarios.putIfAbsent(identifier, scenario) != null) {
-                throw new IllegalStateException("Scenario is already registered: " + identifier);
-            }
+        scenario.enableScenario();
+        this.enabledScenarios.add(identifier);
+
+        return true;
+    }
+
+    public boolean disableScenario(String identifier) {
+        Scenario scenario = this.registeredScenarios.get(identifier);
+
+        if (scenario == null || !this.enabledScenarios.contains(identifier)) {
+            return false;
         }
+
+        scenario.disableScenario();
+        this.enabledScenarios.remove(identifier);
+
+        return true;
+    }
+
+    public boolean toggleScenario(String identifier) {
+        return this.enabledScenarios.contains(identifier)
+                ? this.disableScenario(identifier)
+                : this.enableScenario(identifier);
+    }
+
+    public Optional<Scenario> findRegisteredScenario(String identifier) {
+        return Optional.ofNullable(this.registeredScenarios.get(identifier));
+    }
+
+    public Optional<Scenario> findEnabledScenario(String identifier) {
+        if (!this.enabledScenarios.contains(identifier)) {
+            return Optional.empty();
+        }
+        return this.findRegisteredScenario(identifier);
+    }
+
+    public List<Scenario> getRegisteredScenarios() {
+        return List.copyOf(this.registeredScenarios.values());
     }
 }

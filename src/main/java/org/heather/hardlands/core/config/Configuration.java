@@ -3,78 +3,79 @@ package org.heather.hardlands.core.config;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.core.data.json.JsonConvertible;
-
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.core.data.json.JsonConvertible;
 
 public abstract class Configuration implements JsonConvertible {
 
     private final Map<String, Option<?>> options = new LinkedHashMap<>();
+
     private String identifier;
 
     protected Configuration() {}
     protected Configuration(String identifier) {
-        this.setIdentifier(identifier);
-    }
-
-    public final String getIdentifier() {
-        if (this.identifier == null) {
-            throw new IllegalStateException("Configuration identifier has not been set");
-        }
-        return this.identifier;
-    }
-
-    public final Map<String, Option<?>> getOptions() {
-        return Map.copyOf(this.options);
-    }
-
-    public final boolean isValid() {
-        return this.options.values().stream().allMatch(Option::isValid) && this.isConfigurationValid();
+        this.setConfigurationIdentifier(identifier);
     }
 
     @Override
     public final JsonElement toJson() {
-        var json = new JsonObject();
+        JsonObject json = new JsonObject();
 
-        for (var option : this.options.values()) {
-            if (option.isValid()) continue;
-
+        this.options.values().forEach(option -> {
+            if (!option.isValid()) return;
             json.add(option.getKey(), Hardlands.GSON.toJsonTree(option.getValue()));
-        }
+        });
 
         return json;
     }
 
     @Override
     public void fromJson(JsonElement json) {
-        for (var entry : json.getAsJsonObject().entrySet()) {
-            var option = this.options.get(entry.getKey());
+        json.getAsJsonObject().entrySet().forEach(entry -> {
+            Option<?> option = this.options.get(entry.getKey());
 
-            if (option == null) continue;
+            if (option == null) return;
 
             option.setValue(Hardlands.GSON.fromJson(entry.getValue(), option.getDataType()));
+        });
+    }
+
+    public final Map<String, Option<?>> getConfigurationOptions() {
+        return Map.copyOf(this.options);
+    }
+
+    public final String getConfigurationIdentifier() {
+        if (this.identifier == null) {
+            throw new IllegalStateException("Configuration identifier has not been set");
         }
+
+        return this.identifier;
     }
 
-    protected boolean isConfigurationValid() {
-        return true;
-    }
-
-    protected final void setIdentifier(String identifier) {
-        if (identifier == null || identifier.isBlank()) throw new IllegalArgumentException("Identifier cannot be null or blank");
-        if (this.identifier != null) throw new IllegalStateException("Configuration identifier is already set");
+    protected final void setConfigurationIdentifier(String identifier) {
+        if (this.identifier != null) {
+            throw new IllegalStateException("Configuration identifier is already set");
+        }
 
         this.identifier = identifier;
     }
 
+    public boolean isConfigurationValid() {
+        return this.options.values().stream().allMatch(Option::isValid);
+    }
+
+    // Registry
     protected final <T> Option<T> registerOption(Option<T> option) {
-        if (this.options.putIfAbsent(option.getKey(), option) != null) throw new IllegalArgumentException("Option already registered: " + option.getKey());
+        if (this.options.putIfAbsent(option.getKey(), option) != null) {
+            throw new IllegalArgumentException("Option already registered: " + option.getKey());
+        }
+
         return option;
     }
 
@@ -106,7 +107,12 @@ public abstract class Configuration implements JsonConvertible {
         return this.registerOption(key, TypeToken.getParameterized(Map.class, keyType, valueType).getType());
     }
 
-    protected final <K, V> Option<Map<K, V>> registerMap(String key, Class<K> keyType, Class<V> valueType, Predicate<Map<K, V>> validator) {
+    protected final <K, V> Option<Map<K, V>> registerMap(
+            String key,
+            Class<K> keyType,
+            Class<V> valueType,
+            Predicate<Map<K, V>> validator
+    ) {
         return this.registerOption(key, TypeToken.getParameterized(Map.class, keyType, valueType).getType(), validator);
     }
 

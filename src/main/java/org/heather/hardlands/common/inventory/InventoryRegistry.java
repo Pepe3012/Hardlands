@@ -1,10 +1,9 @@
-package org.heather.hardlands.inventory;
-
-import org.bukkit.inventory.Inventory;
+package org.heather.hardlands.common.inventory;
 
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import org.bukkit.inventory.Inventory;
 
 public final class InventoryRegistry {
 
@@ -33,7 +32,7 @@ public final class InventoryRegistry {
     }
 
     public static Optional<InventoryDefinition> findDefinition(Inventory inventory) {
-        return InventoryDefinition.find(inventory)
+        return InventoryDefinition.findDefinition(inventory)
                 .filter(definition -> INVENTORIES.get(definition) == inventory);
     }
 

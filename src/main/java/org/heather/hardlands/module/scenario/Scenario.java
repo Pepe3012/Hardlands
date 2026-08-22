@@ -1,44 +1,46 @@
 package org.heather.hardlands.module.scenario;
 
-import org.heather.hardlands.Hardlands;
-import org.heather.hardlands.core.config.Configuration;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.core.config.Configuration;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class Scenario extends Configuration implements Listener {
 
-    private Hardlands plugin;
+    @Nullable private Hardlands plugin;
 
-    protected final Hardlands getPlugin() {
-        if (this.plugin == null) {
-            throw new IllegalStateException("Scenario has not been initialized");
-        }
-        return this.plugin;
-    }
-
-    final void initialize(Hardlands plugin, String identifier) {
+    final void initializeScenario(final Hardlands plugin, String identifier) {
         if (this.plugin != null) {
             throw new IllegalStateException("Scenario is already initialized");
         }
 
-        if (plugin == null) {
-            throw new IllegalArgumentException("Plugin cannot be null");
-        }
-
-        this.setIdentifier(identifier);
+        super.setConfigurationIdentifier(identifier);
         this.plugin = plugin;
     }
 
-    final void enable() {
-        if (!this.isValid()) {
-            throw new IllegalStateException("Scenario configuration is invalid: " + this.getIdentifier());
+    final void enableScenario() {
+        if (!super.isConfigurationValid()) {
+            throw new IllegalStateException("Scenario configuration is invalid: " + this.getConfigurationIdentifier());
+        }
+
+        if (this.plugin == null) {
+            throw new IllegalArgumentException("Scenario has not been initialized");
         }
 
         Bukkit.getPluginManager().registerEvents(this, this.plugin);
     }
 
-    final void disable() {
+    final void disableScenario() {
         HandlerList.unregisterAll(this);
+    }
+
+    protected final Hardlands getPluginOrThrow() {
+        if (this.plugin == null) {
+            throw new IllegalStateException("Scenario has not been initialized");
+        }
+
+        return this.plugin;
     }
 }

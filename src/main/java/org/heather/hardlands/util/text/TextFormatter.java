@@ -1,5 +1,7 @@
-package org.heather.hardlands.text;
+package org.heather.hardlands.util.text;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -8,23 +10,18 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.heather.hardlands.util.TinyCaps;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public final class TextFormatter {
 
-    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-    private static final PlainTextComponentSerializer PLAIN_TEXT = PlainTextComponentSerializer.plainText();
-    private static final Pattern HIGHLIGHT_PATTERN = Pattern.compile("<([^<>\\s]+)>");
+    private static final Pattern HIGHLIGHT_PATTERN = Pattern.compile("\\{([^{}]+)}");
 
     private TextFormatter() {}
 
     public static Component parse(String text) {
-        return MINI_MESSAGE.deserialize(text);
+        return MiniMessage.miniMessage().deserialize(text);
     }
 
     public static String toPlainText(Component component) {
-        return PLAIN_TEXT.serialize(component);
+        return PlainTextComponentSerializer.plainText().serialize(component);
     }
 
     public static Component formatHighlighted(String text) {
@@ -33,12 +30,12 @@ public final class TextFormatter {
         int position = 0;
 
         while (matcher.find()) {
-            result.append(Component.text(text.substring(position, matcher.start())));
+            result.append(parse(text.substring(position, matcher.start())));
             result.append(Component.text(matcher.group(1), HardlandsColor.PRIMARY));
             position = matcher.end();
         }
 
-        result.append(Component.text(text.substring(position)));
+        result.append(parse(text.substring(position)));
         return result.build();
     }
 

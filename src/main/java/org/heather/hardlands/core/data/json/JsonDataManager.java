@@ -1,7 +1,6 @@
 package org.heather.hardlands.core.data.json;
 
 import com.google.gson.Gson;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +21,9 @@ public final class JsonDataManager<T> {
     public void write(T data) {
         try {
             Path parent = this.path.getParent();
-            if (parent != null) Files.createDirectories(parent);
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
 
             String json = this.gson.toJson(data);
             Files.writeString(this.path, json);
@@ -32,7 +33,9 @@ public final class JsonDataManager<T> {
     }
 
     public Optional<T> read() {
-        if (Files.notExists(this.path)) return Optional.empty();
+        if (Files.notExists(this.path)) {
+            return Optional.empty();
+        }
 
         try {
             String json = Files.readString(this.path);

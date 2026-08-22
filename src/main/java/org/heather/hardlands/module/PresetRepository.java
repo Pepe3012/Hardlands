@@ -2,10 +2,9 @@ package org.heather.hardlands.module;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import java.nio.file.Path;
 import org.heather.hardlands.Hardlands;
 import org.heather.hardlands.core.data.json.JsonDataManager;
-
-import java.nio.file.Path;
 
 public final class PresetRepository {
 
@@ -33,8 +32,7 @@ public final class PresetRepository {
                 this.plugin.getGeneralConfiguration().toJson().getAsJsonObject(),
                 this.plugin.getWorldManagerOrThrow().toJson().getAsJsonObject(),
                 this.plugin.getScenarioManager().toJson().getAsJsonObject(),
-                this.plugin.getPhaseController().toJson().getAsJsonObject()
-        ));
+                this.plugin.getPhaseController().toJson().getAsJsonObject()));
     }
 
     public void load(String name) {
@@ -47,10 +45,6 @@ public final class PresetRepository {
     }
 
     private JsonDataManager<Preset> managerFor(String name) {
-        return new JsonDataManager<>(
-                Hardlands.GSON,
-                this.directory.resolve(name + ".json"),
-                Preset.class
-        );
+        return new JsonDataManager<>(Hardlands.GSON, this.directory.resolve(name + ".json"), Preset.class);
     }
 }
