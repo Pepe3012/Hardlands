@@ -29,7 +29,7 @@ public final class InventoryListener implements Listener {
         if (!clickedTop) return;
 
         InventoryItem.findByItem(event.getCurrentItem()).ifPresent(item -> {
-            if (item.handleClick(topInventory, player, event.getClick())) {
+            if (handleItemClick(item, topInventory, player, event.getClick())) {
                 player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1.5F);
             }
         });
