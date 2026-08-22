@@ -3,15 +3,14 @@ package org.heather.hardlands.common.inventory;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.heather.hardlands.Hardlands;
 import org.heather.hardlands.common.inventory.handler.InventoryHandler;
 import org.heather.hardlands.common.item.InventoryItem;
 import org.heather.hardlands.common.item.ItemBuilder;
@@ -30,133 +29,54 @@ public enum InventoryDefinition {
             'G', InventoryItem.GENERAL,
             'F', InventoryItem.PHASES,
             'W', InventoryItem.WORLD,
-            'T', InventoryItem.PRESETS)), null),
+            'T', InventoryItem.PRESETS))),
 
-    SCENARIOS("Escenarios", Outline.PINK, MAIN),
-    PLAYERS("Jugadores", Outline.YELLOW, MAIN),
-    GENERAL("General", Outline.ORANGE, MAIN),
-    PHASES("Fases", Outline.LIME, MAIN),
-    WORLD("Mundo", Outline.LIGHT_BLUE, MAIN),
-    PRESETS("Plantillas", Outline.PURPLE, MAIN);
+    SCENARIOS("Escenarios", Outline.PINK),
+    PLAYERS("Jugadores", Outline.YELLOW),
+    GENERAL("General", Outline.ORANGE),
+    PHASES("Fases", Outline.LIME),
+    WORLD("Mundo", Outline.LIGHT_BLUE),
+    PRESETS("Plantillas", Outline.PURPLE);
 
     private static final int ROW_SIZE = 9;
     private static final int CONTENT_WIDTH = ROW_SIZE - 2;
-    private static final int PREVIOUS_COLUMN = 4;
-    private static final int PREPARATION_COLUMN = 5;
-    private static final int NEXT_COLUMN = 6;
-
-    private static final Map<InventoryItem, InventoryDefinition> NAVIGATION_TARGETS = Map.of(
-            InventoryItem.SCENARIOS, SCENARIOS,
-            InventoryItem.PLAYERS, PLAYERS,
-            InventoryItem.GENERAL, GENERAL,
-            InventoryItem.PHASES, PHASES,
-            InventoryItem.WORLD, WORLD,
-            InventoryItem.PRESETS, PRESETS);
 
     private final String title;
     private final ItemStack outline;
     private final Layout layout;
     private final InventoryHandler handler;
-    private final InventoryDefinition parent;
 
-    InventoryDefinition(
-            String title,
-            Outline outline,
-            Layout layout,
-            InventoryHandler handler,
-            InventoryDefinition parent) {
+    InventoryDefinition(String title, Outline outline, Layout layout, InventoryHandler handler) {
         this.title = title;
         this.outline = outline.buildItem();
         this.layout = layout;
         this.handler = handler;
-        this.parent = parent;
     }
 
-    InventoryDefinition(
-            String title,
-            Outline outline,
-            Layout layout,
-            InventoryDefinition parent) {
-        this(title, outline, layout, InventoryHandler.EMPTY, parent);
+    InventoryDefinition(String title, Outline outline, Layout layout) {
+        this(title, outline, layout, InventoryHandler.EMPTY);
     }
 
-    InventoryDefinition(
-            String title,
-            Outline outline,
-            InventoryDefinition parent) {
-        this(title, outline, Layout.BLANK, InventoryHandler.EMPTY, parent);
-    }
-
-    public String getTitle() {
-        return this.title;
-    }
-
-    public InventoryDefinition getParent() {
-        return this.parent;
+    InventoryDefinition(String title, Outline outline) {
+        this(title, outline, Layout.BLANK);
     }
 
     public void openInventory(Player player) {
         Inventory inventory = InventoryRegistry.getInventory(this);
 
-        this.renderPreparationItem(inventory);
+        this.renderFooter(inventory);
 
         player.openInventory(inventory);
         this.handler.onOpen(inventory, player);
-    }
-
-    public boolean handleItemClick(
-            Player player,
-            ItemStack item,
-            ClickType clickType) {
-
-        if (clickType != ClickType.LEFT) {
-            return false;
-        }
-
-        Optional<InventoryItem> inventoryItemOptional = findInventoryItem(item);
-
-        if (inventoryItemOptional.isEmpty()) {
-            return false;
-        }
-
-        InventoryItem inventoryItem = inventoryItemOptional.get();
-
-        if (inventoryItem == InventoryItem.PREVIOUS) {
-            return this.handlePrevious(player);
-        }
-
-        if (inventoryItem == InventoryItem.NEXT) {
-            return this.handleNext(player);
-        }
-
-        InventoryDefinition target = NAVIGATION_TARGETS.get(inventoryItem);
-
-        if (target == null) {
-            return false;
-        }
-
-        target.openInventory(player);
-        return true;
     }
 
     public void handleClose(Inventory inventory, Player player) {
         this.handler.onClose(inventory, player);
     }
 
-    public static Optional<InventoryDefinition> findDefinition(Inventory inventory) {
-        if (inventory.getHolder() instanceof DefinitionHolder definitionHolder) {
-            return Optional.of(definitionHolder.definition);
-        }
-
-        return Optional.empty();
-    }
-
     Inventory createInventory() {
         DefinitionHolder holder = new DefinitionHolder(this);
-        Inventory inventory = Bukkit.createInventory(
-                holder,
-                this.layout.getSize(),
-                Component.text(this.title));
+        Inventory inventory = Bukkit.createInventory(holder, this.layout.getSize(), Component.text(this.title));
 
         holder.setInventory(inventory);
 
@@ -165,19 +85,6 @@ public enum InventoryDefinition {
         this.handler.onCreate(inventory);
 
         return inventory;
-    }
-
-    private boolean handlePrevious(Player player) {
-        if (this.parent == null) {
-            return false;
-        }
-
-        this.parent.openInventory(player);
-        return true;
-    }
-
-    private boolean handleNext(Player player) {
-        return false;
     }
 
     private void renderFrame(Inventory inventory) {
@@ -192,38 +99,21 @@ public enum InventoryDefinition {
             inventory.setItem(slot(row, 1), this.outline);
             inventory.setItem(slot(row, ROW_SIZE), this.outline);
         }
-
-        this.renderNavigation(inventory, bottomRow);
     }
 
-    private void renderNavigation(Inventory inventory, int row) {
-        if (this.parent != null) {
-            inventory.setItem(slot(row, PREVIOUS_COLUMN), InventoryItem.PREVIOUS.buildItem());
-        }
+    private void renderFooter(Inventory inventory) {
+        int bottomRow = getBottomRow(inventory);
 
-        inventory.setItem(slot(row, NEXT_COLUMN), InventoryItem.NEXT.buildItem());
+        inventory.setItem(slot(bottomRow, 4), InventoryItem.PREVIOUS.buildItem());
+        inventory.setItem(slot(bottomRow, 5), InventoryItem.PREPARATION.buildItem());
+        inventory.setItem(slot(bottomRow, 6), InventoryItem.NEXT.buildItem());
     }
 
-    private void renderPreparationItem(Inventory inventory) {
-        inventory.setItem(slot(getBottomRow(inventory), PREPARATION_COLUMN), InventoryItem.createPreparationItem());
-    }
-
-    private static Optional<InventoryItem> findInventoryItem(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) {
-            return Optional.empty();
-        }
-
-        Optional<String> identifierOptional = new ItemBuilder(item).findId();
-
-        if (identifierOptional.isEmpty()) {
-            return Optional.empty();
-        }
-
-        try {
-            return Optional.of(InventoryItem.valueOf(identifierOptional.get()));
-        } catch (IllegalArgumentException _) {
-            return Optional.empty();
-        }
+    //
+    public static Optional<InventoryDefinition> findDefinition(Inventory inventory) {
+        return inventory.getHolder() instanceof DefinitionHolder holder
+                ? Optional.of(holder.definition)
+                : Optional.empty();
     }
 
     private static int getBottomRow(Inventory inventory) {
@@ -291,11 +181,16 @@ public enum InventoryDefinition {
 
                 for (int column = 0; column < CONTENT_WIDTH; column++) {
                     char symbol = line.charAt(column);
-                    if (symbol == '-') continue;
+
+                    if (symbol == '-') {
+                        continue;
+                    }
 
                     InventoryItem item = this.items.get(symbol);
+
                     if (item == null) {
-                        throw new IllegalStateException("No InventoryItem defined for layout symbol '%s'.".formatted(symbol));
+                        throw new IllegalStateException(
+                                "No InventoryItem defined for layout symbol '%s'.".formatted(symbol));
                     }
 
                     inventory.setItem(slot(row + 2, column + 2), item.buildItem());

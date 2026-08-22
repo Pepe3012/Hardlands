@@ -18,45 +18,64 @@ public final class InventoryListener implements Listener {
         Inventory topInventory = event.getView().getTopInventory();
 
         if (!InventoryRegistry.isRegistered(topInventory)
-                || !(event.getWhoClicked() instanceof Player player)) return;
+                || !(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
 
         boolean clickedTop = event.getClickedInventory() == topInventory;
 
-        if (!clickedTop && !affectsTopInventory(event.getAction())) return;
+        if (!clickedTop && !affectsTopInventory(event.getAction())) {
+            return;
+        }
 
         event.setCancelled(true);
 
-        if (!clickedTop) return;
+        if (!clickedTop) {
+            return;
+        }
 
-        InventoryItem.findByItem(event.getCurrentItem()).ifPresent(item -> {
-            if (handleItemClick(item, topInventory, player, event.getClick())) {
-                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1.5F);
-            }
-        });
+        InventoryItem.findByItem(event.getCurrentItem())
+                .ifPresent(item -> {
+                    boolean handled = item.handleClick(event);
+
+                    player.playSound(
+                            player,
+                            handled ? Sound.UI_BUTTON_CLICK : Sound.BLOCK_NOTE_BLOCK_BASS,
+                            0.5F,
+                            handled ? 1.5F : 0.5F);
+                });
     }
 
     @EventHandler
     private void onInventoryDrag(InventoryDragEvent event) {
         Inventory topInventory = event.getView().getTopInventory();
 
-        if (!InventoryRegistry.isRegistered(topInventory)) return;
+        if (!InventoryRegistry.isRegistered(topInventory)) {
+            return;
+        }
 
-        boolean affectsTop = event.getRawSlots().stream()
+        boolean affectsTopInventory = event.getRawSlots().stream()
                 .anyMatch(slot -> slot < topInventory.getSize());
 
-        if (affectsTop) event.setCancelled(true);
+        if (affectsTopInventory) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
     private void onInventoryClose(InventoryCloseEvent event) {
-        if (!(event.getPlayer() instanceof Player player)) return;
+        if (!(event.getPlayer() instanceof Player player)) {
+            return;
+        }
 
         Inventory inventory = event.getView().getTopInventory();
+
         InventoryRegistry.findDefinition(inventory)
                 .ifPresent(definition -> definition.handleClose(inventory, player));
     }
 
     private static boolean affectsTopInventory(InventoryAction action) {
-        return action == InventoryAction.MOVE_TO_OTHER_INVENTORY || action == InventoryAction.COLLECT_TO_CURSOR;
+        return action == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                || action == InventoryAction.COLLECT_TO_CURSOR;
     }
 }

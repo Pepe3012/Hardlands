@@ -1,52 +1,145 @@
 package org.heather.hardlands.common.item;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.heather.hardlands.Hardlands;
+import org.heather.hardlands.common.inventory.InventoryDefinition;
 import org.heather.hardlands.core.config.Option;
 import org.heather.hardlands.module.world.PregenerationManager;
 import org.heather.hardlands.module.world.WorldManager;
 import org.heather.hardlands.util.text.TextFormatter;
 
-import java.util.Optional;
-
 public enum InventoryItem {
 
-    PREVIOUS("MHF_ArrowLeft", "Anterior", "Regresa al menú o página anterior."),
-    NEXT("MHF_ArrowRight", "Siguiente", "Avanza a la siguiente página."),
+    PREVIOUS("MHF_ArrowLeft",
+            "Anterior",
+            "Regresa al menú o página anterior.",
+            open(() -> InventoryDefinition.MAIN)),
 
-    SCENARIOS(Material.CHERRY_SAPLING, "Escenarios", "Activa, desactiva y configura los escenarios de la partida."),
-    PLAYERS(Material.PLAYER_HEAD, "Jugadores", "Administra los jugadores de la partida."),
-    GENERAL(Material.COMPARATOR, "General", "Configura las opciones generales de la partida."),
-    PHASES(Material.CLOCK, "Fases", "Configura la progresión y los tiempos de las fases de la partida."),
-    WORLD("KEYKOTV", "Mundo", "Configura la generación y los límites del mundo."),
-    PRESETS(Material.WRITABLE_BOOK, "Plantillas", "Administra las plantillas de configuración.");
+    NEXT("MHF_ArrowRight",
+            "Siguiente",
+            "Avanza a la siguiente página."),
+
+    PREPARATION(InventoryItem::createPreparationItem, Map.of(ClickType.LEFT, InventoryItem::togglePregeneration)),
+
+    SCENARIOS(Material.CHERRY_SAPLING,
+            "Escenarios",
+            "Activa, desactiva y configura los escenarios de la partida.",
+            open(() -> InventoryDefinition.SCENARIOS)),
+
+    PLAYERS(Material.PLAYER_HEAD,
+            "Jugadores",
+            "Administra los jugadores de la partida.",
+            open(() -> InventoryDefinition.PLAYERS)),
+
+    GENERAL(Material.COMPARATOR,
+            "General",
+            "Configura las opciones generales de la partida.",
+            open(() -> InventoryDefinition.GENERAL)),
+
+    PHASES(Material.CLOCK,
+            "Fases",
+            "Configura la progresión y los tiempos de las fases de la partida.",
+            open(() -> InventoryDefinition.PHASES)),
+
+    WORLD("KEYKOTV",
+            "Mundo",
+            "Configura la generación y los límites del mundo.",
+            open(() -> InventoryDefinition.WORLD)),
+
+    PRESETS(Material.WRITABLE_BOOK,
+            "Plantillas",
+            "Administra las plantillas de configuración.",
+            open(() -> InventoryDefinition.PRESETS)),
+
+    ;
 
     private static final String DESCRIPTION_PREFIX = "<gray>";
-    private final ItemStack item;
-
-    InventoryItem(ItemStack item) {
-        this.item = item;
-    }
+    private final Supplier<ItemStack> itemSupplier;
+    private final Map<ClickType, ClickHandler> clickHandlers;
 
     InventoryItem(Material material, String name, String description) {
-        this(new ItemBuilder(material)
-                .name(name)
-                .lore(DESCRIPTION_PREFIX + description)
-                .build());
+        this(material, name, description, Map.of());
+    }
+
+    InventoryItem(Material material, String name, String description, ClickHandler handler) {
+        this(material, name, description, Map.of(ClickType.LEFT, handler));
+    }
+
+    InventoryItem(Material material, String name, String description, Map<ClickType, ClickHandler> clickHandlers) {
+        this(() -> createDisplayItem(material, name, description), clickHandlers);
     }
 
     InventoryItem(String skullOwner, String name, String description) {
-        this(new ItemBuilder(Material.PLAYER_HEAD)
+        this(skullOwner, name, description, Map.of());
+    }
+
+    InventoryItem(String skullOwner, String name, String description, ClickHandler handler) {
+        this(skullOwner, name, description, Map.of(ClickType.LEFT, handler));
+    }
+
+    InventoryItem(String skullOwner, String name, String description, Map<ClickType, ClickHandler> clickHandlers) {
+        this(() -> new ItemBuilder(Material.PLAYER_HEAD)
                 .skullOwner(skullOwner)
                 .name(name)
                 .lore(DESCRIPTION_PREFIX + description)
-                .build());
+                .build(), clickHandlers);
     }
 
-    public static ItemStack createPreparationItem() {
+    InventoryItem(Supplier<ItemStack> itemSupplier, Map<ClickType, ClickHandler> clickHandlers) {
+        this.itemSupplier = itemSupplier;
+        this.clickHandlers = clickHandlers;
+    }
+
+    public ItemStack buildItem() {
+        return new ItemBuilder(this.itemSupplier.get())
+                .setId(this.name())
+                .build();
+    }
+
+    public boolean handleClick(InventoryClickEvent event) {
+        ClickHandler handler = this.clickHandlers.get(event.getClick());
+
+        return handler != null && handler.handle(event);
+    }
+
+    public static Optional<InventoryItem> findByItem(ItemStack item) {
+        if (item == null || item.getType().isAir()) {
+            return Optional.empty();
+        }
+
+        return new ItemBuilder(item)
+                .findId()
+                .flatMap(InventoryItem::findById);
+    }
+
+    public static ItemStack createDisplayItem(Material material, String name, String description) {
+        return new ItemBuilder(material)
+                .name(name)
+                .lore(DESCRIPTION_PREFIX + description)
+                .build();
+    }
+
+    private static ClickHandler open(Supplier<InventoryDefinition> definition) {
+        return event -> {
+            if (!(event.getWhoClicked() instanceof Player player)) {
+                return false;
+            }
+
+            definition.get().openInventory(player);
+            return true;
+        };
+    }
+
+    private static ItemStack createPreparationItem() {
         WorldManager worldManager = Hardlands.getInstance().getWorldManagerOrThrow();
         PregenerationManager pregenerationManager = worldManager.getPregenerationManager();
 
@@ -59,6 +152,7 @@ public enum InventoryItem {
         String borderSizeText = survivalSizeOption.isValid() && borderSize != null
                 ? "{%1$d × %1$d}".formatted(borderSize)
                 : "<gray>Inválido";
+
         String progressText = progress >= 100.0F
                 ? "{%.1f%%}".formatted(progress)
                 : "<gray>%.1f%%".formatted(progress);
@@ -74,41 +168,42 @@ public enum InventoryItem {
                 .build();
     }
 
-    public ItemStack buildItem() {
-        return new ItemBuilder(this.item.clone()).setId(this.name()).build();
-    }
+    private static boolean togglePregeneration(InventoryClickEvent event) {
+        WorldManager worldManager = Hardlands.getInstance().getWorldManagerOrThrow();
+        PregenerationManager pregenerationManager = worldManager.getPregenerationManager();
 
-    public static DisplayItem createDisplayItem(Material material, String description) {
-        return new DisplayItem(material, description);
-    }
+        switch (pregenerationManager.getState()) {
+            case IDLE -> {
+                if (!worldManager.isConfigurationValid()) {
+                    return false;
+                }
 
-    public static Optional<InventoryItem> findByItem(ItemStack item) {
-        if (item == null || item.getType().isAir()) {
-            return Optional.empty();
-        }
+                worldManager.pregenerate();
+            }
 
-        Optional<String> id = new ItemBuilder(item).findId();
+            case RUNNING -> pregenerationManager.pause();
+            case PAUSED -> pregenerationManager.resume();
 
-        if (id.isEmpty()) {
-            return Optional.empty();
-        }
-
-        for (InventoryItem inventoryItem : values()) {
-            if (inventoryItem.name().equals(id.get())) {
-                return Optional.of(inventoryItem);
+            case COMPLETED -> {
+                return false;
             }
         }
 
-        return Optional.empty();
+        event.setCurrentItem(PREPARATION.buildItem());
+        return true;
     }
 
-    public record DisplayItem(Material material, String description) {
-
-        public ItemStack buildItem(String name) {
-            return new ItemBuilder(this.material)
-                    .name(name)
-                    .lore(DESCRIPTION_PREFIX + this.description)
-                    .build();
+    private static Optional<InventoryItem> findById(String id) {
+        try {
+            return Optional.of(valueOf(id));
+        } catch (IllegalArgumentException _) {
+            return Optional.empty();
         }
+    }
+
+    @FunctionalInterface
+    public interface ClickHandler {
+
+        boolean handle(InventoryClickEvent event);
     }
 }

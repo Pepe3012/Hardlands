@@ -46,16 +46,34 @@ public final class PregenerationManager {
             throw new IllegalStateException("Chunky is already pregenerating world: " + worldName);
         }
 
-        this.pregenerating.put(worldName, PregenerationTask.withRunningState());
+        this.pregenerating.put(worldName, PregenerationTask.running());
     }
 
     public synchronized void pause() {
         this.pregenerating.replaceAll((worldName, task) -> {
+            if (task.state() != State.RUNNING) {
+                return task;
+            }
+
             if (!this.chunky.pauseTask(worldName)) {
                 throw new IllegalStateException("Unable to pause pregeneration for world: " + worldName);
             }
 
-            return task.withPausedState();
+            return task.withState(State.PAUSED);
+        });
+    }
+
+    public synchronized void resume() {
+        this.pregenerating.replaceAll((worldName, task) -> {
+            if (task.state() != State.PAUSED) {
+                return task;
+            }
+
+            if (!this.chunky.continueTask(worldName)) {
+                throw new IllegalStateException("Unable to resume pregeneration for world: " + worldName);
+            }
+
+            return task.withState(State.RUNNING);
         });
     }
 
@@ -83,19 +101,20 @@ public final class PregenerationManager {
     }
 
     private record PregenerationTask(State state, float progress) {
-        private PregenerationTask withProgress(float progress) {
-            return new PregenerationTask(this.state, progress);
+
+        private PregenerationTask withState(State state) {
+            return new PregenerationTask(state, this.progress);
         }
 
-        private PregenerationTask withPausedState() {
-            return new PregenerationTask(State.PAUSED, this.progress);
+        private PregenerationTask withProgress(float progress) {
+            return new PregenerationTask(this.state, progress);
         }
 
         private PregenerationTask withCompletedState() {
             return new PregenerationTask(State.COMPLETED, 100.0F);
         }
 
-        private static PregenerationTask withRunningState() {
+        private static PregenerationTask running() {
             return new PregenerationTask(State.RUNNING, 0.0F);
         }
     }
